@@ -14,9 +14,11 @@
           :key="route.path"
           :index="'/app/' + route.path"
           class="custom-menu-item"
+          @click="handleMenuClick(route)"
         >
           <span class="menu-item-label">{{ route.meta && route.meta.title ? route.meta.title : route.name }}</span>
         </el-menu-item>
+
       </el-menu>
       <div class="user-info-box">
         <img class="user-avatar" :src="userAvatar" alt="头像" />
@@ -35,15 +37,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import activityMonitor from '../utils/activityMonitor'
 
 const router = useRouter()
 const route = useRoute()
 const currentRole = localStorage.getItem('role') || '物料员'
 
 const userName = localStorage.getItem('jobId') || '未登录'
-const userAvatar = '/src/assets/avatar.png' // 可替换为实际头像路径
+const userAvatar = '/src/assets/default-avatar.svg' // 使用默认头像
 
 const filteredMenuRoutes = computed(() => {
   // 找到SidebarLayout一级路由
@@ -62,7 +66,24 @@ onMounted(() => {
   if (route.path === '/app' && filteredMenuRoutes.value.length > 0) {
     router.replace('/app/' + filteredMenuRoutes.value[0].path)
   }
+  
+  // 启动活动监测
+  activityMonitor.start(() => {
+    // 2分钟无活动时的回调
+    ElMessage.warning('由于长时间无操作，已自动退出登录')
+    localStorage.clear()
+    router.push('/')
+  })
 })
+
+onUnmounted(() => {
+  // 组件卸载时停止活动监测
+  activityMonitor.stop()
+})
+
+function handleMenuClick(route) {
+  router.push('/app/' + route.path)
+}
 
 function logout() {
   localStorage.clear()
@@ -71,7 +92,6 @@ function logout() {
 </script>
 
 <style scoped>
-/* 删除.logo-box、.img-logo、.text-logo相关样式 */
 .global-bg {
   min-height: 100vh;
   min-width: 100vw;

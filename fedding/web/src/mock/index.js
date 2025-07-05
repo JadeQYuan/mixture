@@ -5,6 +5,39 @@ Mock.setup({
   timeout: '200-600'
 })
 
+// 登录接口
+Mock.mock('/login', 'post', (options) => {
+  const data = JSON.parse(options.body)
+  const { jobId, password } = data
+  
+  // 模拟登录验证
+  if (jobId && password) {
+    // 根据工号分配不同角色
+    const roleMap = {
+      '001': '物料员',
+      '002': '高级操作员', 
+      '003': '操作员'
+    }
+    const role = roleMap[jobId] || '物料员'
+    
+    return {
+      code: 0,
+      message: '登录成功',
+      data: {
+        jobId,
+        role,
+        token: Mock.Random.guid()
+      }
+    }
+  } else {
+    return {
+      code: 1,
+      message: '工号或密码错误',
+      data: null
+    }
+  }
+})
+
 // 用户管理接口
 Mock.mock(/\/users(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
@@ -13,21 +46,25 @@ Mock.mock(/\/users(\?.*)?$/, 'get', (options) => {
   const name = url.searchParams.get('name') || ''
   const jobId = url.searchParams.get('jobId') || ''
 
-  const users = Mock.mock({
-    [`data|${pageSize}`]: [{
-      'id|+1': 1,
-      'role|1': ['物料员', '高级操作员', '操作员'],
-      'jobId': () => Mock.Random.string('number', 6),
-      'name': () => Mock.Random.cname(),
-      'desc': () => Mock.Random.sentence(3, 10),
-      'photo': () => Mock.Random.dataImage('100x100', Mock.Random.cname()),
-      'createdAt': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      'updatedAt': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
-    }]
-  })
+  // 生成更多数据用于分页测试
+  const totalCount = 28 // 总共28条数据
+  const allData = []
+  
+  for (let i = 0; i < totalCount; i++) {
+    allData.push({
+      id: i + 1,
+      role: Mock.Random.pick(['物料员', '高级操作员', '操作员']),
+      jobId: Mock.Random.string('number', 6),
+      name: Mock.Random.cname(),
+      desc: Mock.Random.sentence(3, 10),
+      photo: Mock.Random.dataImage('100x100', Mock.Random.cname()),
+      createdAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+      updatedAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+    })
+  }
 
   // 过滤数据
-  let filteredData = users.data
+  let filteredData = allData
   if (name) {
     filteredData = filteredData.filter(user => user.name.includes(name))
   }
@@ -35,10 +72,15 @@ Mock.mock(/\/users(\?.*)?$/, 'get', (options) => {
     filteredData = filteredData.filter(user => user.jobId.includes(jobId))
   }
 
+  // 分页处理
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const pagedData = filteredData.slice(start, end)
+
   return {
     code: 200,
     message: '获取成功',
-    data: filteredData,
+    data: pagedData,
     total: filteredData.length,
     page,
     pageSize
@@ -86,30 +128,39 @@ Mock.mock(/\/tanks(\?.*)?$/, 'get', (options) => {
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
   const code = url.searchParams.get('code') || ''
 
-  const tanks = Mock.mock({
-    [`data|${pageSize}`]: [{
-      'id|+1': 1,
-      'code': () => Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      'desc': () => Mock.Random.sentence(3, 8),
-      'status|1': ['正常', '维护中', '停用'],
-      'capacity': () => Mock.Random.integer(100, 1000),
-      'currentLevel': () => Mock.Random.integer(0, 100),
-      'person': () => Mock.Random.cname(),
-      'createdAt': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      'updatedAt': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
-    }]
-  })
+  // 生成更多数据用于分页测试
+  const totalCount = 22 // 总共22条数据
+  const allData = []
+  
+  for (let i = 0; i < totalCount; i++) {
+    allData.push({
+      id: i + 1,
+      code: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      desc: Mock.Random.sentence(3, 8),
+      status: Mock.Random.pick(['正常', '维护中', '停用']),
+      capacity: Mock.Random.integer(100, 1000),
+      currentLevel: Mock.Random.integer(0, 100),
+      person: Mock.Random.cname(),
+      createdAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+      updatedAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+    })
+  }
 
   // 过滤数据
-  let filteredData = tanks.data
+  let filteredData = allData
   if (code) {
     filteredData = filteredData.filter(tank => tank.code.includes(code))
   }
 
+  // 分页处理
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const pagedData = filteredData.slice(start, end)
+
   return {
     code: 200,
     message: '获取成功',
-    data: filteredData,
+    data: pagedData,
     total: filteredData.length,
     page,
     pageSize
@@ -158,27 +209,43 @@ Mock.mock(/\/feed-manage(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
+  const person = url.searchParams.get('person') || ''
+  const tank = url.searchParams.get('tank') || ''
 
-  const feedManage = Mock.mock({
-    [`data|${pageSize}`]: [{
-      'id|+1': 1,
-      'tankCode': () => Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      'tankName': () => Mock.Random.sentence(2, 4),
-      'materialName': () => Mock.Random.sentence(2, 4),
-      'amount': () => Mock.Random.integer(10, 100),
-      'unit': () => Mock.Random.pick(['kg', 'L', '个']),
-      'status|1': ['待加料', '加料中', '已完成'],
-      'operator': () => Mock.Random.cname(),
-      'applyTime': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      'completeTime': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
-    }]
-  })
+  // 生成更多数据用于分页测试
+  const totalCount = 25 // 总共25条数据
+  const allData = []
+  
+  for (let i = 0; i < totalCount; i++) {
+    allData.push({
+      id: i + 1,
+      person: Mock.Random.cname(),
+      tank: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      spec: Mock.Random.pick(['10kg', '20kg', '50kg', '100kg']),
+      weight: Mock.Random.float(10, 100, 2, 2),
+      time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+    })
+  }
+
+  // 过滤数据
+  let filteredData = allData
+  if (person) {
+    filteredData = filteredData.filter(item => item.person.includes(person))
+  }
+  if (tank) {
+    filteredData = filteredData.filter(item => item.tank.includes(tank))
+  }
+
+  // 分页处理
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const pagedData = filteredData.slice(start, end)
 
   return {
     code: 200,
     message: '获取成功',
-    data: feedManage.data,
-    total: feedManage.data.length,
+    data: pagedData,
+    total: filteredData.length,
     page,
     pageSize
   }
@@ -198,32 +265,61 @@ Mock.mock('/feed-operation', 'post', (options) => {
   }
 })
 
+// 获取底罐重量和加料重量接口
+Mock.mock(/\/tank-weight\/\w+$/, 'get', (options) => {
+  const url = new URL(options.url, 'http://localhost')
+  const tankId = url.pathname.split('/').pop()
+  
+  return {
+    code: 200,
+    message: '获取成功',
+    data: {
+      baseWeight: Mock.Random.float(50, 200, 2, 2),
+      feedWeight: Mock.Random.float(10, 100, 2, 2)
+    }
+  }
+})
+
 // 退料管理接口
 Mock.mock(/\/return-manage(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
+  const person = url.searchParams.get('person') || ''
+  const tank = url.searchParams.get('tank') || ''
 
-  const returnManage = Mock.mock({
-    [`data|${pageSize}`]: [{
-      'id|+1': 1,
-      'tankCode': () => Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      'tankName': () => Mock.Random.sentence(2, 4),
-      'materialName': () => Mock.Random.sentence(2, 4),
-      'amount': () => Mock.Random.integer(5, 50),
-      'unit': () => Mock.Random.pick(['kg', 'L', '个']),
-      'status|1': ['待退料', '退料中', '已完成'],
-      'operator': () => Mock.Random.cname(),
-      'applyTime': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      'completeTime': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
-    }]
-  })
+  // 生成更多数据用于分页测试
+  const totalCount = 30 // 总共30条数据
+  const allData = []
+  
+  for (let i = 0; i < totalCount; i++) {
+    allData.push({
+      id: i + 1,
+      person: Mock.Random.cname(),
+      tank: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+    })
+  }
+
+  // 过滤数据
+  let filteredData = allData
+  if (person) {
+    filteredData = filteredData.filter(item => item.person.includes(person))
+  }
+  if (tank) {
+    filteredData = filteredData.filter(item => item.tank.includes(tank))
+  }
+
+  // 分页处理
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const pagedData = filteredData.slice(start, end)
 
   return {
     code: 200,
     message: '获取成功',
-    data: returnManage.data,
-    total: returnManage.data.length,
+    data: pagedData,
+    total: filteredData.length,
     page,
     pageSize
   }
@@ -248,26 +344,54 @@ Mock.mock(/\/feed-records(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
+  const person = url.searchParams.get('person') || ''
+  const tank = url.searchParams.get('tank') || ''
+  const startTime = url.searchParams.get('startTime') || ''
+  const endTime = url.searchParams.get('endTime') || ''
 
-  const feedRecords = Mock.mock({
-    [`data|${pageSize}`]: [{
-      'id|+1': 1,
-      'tankCode': () => Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      'tankName': () => Mock.Random.sentence(2, 4),
-      'materialName': () => Mock.Random.sentence(2, 4),
-      'amount': () => Mock.Random.integer(10, 100),
-      'unit': () => Mock.Random.pick(['kg', 'L', '个']),
-      'operator': () => Mock.Random.cname(),
-      'operationTime': () => Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      'remark': () => Mock.Random.sentence(5, 15)
-    }]
-  })
+  // 生成更多数据用于分页测试
+  const totalCount = 35 // 总共35条数据
+  const allData = []
+  
+  for (let i = 0; i < totalCount; i++) {
+    allData.push({
+      id: i + 1,
+      person: Mock.Random.cname(),
+      tank: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      baseWeight: Mock.Random.float(50, 200, 2, 2),
+      feedWeight: Mock.Random.float(10, 100, 2, 2),
+      flameWeight: Mock.Random.float(0, 20, 2, 2),
+      time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+    })
+  }
+
+  // 过滤数据
+  let filteredData = allData
+  if (person) {
+    filteredData = filteredData.filter(item => item.person.includes(person))
+  }
+  if (tank) {
+    filteredData = filteredData.filter(item => item.tank.includes(tank))
+  }
+  if (startTime && endTime) {
+    filteredData = filteredData.filter(item => {
+      const itemTime = new Date(item.time)
+      const start = new Date(startTime)
+      const end = new Date(endTime)
+      return itemTime >= start && itemTime <= end
+    })
+  }
+
+  // 分页处理
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const pagedData = filteredData.slice(start, end)
 
   return {
     code: 200,
     message: '获取成功',
-    data: feedRecords.data,
-    total: feedRecords.data.length,
+    data: pagedData,
+    total: filteredData.length,
     page,
     pageSize
   }

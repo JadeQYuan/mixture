@@ -3,7 +3,7 @@
     <el-card class="tank-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="编号">
-          <el-input v-model="searchForm.code" placeholder="请输入编号" clearable size="large" />
+          <el-input v-model="searchForm.code" placeholder="请输入编号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -17,10 +17,14 @@
       <el-table :data="pagedTanks" style="width: 100%;" class="tank-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
         <el-table-column prop="code" label="编号" width="160" />
-        <el-table-column prop="desc" label="描述" />
         <el-table-column prop="person" label="当前人员" width="160" />
-        <el-table-column prop="updatedAt" label="修改时间" width="180" />
-        <el-table-column label="操作" width="240">
+        <el-table-column prop="desc" label="描述" width="500" show-overflow-tooltip>
+          <template #default="scope">
+            <div class="desc-cell">{{ scope.row.desc || '-' }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updatedAt" label="修改时间" width="240" />
+        <el-table-column label="操作">
           <template #default="scope">
             <el-button size="large" @click="openDialog('edit', scope.$index)">编辑</el-button>
             <el-button size="large" type="danger" @click="confirmDelete(scope.$index)">删除</el-button>
@@ -30,46 +34,53 @@
       <div class="pagination-box">
         <el-pagination
           background
-          layout="prev, pager, next, jumper, total"
-          :total="filteredTanks.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
           :page-size="pageSize"
           :current-page.sync="currentPage"
+          :page-sizes="[10, 15, 20, 25, 30, 50, 100]"
+          size="large"
+          prev-text="上一页"
+          next-text="下一页"
+          :pager-count="7"
+          :hide-on-single-page="false"
           @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
-    <el-dialog v-model="dialog.visible" :title="dialog.mode === 'add' ? '新增料罐' : '编辑料罐'" width="400px">
+    <el-dialog v-model="dialog.visible" :title="dialog.mode === 'add' ? '新增料罐' : '编辑料罐'" width="700px" :close-on-click-modal="false">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           {{ dialog.mode === 'add' ? '新增料罐' : '编辑料罐' }}
         </div>
       </template>
-      <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="80px">
+      <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="180px" style="margin-top: 32px;">
         <el-form-item label="编号" prop="code">
-          <el-input v-model="dialog.form.code" placeholder="请输入编号" />
+          <el-input v-model="dialog.form.code" placeholder="请输入编号" size="large" />
         </el-form-item>
         <el-form-item label="描述" prop="desc">
-          <el-input v-model="dialog.form.desc" placeholder="请输入描述" />
+          <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="dialog.visible = false">取消</el-button>
-          <el-button type="primary" @click="handleDialogOk">确定</el-button>
+        <div style="padding: 0;">
+          <el-button @click="dialog.visible = false" size="large">取消</el-button>
+          <el-button type="primary" @click="handleDialogOk" size="large">确定</el-button>
         </div>
       </template>
     </el-dialog>
-    <el-dialog v-model="deleteDialog.visible" title="确认删除" width="300px">
+    <el-dialog v-model="deleteDialog.visible" title="确认删除" width="400px">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           确认删除
         </div>
       </template>
-      <span>确定要删除该料罐吗？</span>
+      <span style="font-size: 18px; margin-top: 32px; display: block;">确定要删除该料罐吗？</span>
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="deleteDialog.visible = false">取消</el-button>
-          <el-button type="danger" @click="handleDeleteTank">删除</el-button>
+        <div style="padding: 0;">
+          <el-button @click="deleteDialog.visible = false" size="large">取消</el-button>
+          <el-button type="danger" @click="handleDeleteTank" size="large">删除</el-button>
         </div>
       </template>
     </el-dialog>
@@ -77,9 +88,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getTankList, createTank, updateTank, deleteTank } from '../request/api'
+import { pageSizeCalculators } from '../utils/pagination'
 
 const currentPerson = localStorage.getItem('username') || '张三'
 
@@ -89,9 +101,16 @@ const searchForm = reactive({
 
 const tanks = ref([])
 const loading = ref(false)
+const total = ref(0)
 
-const pageSize = 5
+// 动态计算每页显示条数
+const pageSize = ref(5)
 const currentPage = ref(1)
+
+// 计算合适的每页显示条数
+function calculatePageSize() {
+  pageSize.value = pageSizeCalculators.tankManage()
+}
 
 // 获取料罐列表
 async function fetchTanks() {
@@ -99,28 +118,22 @@ async function fetchTanks() {
   try {
     const params = {
       page: currentPage.value,
-      pageSize,
+      pageSize: pageSize.value,
       code: searchForm.code
     }
     const response = await getTankList(params)
     tanks.value = response.data || []
+    total.value = response.total || 0
   } catch (error) {
-    console.error('获取料罐列表失败:', error)
     ElMessage.error('获取料罐列表失败')
   } finally {
     loading.value = false
   }
 }
 
-const filteredTanks = computed(() => {
-  return tanks.value.filter(t => {
-    return !searchForm.code || t.code.includes(searchForm.code)
-  })
-})
-
+// 直接使用后端返回的数据，不再进行客户端分页
 const pagedTanks = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return filteredTanks.value.slice(start, start + pageSize)
+  return tanks.value
 })
 
 async function handleSearch() {
@@ -137,6 +150,12 @@ async function handlePageChange(page) {
   await fetchTanks()
 }
 
+async function handleSizeChange(size) {
+  pageSize.value = size
+  currentPage.value = 1
+  await fetchTanks()
+}
+
 const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
@@ -144,7 +163,7 @@ const dialog = reactive({
   form: { code: '', desc: '' },
   rules: {
     code: [ { required: true, message: '请输入编号', trigger: 'blur' } ],
-    desc: [ { required: true, message: '请输入描述', trigger: 'blur' } ]
+    desc: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
   }
 })
 const dialogFormRef = ref()
@@ -186,7 +205,6 @@ async function handleDialogOk() {
       dialog.visible = false
       await fetchTanks() // 重新获取列表
     } catch (error) {
-      console.error('操作失败:', error)
       ElMessage.error('操作失败')
     }
   })
@@ -208,7 +226,6 @@ async function handleDeleteTank() {
       deleteDialog.index = null
       await fetchTanks() // 重新获取列表
     } catch (error) {
-      console.error('删除失败:', error)
       ElMessage.error('删除失败')
     }
   }
@@ -216,20 +233,32 @@ async function handleDeleteTank() {
 
 // 页面加载时获取数据
 onMounted(() => {
+  calculatePageSize()
   fetchTanks()
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', calculatePageSize)
+  })
+  
+// 组件卸载时清理事件监听
+onUnmounted(() => {
+  window.removeEventListener('resize', calculatePageSize)
 })
 </script>
 
 <style scoped>
 .tank-manage-container {
   margin: 20px;
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
 }
 .tank-card {
   background: rgba(255,255,255,0.8);
   border-radius: 32px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.10);
   padding: 48px 40px 32px 40px;
-  font-size: 1.08em;
+  font-size: 1.2em;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -254,14 +283,181 @@ onMounted(() => {
 }
 .tank-table {
   margin-bottom: 24px;
-  font-size: 14px;
+  font-size: 20px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
+}
+
+/* 增加表格行高，确保文字完整显示 */
+:deep(.tank-table .el-table__row) {
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+:deep(.tank-table .el-table__cell) {
+  padding: 12px 0 !important;
+  line-height: 1.5 !important;
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+/* 确保表格内容垂直居中且完整显示 */
+:deep(.tank-table .el-table) {
+  --el-table-row-height: 60px !important;
+}
+
+:deep(.tank-table .el-table__cell) {
+  vertical-align: middle !important;
+}
+
+/* 确保单元格内容不被截断 */
+:deep(.tank-table .el-table__cell .cell) {
+  height: 100% !important;
+  min-height: 36px !important;
+  line-height: 1.5 !important;
+  overflow: visible !important;
+}
+
+/* 描述列样式 */
+.desc-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
+}
+
+/* 分页组件中文样式 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  font-size: 16px;
+}
+
+/* 隐藏分页组件的英文文本 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  font-size: 16px;
+}
+
+/* 隐藏英文文本，只显示中文 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__total::before) {
+  content: "共 ";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__total::after) {
+  content: " 条";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__total span) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner::after) {
+  content: " 条/页";
+  font-size: 16px;
+  color: #606266;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner input) {
+  font-size: 16px;
+  padding-right: 50px;
+}
+
+/* 隐藏下拉选项中的英文文本 */
+:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item::after) {
+  content: " 条/页";
+  font-size: 16px;
+  color: #606266;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto::before) {
+  content: "前往第 ";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto::after) {
+  content: " 页";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto input) {
+  font-size: 16px;
 }
 .pagination-box {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+  flex-shrink: 0;
+  padding: 10px 0;
 }
-.el-form-item__label {
-  font-size: 1em;
+/* 使用更高优先级的选择器确保表单标签字体生效 */
+:deep(.el-form-item__label) {
+  font-size: 20px !important;
+}
+
+:deep(.search-form .el-form-item__label),
+:deep(.el-dialog .el-form-item__label) {
+  font-size: 20px !important;
+}
+
+/* 确保所有表单标签字体生效 */
+:deep(.el-form-item) .el-form-item__label {
+  font-size: 20px !important;
+}
+
+/* 固定输入框宽度，避免清除按钮导致宽度变化 */
+.fixed-width-input {
+  width: 180px !important;
+}
+
+.fixed-width-input .el-input__wrapper {
+  width: 100% !important;
+}
+
+/* 弹窗表单输入框宽度 */
+:deep(.el-dialog .el-input) {
+  width: 85% !important;
+}
+
+:deep(.el-dialog .el-input-number) {
+  width: 85% !important;
+}
+
+/* 弹窗文本域宽度 */
+:deep(.el-dialog .el-textarea) {
+  width: 85% !important;
 }
 </style> 

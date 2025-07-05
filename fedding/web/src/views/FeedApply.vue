@@ -107,6 +107,24 @@ function submit() {
   font-size: 2em;
   padding: 18px 20px;
 }
+
+/* 表单组件宽度 */
+:deep(.el-input) {
+  width: 85% !important;
+}
+
+:deep(.el-select) {
+  width: 85% !important;
+}
+
+:deep(.el-input-number) {
+  width: 85% !important;
+}
+
+/* 文本域宽度 */
+:deep(.el-textarea) {
+  width: 85% !important;
+}
 @media (max-width: 600px) {
   .feed-apply-card {
     min-width: 0;

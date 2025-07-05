@@ -3,10 +3,10 @@
     <el-card class="user-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="姓名">
-          <el-input v-model="searchForm.name" placeholder="请输入姓名" clearable size="large" />
+          <el-input v-model="searchForm.name" placeholder="请输入姓名" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item label="工号">
-          <el-input v-model="searchForm.jobId" placeholder="请输入工号" clearable size="large" />
+          <el-input v-model="searchForm.jobId" placeholder="请输入工号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -18,15 +18,21 @@
         <el-button type="primary" size="large" class="add-btn" @click="openDialog('add')">新增用户</el-button>
       </div>
       <el-table :data="pagedUsers" style="width: 100%;" class="user-table" v-loading="loading">
-        <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="role" label="角色" width="120" />
+        <el-table-column type="index" label="序号" width="100" />
+        <el-table-column prop="role" label="角色" width="150">
+          <template #default="scope">
+            <el-tag :type="getRoleTagType(scope.row.role)" size="large">
+              {{ scope.row.role }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="jobId" label="工号" width="120" />
-        <el-table-column prop="name" label="姓名" width="160" />
-        <el-table-column label="照片" width="160">
+        <el-table-column prop="name" label="姓名" width="120" />
+        <el-table-column label="照片" width="120">
           <template #default="scope">
             <el-image 
               :src="scope.row.photo || '/src/assets/default-avatar.svg'" 
-              style="width: 80px; height: 80px; border-radius: 8px;"
+              style="width: 60px; height: 60px; border-radius: 8px;"
               fit="cover"
               :preview-src-list="[scope.row.photo || '/src/assets/default-avatar.svg']"
             >
@@ -38,8 +44,12 @@
             </el-image>
           </template>
         </el-table-column>
-        <el-table-column prop="desc" label="描述" />
-        <el-table-column prop="createdAt" label="添加时间" width="180" />
+        <el-table-column prop="desc" label="描述" width="200" show-overflow-tooltip>
+          <template #default="scope">
+            <div class="desc-cell">{{ scope.row.desc || '-' }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="添加时间" width="240" />
         <el-table-column label="操作" width="400">
           <template #default="scope">
             <el-button size="large" @click="openDialog('edit', scope.$index)">编辑</el-button>
@@ -52,115 +62,149 @@
       <div class="pagination-box">
         <el-pagination
           background
-          layout="prev, pager, next, jumper, total"
-          :total="filteredUsers.length"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
           :page-size="pageSize"
-          :current-page.sync="currentPage"
+          :current-page="currentPage"
+          :page-sizes="[10, 15, 20, 25, 30, 50, 100]"
+          size="large"
+          prev-text="上一页"
+          next-text="下一页"
+          :pager-count="7"
+          :hide-on-single-page="false"
           @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
-    <el-dialog v-model="dialog.visible" :title="dialog.mode === 'add' ? '新增用户' : '编辑用户'" width="500px">
+    <el-dialog v-model="dialog.visible" :title="dialog.mode === 'add' ? '新增用户' : '编辑用户'" width="700px" :close-on-click-modal="false">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           {{ dialog.mode === 'add' ? '新增用户' : '编辑用户' }}
-          <div v-if="dialog.mode === 'add'" style="font-size: 14px; color: #666; margin-top: 4px;">
-            步骤 {{ dialog.step }}/2
-          </div>
         </div>
       </template>
       
-      <!-- 第一步：基本信息 -->
-      <div v-if="dialog.step === 1">
-        <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="80px">
-          <el-form-item label="角色" prop="role">
-            <el-select v-model="dialog.form.role" placeholder="请选择角色" style="width: 100%;">
-              <el-option v-for="r in roles" :key="r" :label="r" :value="r" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="工号" prop="jobId">
-            <el-input v-model="dialog.form.jobId" placeholder="请输入工号" />
+      <el-steps v-if="dialog.mode === 'add'" :active="dialog.step" finish-status="success" align-center style="margin-bottom: 24px; margin-top: 32px;">
+        <el-step title="基本信息" />
+        <el-step title="拍摄照片" />
+      </el-steps>
+      
+      <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="180px" style="margin-top: 32px;">
+        <!-- 新增用户：显示步骤 -->
+        <template v-if="dialog.mode === 'add'">
+          <template v-if="dialog.step === 0">
+            <el-form-item label="角色" prop="role">
+              <el-radio-group v-model="dialog.form.role" style="width: 100%;">
+                <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ r }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+                      <el-form-item label="工号" prop="jobId">
+            <el-input v-model="dialog.form.jobId" placeholder="请输入工号" size="large" />
           </el-form-item>
           <el-form-item label="姓名" prop="name">
-            <el-input v-model="dialog.form.name" placeholder="请输入姓名" />
+            <el-input v-model="dialog.form.name" placeholder="请输入姓名" size="large" />
           </el-form-item>
           <el-form-item label="描述" prop="desc">
-            <el-input v-model="dialog.form.desc" placeholder="请输入描述" />
+            <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
           </el-form-item>
-        </el-form>
-      </div>
-      
-      <!-- 第二步：拍照 -->
-      <div v-if="dialog.step === 2">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div style="margin-bottom: 16px; font-size: 16px; color: #333;">
-            请拍摄用户照片
-          </div>
-          <div style="position: relative; display: inline-block;">
-            <video 
-              ref="videoRef" 
-              autoplay 
-              style="width: 400px; height: 300px; border-radius: 16px; border: 2px solid #409EFF;"
-            ></video>
-            <canvas ref="canvasRef" style="display: none;"></canvas>
-          </div>
-          <div style="margin-top: 16px;">
-            <el-button type="primary" size="large" @click="takePhoto" :disabled="photoTaken">
-              {{ photoTaken ? '已拍照' : '拍照' }}
-            </el-button>
-            <el-button size="large" @click="startCamera" v-if="!stream">
-              重新启动摄像头
-            </el-button>
-          </div>
-          <div v-if="photoTaken" style="margin-top: 12px; color: #67C23A;">
-            ✓ 照片已拍摄完成
-          </div>
-        </div>
-      </div>
+          </template>
+          
+          <template v-else-if="dialog.step === 1">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <div style="margin-bottom: 16px; font-size: 16px; color: #333;">
+                请拍摄用户照片
+              </div>
+                          <div style="position: relative; display: inline-block;">
+              <video 
+                ref="videoRef" 
+                autoplay 
+                style="width: 500px; height: 375px; border-radius: 16px; border: 2px solid #409EFF;"
+              ></video>
+              <canvas ref="canvasRef" style="display: none;"></canvas>
+            </div>
+              <div style="margin-top: 16px;">
+                <el-button type="primary" size="large" @click="takePhoto" :disabled="photoTaken">
+                  {{ photoTaken ? '已拍照' : '拍照' }}
+                </el-button>
+                <el-button size="large" @click="startCamera" v-if="!stream">
+                  重新启动摄像头
+                </el-button>
+              </div>
+              <div v-if="photoTaken" style="margin-top: 12px; color: #67C23A;">
+                ✓ 照片已拍摄完成
+              </div>
+            </div>
+          </template>
+        </template>
+        
+        <!-- 编辑用户：只显示基本信息 -->
+        <template v-else-if="dialog.mode === 'edit'">
+          <el-form-item label="角色" prop="role">
+            <el-radio-group v-model="dialog.form.role" style="width: 100%;">
+              <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ r }}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="工号" prop="jobId">
+            <el-input v-model="dialog.form.jobId" placeholder="请输入工号" size="large" />
+          </el-form-item>
+          <el-form-item label="姓名" prop="name">
+            <el-input v-model="dialog.form.name" placeholder="请输入姓名" size="large" />
+          </el-form-item>
+          <el-form-item label="描述" prop="desc">
+            <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
+          </el-form-item>
+        </template>
+      </el-form>
       
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="dialog.visible = false">取消</el-button>
-          <el-button v-if="dialog.mode === 'add' && dialog.step === 1" type="primary" @click="nextStep">下一步</el-button>
-          <el-button v-if="dialog.mode === 'add' && dialog.step === 2" @click="prevStep">上一步</el-button>
-          <el-button v-if="dialog.mode === 'add' && dialog.step === 2" type="primary" @click="handleDialogOk" :disabled="!photoTaken">
-            完成
-          </el-button>
-          <el-button v-if="dialog.mode === 'edit'" type="primary" @click="handleDialogOk">确定</el-button>
+        <div style="padding: 0;">
+          <!-- 新增用户：显示步骤按钮 -->
+          <template v-if="dialog.mode === 'add'">
+            <el-button @click="dialog.visible = false" size="large">取消</el-button>
+            <el-button v-if="dialog.step > 0" @click="prevStep" size="large">上一步</el-button>
+            <el-button v-if="dialog.step < 1" type="primary" @click="nextStep" size="large">下一步</el-button>
+            <el-button v-else type="success" @click="handleDialogOk" size="large">提交</el-button>
+          </template>
+          
+          <!-- 编辑用户：只显示确定和取消按钮 -->
+          <template v-else-if="dialog.mode === 'edit'">
+            <el-button @click="dialog.visible = false" size="large">取消</el-button>
+            <el-button type="primary" @click="handleDialogOk" size="large">确定</el-button>
+          </template>
         </div>
       </template>
     </el-dialog>
-    <el-dialog v-model="deleteDialog.visible" title="确认删除" width="300px">
+    <el-dialog v-model="deleteDialog.visible" title="确认删除" width="400px">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           确认删除
         </div>
       </template>
-      <span>确定要删除该用户吗？</span>
+      <span style="font-size: 18px; margin-top: 32px; display: block;">确定要删除该用户吗？</span>
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="deleteDialog.visible = false">取消</el-button>
-          <el-button type="danger" @click="handleDeleteUser">删除</el-button>
+        <div style="padding: 0;">
+          <el-button @click="deleteDialog.visible = false" size="large">取消</el-button>
+          <el-button type="danger" @click="handleDeleteUser" size="large">删除</el-button>
         </div>
       </template>
     </el-dialog>
 
     <!-- 修改照片对话框 -->
-    <el-dialog v-model="photoDialog.visible" title="修改照片" width="500px">
+    <el-dialog v-model="photoDialog.visible" title="修改照片" width="600px">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           修改照片
         </div>
       </template>
-      <div style="text-align: center; margin-bottom: 20px;">
-        <div style="margin-bottom: 16px; font-size: 16px; color: #333;">
+      <div style="text-align: center; margin-bottom: 20px; margin-top: 32px;">
+        <div style="margin-bottom: 16px; font-size: 18px; color: #333;">
           请重新拍摄用户照片
         </div>
         <div style="position: relative; display: inline-block;">
           <video 
             ref="photoVideoRef" 
             autoplay 
-            style="width: 400px; height: 300px; border-radius: 16px; border: 2px solid #409EFF;"
+            style="width: 500px; height: 375px; border-radius: 16px; border: 2px solid #409EFF;"
           ></video>
           <canvas ref="photoCanvasRef" style="display: none;"></canvas>
         </div>
@@ -172,14 +216,14 @@
             重新启动摄像头
           </el-button>
         </div>
-        <div v-if="photoTakenForEdit" style="margin-top: 12px; color: #67C23A;">
+        <div v-if="photoTakenForEdit" style="margin-top: 12px; color: #67C23A; font-size: 16px;">
           ✓ 照片已拍摄完成
         </div>
       </div>
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="photoDialog.visible = false">取消</el-button>
-          <el-button type="primary" @click="handleUpdatePhoto" :disabled="!photoTakenForEdit">
+        <div style="padding: 0;">
+          <el-button @click="photoDialog.visible = false" size="large">取消</el-button>
+          <el-button type="primary" @click="handleUpdatePhoto" :disabled="!photoTakenForEdit" size="large">
             确定
           </el-button>
         </div>
@@ -187,27 +231,24 @@
     </el-dialog>
 
     <!-- 修改密码对话框 -->
-    <el-dialog v-model="passwordDialog.visible" title="修改密码" width="400px">
+    <el-dialog v-model="passwordDialog.visible" title="修改密码" width="500px">
       <template #header>
-        <div style="text-align: center; font-size: 18px; font-weight: 900; color: #000;">
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
           修改密码
         </div>
       </template>
-      <el-form :model="passwordDialog.form" :rules="passwordDialog.rules" ref="passwordFormRef" label-width="100px">
-        <el-form-item label="原密码" prop="oldPassword">
-          <el-input v-model="passwordDialog.form.oldPassword" type="password" placeholder="请输入原密码" show-password />
-        </el-form-item>
+      <el-form :model="passwordDialog.form" :rules="passwordDialog.rules" ref="passwordFormRef" label-width="180px" style="margin-top: 32px;">
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="passwordDialog.form.newPassword" type="password" placeholder="请输入新密码" show-password />
+          <el-input v-model="passwordDialog.form.newPassword" type="password" placeholder="请输入新密码" show-password size="large" />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="passwordDialog.form.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
+          <el-input v-model="passwordDialog.form.confirmPassword" type="password" placeholder="请再次输入新密码" show-password size="large" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <div style="padding: 8px 0;">
-          <el-button @click="passwordDialog.visible = false">取消</el-button>
-          <el-button type="primary" @click="handleUpdatePassword">确定</el-button>
+        <div style="padding: 0;">
+          <el-button @click="passwordDialog.visible = false" size="large">取消</el-button>
+          <el-button type="primary" @click="handleUpdatePassword" size="large">确定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -215,11 +256,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser } from '../request/api'
+import { pageSizeCalculators } from '../utils/pagination'
 
 const roles = ['物料员', '高级操作员', '操作员']
+
+// 获取角色标签类型
+function getRoleTagType(role) {
+  switch (role) {
+    case '物料员':
+      return 'success'
+    case '高级操作员':
+      return 'warning'
+    case '操作员':
+      return 'info'
+    default:
+      return 'info'
+  }
+}
 
 const searchForm = reactive({
   name: '',
@@ -228,9 +284,16 @@ const searchForm = reactive({
 
 const users = ref([])
 const loading = ref(false)
+const total = ref(0)
 
-const pageSize = 5
+// 动态计算每页显示条数
+const pageSize = ref(5)
 const currentPage = ref(1)
+
+// 计算合适的每页显示条数
+function calculatePageSize() {
+  pageSize.value = pageSizeCalculators.userManage()
+}
 
 // 获取用户列表
 async function fetchUsers() {
@@ -238,31 +301,23 @@ async function fetchUsers() {
   try {
     const params = {
       page: currentPage.value,
-      pageSize,
+      pageSize: pageSize.value,
       name: searchForm.name,
       jobId: searchForm.jobId
     }
     const response = await getUserList(params)
     users.value = response.data || []
+    total.value = response.total || 0
   } catch (error) {
-    console.error('获取用户列表失败:', error)
     ElMessage.error('获取用户列表失败')
   } finally {
     loading.value = false
   }
 }
 
-const filteredUsers = computed(() => {
-  return users.value.filter(u => {
-    const nameMatch = !searchForm.name || u.name.includes(searchForm.name)
-    const jobIdMatch = !searchForm.jobId || u.jobId.includes(searchForm.jobId)
-    return nameMatch && jobIdMatch
-  })
-})
-
+// 直接使用后端返回的数据，不再进行客户端分页
 const pagedUsers = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return filteredUsers.value.slice(start, start + pageSize)
+  return users.value
 })
 
 async function handleSearch() {
@@ -280,6 +335,12 @@ async function handlePageChange(page) {
   await fetchUsers()
 }
 
+async function handleSizeChange(size) {
+  pageSize.value = size
+  currentPage.value = 1
+  await fetchUsers()
+}
+
 const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
@@ -290,7 +351,7 @@ const dialog = reactive({
     role: [ { required: true, message: '请选择角色', trigger: 'change' } ],
     jobId: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
     name: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
-    desc: [ { required: true, message: '请输入描述', trigger: 'blur' } ]
+    desc: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
   }
 })
 const dialogFormRef = ref()
@@ -315,9 +376,8 @@ const photoTakenForEdit = ref(false)
 const passwordDialog = reactive({
   visible: false,
   index: null,
-  form: { oldPassword: '', newPassword: '', confirmPassword: '' },
+  form: { newPassword: '', confirmPassword: '' },
   rules: {
-    oldPassword: [ { required: true, message: '请输入原密码', trigger: 'blur' } ],
     newPassword: [ { required: true, message: '请输入新密码', trigger: 'blur' } ],
     confirmPassword: [ { required: true, message: '请再次输入新密码', trigger: 'blur' } ]
   }
@@ -326,7 +386,7 @@ const passwordFormRef = ref()
 
 function openDialog(mode, index = null) {
   dialog.mode = mode
-  dialog.step = 1
+  dialog.step = 0
   dialog.visible = true
   dialog.index = index
   photoTaken.value = false
@@ -345,7 +405,7 @@ function openDialog(mode, index = null) {
 async function handleDialogOk() {
   try {
     if (dialog.mode === 'add') {
-      // 新增模式：需要拍照
+      // 新增模式：提交步骤
       if (!photoTaken.value) {
         ElMessage.warning('请先拍摄用户照片')
         return
@@ -369,7 +429,6 @@ async function handleDialogOk() {
     stopCamera() // 停止摄像头
     await fetchUsers() // 重新获取列表
   } catch (error) {
-    console.error('操作失败:', error)
     ElMessage.error('操作失败')
   }
 }
@@ -389,10 +448,9 @@ async function handleDeleteUser() {
       deleteDialog.visible = false
       deleteDialog.index = null
       await fetchUsers() // 重新获取列表
-    } catch (error) {
-      console.error('删除失败:', error)
-      ElMessage.error('删除失败')
-    }
+      } catch (error) {
+    ElMessage.error('删除失败')
+  }
   }
 }
 
@@ -410,7 +468,6 @@ async function startCamera() {
       videoRef.value.srcObject = stream.value
     }
   } catch (error) {
-    console.error('无法访问摄像头:', error)
     ElMessage.error('无法访问摄像头，请检查权限设置')
   }
 }
@@ -445,20 +502,26 @@ function takePhoto() {
 }
 
 function nextStep() {
-  dialogFormRef.value.validate(async valid => {
-    if (!valid) return
-    dialog.step = 2
-    // 延迟启动摄像头，确保DOM已更新
-    setTimeout(() => {
-      startCamera()
-    }, 100)
-  })
+  if (dialog.step === 0) {
+    dialogFormRef.value.validate(async valid => {
+      if (!valid) return
+      dialog.step = 1
+      // 延迟启动摄像头，确保DOM已更新
+      setTimeout(() => {
+        startCamera()
+      }, 100)
+    })
+  }
 }
 
 function prevStep() {
-  dialog.step = 1
-  stopCamera()
-  photoTaken.value = false
+  if (dialog.step > 0) {
+    dialog.step--
+    if (dialog.step === 0) {
+      stopCamera()
+      photoTaken.value = false
+    }
+  }
 }
 
 // 修改照片相关函数
@@ -486,7 +549,6 @@ async function startPhotoCamera() {
       photoVideoRef.value.srcObject = photoStream.value
     }
   } catch (error) {
-    console.error('无法访问摄像头:', error)
     ElMessage.error('无法访问摄像头，请检查权限设置')
   }
 }
@@ -528,7 +590,6 @@ async function handleUpdatePhoto() {
       stopPhotoCamera()
       await fetchUsers() // 重新获取列表
     } catch (error) {
-      console.error('更新照片失败:', error)
       ElMessage.error('更新照片失败')
     }
   }
@@ -538,7 +599,6 @@ async function handleUpdatePhoto() {
 function openPasswordDialog(index) {
   passwordDialog.visible = true
   passwordDialog.index = index
-  passwordDialog.form.oldPassword = ''
   passwordDialog.form.newPassword = ''
   passwordDialog.form.confirmPassword = ''
 }
@@ -555,11 +615,10 @@ async function handleUpdatePassword() {
     try {
       const user = users.value[passwordDialog.index]
       // 这里应该调用修改密码的API
-      // await updateUserPassword(user.id, passwordDialog.form)
+      // await updateUserPassword(user.id, { newPassword: passwordDialog.form.newPassword })
       ElMessage.success('密码修改成功')
       passwordDialog.visible = false
     } catch (error) {
-      console.error('修改密码失败:', error)
       ElMessage.error('修改密码失败')
     }
   })
@@ -567,7 +626,11 @@ async function handleUpdatePassword() {
 
 // 页面加载时获取数据
 onMounted(() => {
+  calculatePageSize()
   fetchUsers()
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', calculatePageSize)
 })
 
 // 监听对话框关闭，停止摄像头
@@ -582,18 +645,27 @@ watch(() => photoDialog.visible, (newVal) => {
     stopPhotoCamera()
   }
 })
+
+// 组件卸载时清理事件监听
+onUnmounted(() => {
+  window.removeEventListener('resize', calculatePageSize)
+})
+
 </script>
 
 <style scoped>
 .user-manage-container {
   margin: 20px;
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
 }
 .user-card {
   background: rgba(255,255,255,0.8);
   border-radius: 32px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.10);
   padding: 48px 40px 32px 40px;
-  font-size: 1.08em;
+  font-size: 1.2em;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -611,20 +683,266 @@ watch(() => photoDialog.visible, (newVal) => {
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* 查询表单标签样式 */
+:deep(.search-form .el-form-item__label) {
+  font-size: 20px !important;
+  color: #333 !important;
+  font-weight: 500 !important;
 }
 .add-btn {
   margin-left: 24px;
 }
 .user-table {
   margin-bottom: 24px;
-  font-size: 14px;
+  font-size: 20px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
+}
+
+/* 增加表格行高，确保文字完整显示 */
+:deep(.user-table .el-table__row) {
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+:deep(.user-table .el-table__cell) {
+  padding: 12px 0 !important;
+  line-height: 1.5 !important;
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+/* 确保表格内容垂直居中且完整显示 */
+:deep(.user-table .el-table) {
+  --el-table-row-height: 60px !important;
+}
+
+:deep(.user-table .el-table__cell) {
+  vertical-align: middle !important;
+}
+
+/* 强制设置表格行高和对齐 */
+:deep(.user-table .el-table) {
+  --el-table-row-height: 60px !important;
+}
+
+:deep(.user-table .el-table__row) {
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+:deep(.user-table .el-table__cell) {
+  height: 60px !important;
+  min-height: 60px !important;
+  padding: 0 12px !important;
+  vertical-align: middle !important;
+  display: table-cell !important;
+}
+
+:deep(.user-table .el-table__header .el-table__cell) {
+  height: 60px !important;
+  min-height: 60px !important;
+  vertical-align: middle !important;
+}
+
+/* 确保单元格内容垂直居中 */
+:deep(.user-table .el-table__cell .cell) {
+  height: 60px !important;
+  min-height: 60px !important;
+  line-height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* 调整照片列 */
+:deep(.user-table .el-table__cell .el-image) {
+  width: 60px !important;
+  height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:deep(.user-table .el-table__cell .el-image img) {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 8px !important;
+}
+
+/* 调整照片错误显示 */
+:deep(.user-table .el-table__cell .el-image .el-image__error) {
+  width: 60px !important;
+  height: 60px !important;
+}
+
+/* 调整标签和按钮 */
+:deep(.user-table .el-table__cell .el-tag) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:deep(.user-table .el-table__cell .el-button) {
+  margin: 2px !important;
 }
 .pagination-box {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+  flex-shrink: 0;
+  padding: 10px 0;
 }
-.el-form-item__label {
-  font-size: 1em;
+/* 使用更高优先级的选择器确保表单标签字体生效 */
+:deep(.el-form-item__label) {
+  font-size: 20px !important;
+}
+
+:deep(.search-form .el-form-item__label),
+:deep(.el-dialog .el-form-item__label) {
+  font-size: 20px !important;
+}
+
+/* 确保所有表单标签字体生效 */
+:deep(.el-form-item) .el-form-item__label {
+  font-size: 20px !important;
+}
+
+/* 固定输入框宽度，避免清除按钮导致宽度变化 */
+.fixed-width-input {
+  width: 180px !important;
+}
+
+.fixed-width-input .el-input__wrapper {
+  width: 100% !important;
+}
+
+/* 弹窗表单输入框宽度 */
+:deep(.el-dialog .el-input) {
+  width: 85% !important;
+}
+
+:deep(.el-dialog .el-input-number) {
+  width: 85% !important;
+}
+
+/* 弹窗文本域宽度 */
+:deep(.el-dialog .el-textarea) {
+  width: 85% !important;
+}
+
+/* 描述列样式 */
+.desc-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* 角色单选按钮组样式 */
+:deep(.el-radio-group) {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+:deep(.el-radio) {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+/* 分页组件中文样式 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  font-size: 16px;
+}
+
+/* 隐藏分页组件的英文文本 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  font-size: 16px;
+}
+
+/* 隐藏英文文本，只显示中文 */
+:deep(.el-pagination .el-pagination__total) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__total::before) {
+  content: "共 ";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__total::after) {
+  content: " 条";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__total span) {
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner::after) {
+  content: " 条/页";
+  font-size: 16px;
+  color: #606266;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner input) {
+  font-size: 16px;
+  padding-right: 50px;
+}
+
+/* 隐藏下拉选项中的英文文本 */
+:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item::after) {
+  content: " 条/页";
+  font-size: 16px;
+  color: #606266;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto) {
+  font-size: 0;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto::before) {
+  content: "前往第 ";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto::after) {
+  content: " 页";
+  font-size: 16px;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-pagination__goto input) {
+  font-size: 16px;
 }
 </style> 

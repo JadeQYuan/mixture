@@ -1,5 +1,7 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
+import activityMonitor from '../utils/activityMonitor'
+import { ElMessage } from 'element-plus'
 
 // 引入页面组件
 import Home from '../views/Home.vue'
@@ -13,6 +15,7 @@ import ReturnManage from '../views/ReturnManage.vue'
 import FeedRecord from '../views/FeedRecord.vue'
 import FaceLogin from '../views/FaceLogin.vue'
 import CodeLogin from '../views/CodeLogin.vue'
+
 
 const routes = [
   {
@@ -75,7 +78,8 @@ const routes = [
         name: 'UserManage',
         component: UserManage,
         meta: { roles: ['物料员'], title: '用户管理' }
-      }
+      },
+
     ]
   }
 ]
@@ -83,6 +87,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+
+  
+  // 如果是首页，停止活动监测
+  if (to.path === '/') {
+    activityMonitor.stop()
+  }
+  
+  next()
 })
 
 export default router

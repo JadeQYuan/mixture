@@ -43,6 +43,11 @@ export function submitFeedOperation(data) {
   return http.post('/feed-operation', data)
 }
 
+// 获取底罐重量和加料重量接口
+export function getTankWeightData(tankId) {
+  return http.get(`/tank-weight/${tankId}`)
+}
+
 // 退料管理接口
 export function getReturnManageList(params) {
   return http.get('/return-manage', { params })

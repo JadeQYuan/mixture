@@ -98,6 +98,16 @@ async function login() {
   font-size: 1.3em;
   padding: 12px 16px;
 }
+
+/* 表单组件宽度 */
+:deep(.el-input) {
+  width: 85% !important;
+}
+
+/* 文本域宽度 */
+:deep(.el-textarea) {
+  width: 85% !important;
+}
 .login-btn {
   width: 100%;
   font-size: 1.5em;
