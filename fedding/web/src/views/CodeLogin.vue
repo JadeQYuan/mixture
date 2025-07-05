@@ -1,0 +1,126 @@
+<template>
+  <div class="code-login-container">
+    <div class="code-login-card">
+      <h2 class="login-title">密码登录</h2>
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="login-form">
+        <el-form-item label="工号" prop="jobId">
+          <el-input v-model="form.jobId" placeholder="请输入工号" size="large" />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" size="large" class="login-btn" @click="login">登录</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import http from '../utils/http'
+
+const router = useRouter()
+const formRef = ref()
+const form = ref({
+  jobId: '',
+  password: ''
+})
+const rules = {
+  jobId: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
+  password: [ { required: true, message: '请输入密码', trigger: 'blur' } ]
+}
+
+async function login() {
+  formRef.value.validate(async valid => {
+    if (!valid) return
+    try {
+      const res = await http.post('/login', {
+        jobId: form.value.jobId,
+        password: form.value.password
+      })
+      if (res.code === 0) {
+        localStorage.setItem('jobId', res.data.jobId)
+        localStorage.setItem('role', res.data.role)
+        localStorage.setItem('token', res.data.token)
+        ElMessage.success('登录成功')
+        setTimeout(() => {
+          router.push('/app')
+        }, 800)
+      } else {
+        ElMessage.error(res.message || '登录失败')
+      }
+    } catch (e) {
+      // 错误已由http拦截器处理
+    }
+  })
+}
+</script>
+
+<style scoped>
+.code-login-container {
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.code-login-card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  padding: 64px 96px 48px 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 540px;
+}
+.login-title {
+  font-size: 3em;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 48px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+.login-form {
+  width: 100%;
+  font-size: 1.5em;
+}
+.el-form-item {
+  margin-bottom: 36px;
+}
+.el-input__wrapper {
+  font-size: 1.3em;
+  padding: 12px 16px;
+}
+.login-btn {
+  width: 100%;
+  font-size: 1.5em;
+  padding: 18px 0;
+  border-radius: 12px;
+  letter-spacing: 2px;
+}
+@media (max-width: 600px) {
+  .code-login-card {
+    min-width: 0;
+    width: 96vw;
+    padding: 32px 8vw 24px 8vw;
+  }
+  .login-title {
+    font-size: 2em;
+    margin-bottom: 24px;
+  }
+  .login-form {
+    font-size: 1em;
+  }
+  .login-btn {
+    font-size: 1em;
+    padding: 12px 0;
+  }
+}
+</style> 
