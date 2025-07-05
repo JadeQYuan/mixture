@@ -1,29 +1,54 @@
+
+
 # vue3-menu-demo
 
-This template should help get you started developing with Vue 3 in Vite.
+这是一个基于 Vue 3 的菜单演示项目，旨在展示如何构建和管理一个具备多种功能模块的前端应用。该项目利用现代前端技术栈，提供了清晰的结构与良好的开发体验。
 
-## Recommended IDE Setup
+## 推荐的 IDE 配置
+- Visual Studio Code
+- Vite 开发服务器
+- Vue 3 支持插件
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 自定义配置
+有关项目的自定义配置，请参考 [Vite Configuration Reference](https://vite.dev/config/)。
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+## 项目设置
+请使用以下命令安装项目依赖：
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
+## 编译与开发
+在开发环境中编译并启动热重载：
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
-
+## 编译与生产构建
+在生产环境中编译并压缩代码：
 ```sh
 npm run build
 ```
+
+## 项目结构
+- `src/`: 源代码目录，包含 Vue 组件、工具类和资源文件。
+- `public/`: 存放静态资源，如图标和背景图片。
+- `utils/`: 提供项目所需的实用工具，如 HTTP 请求封装和活动监控。
+- `router/`: 包含前端路由配置。
+- `request/`: 用于网络请求的封装。
+- `mock/`: 存放模拟数据，用于开发测试。
+
+## 功能模块
+- **登录模块**：支持验证码登录和人脸识别登录。
+- **管理模块**：涵盖饲料申请、饲料管理、归还申请、归还管理、油罐管理、用户管理等核心功能。
+- **导航与布局**：通过 `Layout.vue` 提供统一的页面布局，包含导航菜单等界面元素。
+
+## 依赖管理
+- 使用 Vite 管理依赖项。
+- 依赖项配置文件: `vite.config.js`
+
+## 许可证
+该项目遵循 MIT 许可证。有关详细信息，请查看项目的许可证文件。
+
+## 联系与贡献
+如果你有兴趣贡献代码或有任何问题，请联系项目维护者或在 Gitee 平台上提交 PR。欢迎任何形式的贡献与反馈！
