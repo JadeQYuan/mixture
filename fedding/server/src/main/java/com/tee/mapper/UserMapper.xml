@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tee.mapper.UserMapper">
+
+  <select id="getUserInfo" resultType="com.tee.pojo.vo.User" >
+    select
+    <include refid="user_corn" />
+    from user_info a
+    <where>
+      <if test="userId != null and userId !=''">
+        a.user_id = #{userId}
+      </if>
+    </where>
+  </select>
+
+  <select id="getUserInfoByName" resultType="com.tee.pojo.vo.User" >
+    select
+    <include refid="user_corn" />
+    from user_info a
+    <where>
+      <if test="userName != null and userName !=''">
+        a.user_name like CONCAT('%', #{userName}, '%')
+      </if>
+    </where>
+    order by create_time desc
+  </select>
+
+  <select id="getUserInfoByNameAndNo" resultType="com.tee.pojo.vo.User" >
+    select
+    <include refid="user_corn" />
+    from user_info a
+    <where>
+      <if test="userName != null and userName !=''">
+        and a.user_name = #{userName}
+      </if>
+      <if test="account != null and account !=''">
+        and a.account = #{account}
+      </if>
+    </where>
+  </select>
+
+  <select id="getUserInfoByAccount" resultType="com.tee.pojo.vo.User" >
+    select
+    <include refid="user_corn" />
+    from user_info a
+    <where>
+      <if test="password != null and password !=''">
+        and a.password = #{password}
+      </if>
+      <if test="account != null and account !=''">
+        and a.account = #{account}
+      </if>
+    </where>
+  </select>
+
+  <insert id="insertUserInfo">
+    insert into user_info(user_id, user_name, account, password, role_id, role_name, remark, create_time, update_time)
+    values(#{userId}, #{userName}, #{account}, #{password}, #{roleId}, #{roleName}, #{remark}, datetime('now'), datetime('now'))
+  </insert>
+
+  <update id="updateUserInfo">
+    update user_info
+    <set>
+      <trim prefix="" suffixOverrides=",">
+        <if test="account != null and account != ''">
+          account = #{account},
+        </if>
+        <if test="password != null and password != ''">
+          password = #{password},
+        </if>
+        <if test="roleId != null and roleId != ''">
+          role_id = #{roleId},
+        </if>
+        <if test="roleName != null and roleName != ''">
+          role_name = #{roleName},
+        </if>
+        <if test="remark != null and remark != ''">
+          remark = #{remark},
+        </if>
+        update_time = datetime('now')
+      </trim>
+    </set>
+    <where>
+      <if test="userId != null and userId !=''">
+        user_id = #{userId}
+      </if>
+    </where>
+  </update>
+
+  <delete id="deleteUserInfo">
+    delete from user_info where user_id = #{userId}
+  </delete>
+
+  <sql id="user_corn">
+    user_id as userId, user_name as userName, account as account, password as password, role_id as roleId, role_name as roleName, remark as remark, create_time as createTime, update_time as updateTime
+  </sql>
+
+
+</mapper>
