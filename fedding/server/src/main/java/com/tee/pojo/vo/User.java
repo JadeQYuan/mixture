@@ -18,4 +18,6 @@ public class User {
     private String roleName;
 
     private String remark;
+
+    private String facePath;
 }

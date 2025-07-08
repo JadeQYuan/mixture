@@ -12,17 +12,13 @@ import com.tee.service.ArcFaceService;
 import com.tee.service.FaceService;
 import com.tee.service.UserService;
 import com.tee.service.caffeine.CacheClient;
-import com.tee.util.ArcfaceUtils;
-import com.tee.util.JwtUtils;
-import com.tee.util.Result;
+import com.tee.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
@@ -187,13 +183,14 @@ public class FaceController {
             return Result.error("用户不存在");
         }
 
-        String jwtToken = JwtUtils.generateToken(userId);
-        Cookie authCookie = new Cookie("authToken", jwtToken); // 将JWT设置为Cookie的值
-        authCookie.setHttpOnly(true); // 防止客户端脚本访问Cookie
-        authCookie.setPath("/"); // 设置路径为根路径
-        response.addCookie(authCookie); // 将Cookie添加到响应中
 
-        return Result.success(userInfo.get(0));
+        User user = userInfo.get(0);
+        String facePath = user.getFacePath();
+        if (!StringUtils.isEmpty(facePath)) {
+            user.setFacePath(Base64Util.fileToBase64(facePath));
+        }
+        CookieUtils.setCookie(userId, response);
+        return Result.success(user);
     }
 
 

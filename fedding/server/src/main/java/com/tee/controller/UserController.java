@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -56,12 +54,11 @@ public class UserController {
         if (!password.equals(decrypt)) {
             return Result.error("账号或密码错误");
         }
-
-        String jwtToken = JwtUtils.generateToken(userInfo.getUserId());
-        Cookie authCookie = new Cookie("authToken", jwtToken); // 将JWT设置为Cookie的值
-        authCookie.setHttpOnly(true); // 防止客户端脚本访问Cookie
-        authCookie.setPath("/"); // 设置路径为根路径
-        response.addCookie(authCookie); // 将Cookie添加到响应中
+        String facePath = userInfo.getFacePath();
+        if (!StringUtils.isEmpty(facePath)) {
+            userInfo.setFacePath(Base64Util.fileToBase64(facePath));
+        }
+        CookieUtils.setCookie(userInfo.getUserId(), response);
 
         return Result.success(userInfo);
     }
@@ -78,6 +75,13 @@ public class UserController {
         List<User> userInfo = userService.getUserInfoByName(userName);
         if (CollectionUtils.isEmpty(userInfo)) {
             return Result.success();
+        }
+        for (User user : userInfo) {
+            String facePath = user.getFacePath();
+            if (!StringUtils.isEmpty(facePath)) {
+                // 加载图片资源
+                user.setFacePath(Base64Util.fileToBase64(facePath));
+            }
         }
 
         PageInfo<User> pageInfo = new PageInfo(userInfo);

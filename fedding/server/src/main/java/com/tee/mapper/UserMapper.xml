@@ -6,6 +6,7 @@
     select
     <include refid="user_corn" />
     from user_info a
+    left join face_info b on a.user_id = b.user_id
     <where>
       <if test="userId != null and userId !=''">
         a.user_id = #{userId}
@@ -17,6 +18,7 @@
     select
     <include refid="user_corn" />
     from user_info a
+    left join face_info b on a.user_id = b.user_id
     <where>
       <if test="userName != null and userName !=''">
         a.user_name like CONCAT('%', #{userName}, '%')
@@ -29,6 +31,7 @@
     select
     <include refid="user_corn" />
     from user_info a
+    left join face_info b on a.user_id = b.user_id
     <where>
       <if test="userName != null and userName !=''">
         and a.user_name = #{userName}
@@ -43,6 +46,7 @@
     select
     <include refid="user_corn" />
     from user_info a
+    left join face_info b on a.user_id = b.user_id
     <where>
       <if test="password != null and password !=''">
         and a.password = #{password}
@@ -92,7 +96,8 @@
   </delete>
 
   <sql id="user_corn">
-    user_id as userId, user_name as userName, account as account, password as password, role_id as roleId, role_name as roleName, remark as remark, create_time as createTime, update_time as updateTime
+    a.user_id as userId, a.user_name as userName, a.account as account, a.password as password, a.role_id as roleId,
+        a.role_name as roleName, a.remark as remark, a.create_time as createTime, a.update_time as updateTime, b.face_path as facePath
   </sql>
 
 

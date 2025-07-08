@@ -1,10 +1,16 @@
 package com.tee.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import java.io.*;
+import java.util.Base64;
 
 /**
  * Base64 工具类
  */
+@Slf4j
 public class Base64Util {
     private static final char last2byte = (char) Integer.parseInt("00000011", 2);
     private static final char last4byte = (char) Integer.parseInt("00001111", 2);
@@ -84,6 +90,28 @@ public class Base64Util {
         }
         return bytes;
     }
+
+    public static String fileToBase64(String facePath) {
+        Resource imageResource = new ClassPathResource(facePath);
+        String base64Image = null;
+        try(FileInputStream fileInputStream = new FileInputStream(imageResource.getFile());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            byte[] imageBytes = outputStream.toByteArray();
+
+            // 将字节数组编码为Base64字符串
+            base64Image = Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            log.error("图片转换异常", e);
+        }
+        return base64Image;
+    }
+
+
 
     /**
      * base64转file
