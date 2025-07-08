@@ -20,4 +20,8 @@ public class User {
     private String remark;
 
     private String facePath;
+
+    private String createTime;
+
+    private String updateTime;
 }

@@ -18,6 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * 用户信息管理
+ *
+ */
 @Slf4j
 @RestController
 @RequestMapping("/service/user")

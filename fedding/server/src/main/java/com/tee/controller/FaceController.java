@@ -23,6 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
 
+/**
+ * 人脸信息管理
+ *
+ */
 @Slf4j
 @RestController
 @RequestMapping("/service/face")

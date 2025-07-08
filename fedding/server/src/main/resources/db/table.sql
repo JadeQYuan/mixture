@@ -22,3 +22,42 @@ CREATE TABLE user_info (
                            create_time text,
                            update_time text
 );
+
+--料罐表
+CREATE TABLE bucket_info (
+                             id INTEGER PRIMARY KEY,
+                             user_id text,
+                             bucket_no INTEGER,
+
+                             capacity real,
+                             abs real,
+                             remake text,
+                             create_time text,
+                             update_time text
+);
+
+--料罐表申请表,type:add 加料，del 退料; status:0 未处理，1已处理
+CREATE TABLE bucket_apply_log (
+                                  id INTEGER PRIMARY KEY,
+                                  user_id text,
+                                  bucket_no INTEGER,
+                                  capacity real,
+                                  type text,
+                                  status text,
+                                  remake text,
+                                  create_time text,
+                                  update_time text
+);
+
+--加料操作记录表
+CREATE TABLE bucket_operate_log (
+                                    id INTEGER PRIMARY KEY,
+                                    user_id text,
+                                    bucket_no INTEGER,
+                                    capacity real,
+                                    capacity_add real,
+                                    abs real,
+                                    remake text,
+                                    create_time text,
+                                    update_time text
+);

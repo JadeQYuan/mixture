@@ -10,4 +10,8 @@ public class Face {
     private String facePath;
 
     private String faceFeature;
+
+    private String createTime;
+
+    private String updateTime;
 }
