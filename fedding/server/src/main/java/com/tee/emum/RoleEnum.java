@@ -4,9 +4,9 @@ import org.apache.logging.log4j.util.Strings;
 
 public enum RoleEnum {
 
-    OPERATOR("3", "操作员"),
-    OPERATOR1("2", "高级操作员"),
-    OPERATOR2("1", "物料员");
+    OPERATOR("Operator", "操作员"),
+    SENIOR_OPERATOR("SeniorOperator", "高级操作员"),
+    MATERIAL_CLERK("MaterialClerk", "物料员");
 
     private RoleEnum(String code, String name) {
         this.code = code;

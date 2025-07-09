@@ -3,8 +3,8 @@
     <div class="code-login-card">
       <h2 class="login-title">密码登录</h2>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="login-form">
-        <el-form-item label="工号" prop="jobId">
-          <el-input v-model="form.jobId" placeholder="请输入工号" size="large" />
+        <el-form-item label="工号" prop="account">
+          <el-input v-model="form.account" placeholder="请输入工号" size="large" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" />
@@ -21,16 +21,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import http from '../utils/http'
+import { accountLogin, getCurrentUser } from '../request/api'
+import { useStore } from 'vuex'
 
 const router = useRouter()
 const formRef = ref()
 const form = ref({
-  jobId: '',
+  account: '',
   password: ''
 })
 const rules = {
-  jobId: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
+  account: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
   password: [ { required: true, message: '请输入密码', trigger: 'blur' } ]
 }
 
@@ -38,14 +39,16 @@ async function login() {
   formRef.value.validate(async valid => {
     if (!valid) return
     try {
-      const res = await http.post('/login', {
-        jobId: form.value.jobId,
-        password: form.value.password
-      })
-      if (res.code === 0) {
-        localStorage.setItem('jobId', res.data.jobId)
-        localStorage.setItem('role', res.data.role)
-        localStorage.setItem('token', res.data.token)
+      const res = await accountLogin(form.value.account, form.value.password)
+      if (res.code === 200) {
+        localStorage.setItem('token', res.data)
+        // 登录成功后获取用户信息
+        try {
+          const userInfo = await getCurrentUser()
+          store.dispatch('setUserInfo', userInfo.data)
+        } catch (e) {
+          // 可选：处理获取用户信息失败
+        }
         ElMessage.success('登录成功')
         setTimeout(() => {
           router.push('/app')

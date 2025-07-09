@@ -2,19 +2,19 @@ import http from '../utils/http'
 
 // 用户管理接口
 export function getUserList(params) {
-  return http.get('/users', { params })
+  return http.get('/service/user/list', { params })
 }
 
 export function createUser(data) {
-  return http.post('/users', data)
+  return http.post('/service/user/add', data)
 }
 
 export function updateUser(id, data) {
-  return http.put(`/users/${id}`, data)
+  return http.put(`/service/user/updateUserInfo`, data)
 }
 
 export function deleteUser(id) {
-  return http.delete(`/users/${id}`)
+  return http.delete(`/service/user/delete`, { params: { userId: id } })
 }
 
 // 料罐管理接口
@@ -70,4 +70,23 @@ export function feedApply(data) {
 // 退料申请接口
 export function returnApply(data) {
   return http.post('/return-apply', data)
+}
+
+// 获取当前用户信息接口
+export function getCurrentUser() {
+  return http.get('/service/user/info')
+}
+
+// 密码登录接口
+export function accountLogin(account, password) {
+  return http.post('/service/user/accountLogin', { account, password })
+}
+
+// 人脸登录接口
+export function faceLogin(imageFile) {
+  const formData = new FormData()
+  formData.append('imageFile', imageFile)
+  return http.post('/service/face/faceLogin', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 } 

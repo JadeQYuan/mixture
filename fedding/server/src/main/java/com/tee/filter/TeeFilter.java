@@ -1,5 +1,6 @@
 package com.tee.filter;
 
+import com.tee.constant.Contants;
 import com.tee.exception.AppException;
 import com.tee.pojo.vo.User;
 import com.tee.service.UserService;
@@ -46,29 +47,13 @@ public class TeeFilter implements Filter {
 
         try {
             if (!flag) {
-                Cookie[] cookies = request.getCookies();
-                if (cookies == null) {
-                    log.error("cookie is null");
-                    throw new AppException("cookie 为空");
-                }
+                String authorization = request.getHeader(Contants.AUTHORIZATION);
                 String userId = null;
-                for (Cookie cookie : cookies) {
-                    String name = cookie.getName();
-                    if ("authToken".equals(name)) {
-                        String authToken = cookie.getValue();
-                        try {
-                            userId = JwtUtils.getSubject(authToken);
-                        } catch (Exception e) {
-                            log.error("getSubject failed", e);
-                            throw new AppException("authToken 校验失败！");
-                        }
-
-                        break;
-                    }
-                }
-                if (StringUtils.isEmpty(userId)) {
-                    log.error("userId is null");
-                    throw new AppException("authToken 校验失败, 用户不存在");
+                try {
+                    userId = JwtUtils.getSubject(authorization);
+                } catch (Exception e) {
+                    log.error("getSubject failed", e);
+                    throw new AppException("authToken 校验失败！");
                 }
                 // 查库 校验userId是否存在即可
                 UserService userService = SpringApplicationContext.getBean(UserService.class);
@@ -88,8 +73,5 @@ public class TeeFilter implements Filter {
             request.setAttribute("code", "401");
             request.getRequestDispatcher("/service/error").forward(request, response);
         }
-
-
-
     }
 }

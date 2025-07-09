@@ -41,43 +41,43 @@ const routes = [
         path: 'feed-apply',
         name: 'FeedApply',
         component: FeedApply,
-        meta: { roles: ['高级操作员', '操作员'], title: '加料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '加料申请' }
       },
       {
         path: 'return-apply',
         name: 'ReturnApply',
         component: ReturnApply,
-        meta: { roles: ['高级操作员', '操作员'], title: '退料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '退料申请' }
       },
       {
         path: 'feed-manage',
         name: 'FeedManage',
         component: FeedManage,
-        meta: { roles: ['高级操作员', '物料员'], title: '加料管理' }
+        meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '加料管理' }
       },
       {
         path: 'return-manage',
         name: 'ReturnManage',
         component: ReturnManage,
-        meta: { roles: ['高级操作员', '物料员'], title: '退料管理' }
+        meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '退料管理' }
       },
       {
         path: 'feed-record',
         name: 'FeedRecord',
         component: FeedRecord,
-        meta: { roles: ['物料员'], title: '加料记录' }
+        meta: { roles: ['MaterialClerk'], title: '加料记录' }
       },
       {
         path: 'tank-manage',
         name: 'TankManage',
         component: TankManage,
-        meta: { roles: ['物料员'], title: '料罐管理' }
+        meta: { roles: ['MaterialClerk'], title: '料罐管理' }
       },  
       {
         path: 'user-manage',
         name: 'UserManage',
         component: UserManage,
-        meta: { roles: ['物料员'], title: '用户管理' }
+        meta: { roles: ['MaterialClerk'], title: '用户管理' }
       },
 
     ]

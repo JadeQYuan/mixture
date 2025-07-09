@@ -13,12 +13,10 @@
         <div class="role-selection">
           <div class="role-label">请选择识别角色：</div>
           <el-radio-group v-model="selectedRole" class="temp-role-radio">
-            <el-radio label="物料员" size="large">物料员</el-radio>
-            <el-radio label="高级操作员" size="large">高级操作员</el-radio>
-            <el-radio label="操作员" size="large">操作员</el-radio>
+            <el-radio v-for="role in roleOptions" :key="role.code" :label="role.code">{{ role.name }}</el-radio>
           </el-radio-group>
         </div>
-        <el-button type="success" size="large" class="temp-login-btn" :disabled="!selectedRole" @click="facePass">
+        <el-button type="success" size="large" class="temp-login-btn" :disabled="!selectedRoleCode" @click="facePass">
           识别通过
         </el-button>
       </div>
@@ -30,19 +28,45 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { faceLogin, getCurrentUser } from '../request/api'
+import { useStore } from 'vuex'
+import { ROLE_MAP } from '../utils/roleMap'
 
-const selectedRole = ref('')
+const roleOptions = [
+  { code: 'MaterialClerk', name: '物料员' },
+  { code: 'SeniorOperator', name: '高级操作员' },
+  { code: 'Operator', name: '操作员' }
+]
+const selectedRoleCode = ref('')
 const router = useRouter()
 const videoRef = ref(null)
 let stream = null
 
-function facePass() {
-  if (!selectedRole.value) return
-  localStorage.setItem('role', selectedRole.value)
-  ElMessage.success('识别通过，欢迎 ' + selectedRole.value)
-  setTimeout(() => {
-    router.push('/app')
-  }, 800)
+async function facePass() {
+  if (!selectedRoleCode.value) return
+  // 这里假设有图片文件 imageFile 变量，实际应为摄像头抓拍图片
+  // 你需要根据实际情况获取 imageFile
+  const imageFile = window.capturedFaceImageFile // 伪代码，请替换为实际图片文件
+  try {
+    const res = await faceLogin(imageFile)
+    if (res.code === 0 && res.data && res.data.token) {
+      localStorage.setItem('token', res.data.token)
+      localStorage.setItem('role', selectedRoleCode.value)
+      // 登录成功后获取用户信息
+      try {
+        const userInfo = await getCurrentUser()
+        store.dispatch('setUserInfo', userInfo.data)
+      } catch (e) {}
+      ElMessage.success('识别通过，欢迎 ' + ROLE_MAP[selectedRoleCode.value]?.name)
+      setTimeout(() => {
+        router.push('/app')
+      }, 800)
+    } else {
+      ElMessage.error(res.message || '人脸识别失败')
+    }
+  } catch (e) {
+    ElMessage.error('人脸识别请求失败')
+  }
 }
 
 onMounted(async () => {

@@ -58,4 +58,5 @@ public class Contants {
     public static final Boolean SUPPORT_IR_LIVENESS = true;
 
 
+    public static final String AUTHORIZATION = "Authorization";
 }

@@ -13,9 +13,7 @@ public class User {
 
     private String password;
 
-    private String roleId;
-
-    private String roleName;
+    private String roleCode;
 
     private String remark;
 

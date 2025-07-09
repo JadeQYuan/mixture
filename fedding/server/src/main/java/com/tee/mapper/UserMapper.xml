@@ -58,8 +58,8 @@
   </select>
 
   <insert id="insertUserInfo">
-    insert into user_info(user_id, user_name, account, password, role_id, role_name, remark, create_time, update_time)
-    values(#{userId}, #{userName}, #{account}, #{password}, #{roleId}, #{roleName}, #{remark}, datetime('now'), datetime('now'))
+    insert into user_info(user_id, user_name, account, password, role_code, remark, create_time, update_time)
+    values(#{userId}, #{userName}, #{account}, #{password}, #{roleCode}, #{remark}, datetime('now'), datetime('now'))
   </insert>
 
   <update id="updateUserInfo">
@@ -72,11 +72,11 @@
         <if test="password != null and password != ''">
           password = #{password},
         </if>
-        <if test="roleId != null and roleId != ''">
-          role_id = #{roleId},
+        <if test="roleCode != null and roleCode != ''">
+          role_code = #{roleCode},
         </if>
-        <if test="roleName != null and roleName != ''">
-          role_name = #{roleName},
+        <if test="userName != null and roleCode != ''">
+          user_name = #{userName},
         </if>
         <if test="remark != null and remark != ''">
           remark = #{remark},
@@ -96,8 +96,8 @@
   </delete>
 
   <sql id="user_corn">
-    a.user_id as userId, a.user_name as userName, a.account as account, a.password as password, a.role_id as roleId,
-        a.role_name as roleName, a.remark as remark, a.create_time as createTime, a.update_time as updateTime, b.face_path as facePath
+    a.user_id as userId, a.user_name as userName, a.account as account, a.password as password, a.role_code as roleCode,
+        a.remark as remark, a.create_time as createTime, a.update_time as updateTime, b.face_path as facePath
   </sql>
 
 

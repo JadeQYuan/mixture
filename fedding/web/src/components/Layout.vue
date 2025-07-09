@@ -22,7 +22,8 @@
       </el-menu>
       <div class="user-info-box">
         <img class="user-avatar" :src="userAvatar" alt="头像" />
-        <div class="user-name">{{ userName }}</div>
+        <div class="user-account">{{ userInfo.account }}</div>
+        <div class="user-name">{{ userInfo.userName }}</div>
       </div>
       <div class="logout-btn-box">
         <el-button color="rgba(140, 166, 191, 1)" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
@@ -41,13 +42,20 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import activityMonitor from '../utils/activityMonitor'
+import { useStore } from 'vuex'
+import { getCurrentUser } from '../request/api'
+import defaultAvatar from '@/assets/avatar.svg'
 
 const router = useRouter()
 const route = useRoute()
-const currentRole = localStorage.getItem('role') || '物料员'
 
-const userName = localStorage.getItem('jobId') || '未登录'
-const userAvatar = '/src/assets/default-avatar.svg' // 使用默认头像
+const store = useStore()
+
+const userInfo = computed(() => store.state.userInfo || {})
+const userAvatar = computed(() => userInfo.value.avatar || defaultAvatar)
+const userAccount = computed(() => store.state.userInfo?.account || '')
+const userName = computed(() => store.state.userInfo?.userName || '')
+const currentRole = computed(() => store.state.userInfo?.roleCode || '').value
 
 const filteredMenuRoutes = computed(() => {
   // 找到SidebarLayout一级路由
@@ -61,7 +69,15 @@ const filteredMenuRoutes = computed(() => {
 
 const activeMenu = computed(() => route.path)
 
-onMounted(() => {
+onMounted(async () => {
+  // 如果有token，每次刷新自动获取用户信息
+  if (localStorage.getItem('token')) {
+    try {
+      const userInfo = await getCurrentUser()
+      store.dispatch('setUserInfo', userInfo.data)
+    } catch (e) {}
+  }
+  
   // 如果当前正好在/app，自动跳转到第一个有权限的子路由
   if (route.path === '/app' && filteredMenuRoutes.value.length > 0) {
     router.replace('/app/' + filteredMenuRoutes.value[0].path)

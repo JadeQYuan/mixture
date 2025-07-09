@@ -16,8 +16,7 @@ CREATE TABLE user_info (
                            user_name text,
                            account text,
                            password text,
-                           role_id text,
-                           role_name text,
+                           role_code text,
                            remark text,
                            create_time text,
                            update_time text

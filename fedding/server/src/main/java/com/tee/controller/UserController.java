@@ -58,12 +58,18 @@ public class UserController {
         if (!password.equals(decrypt)) {
             return Result.error("账号或密码错误");
         }
+
         String facePath = userInfo.getFacePath();
         if (!StringUtils.isEmpty(facePath)) {
             userInfo.setFacePath(Base64Util.fileToBase64(facePath));
         }
-        CookieUtils.setCookie(userInfo.getUserId(), response);
+        String jwtToken = JwtUtils.generateToken(userInfo.getUserId());
+        return Result.success(jwtToken);
+    }
 
+    @GetMapping("/info")
+    public Result getUserInfo() {
+        User userInfo = userService.getCurrentUser();
         return Result.success(userInfo);
     }
 
@@ -109,8 +115,7 @@ public class UserController {
         User user = new User();
         BeanUtils.copyProperties(userQo, user);
         user.setPassword(AESUtil.encrypt(defaultPassword));
-        String roleName = RoleEnum.getRoleNameByCode(user.getRoleId());
-        user.setRoleName(roleName);
+        // roleCode已由前端传递，无需再查name
         user.setUserId(UIdUtil.generateUUID());
         userService.insertUserInfo(user);
 

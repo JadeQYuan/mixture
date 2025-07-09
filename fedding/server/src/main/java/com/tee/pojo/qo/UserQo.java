@@ -19,9 +19,7 @@ public class UserQo {
     private String password;
 
     @NotNull
-    private String roleId;
-
-    private String roleName;
+    private String roleCode;
 
     private String remark;
 }

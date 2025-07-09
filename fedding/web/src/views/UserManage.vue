@@ -3,10 +3,10 @@
     <el-card class="user-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="姓名">
-          <el-input v-model="searchForm.name" placeholder="请输入姓名" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.userName" placeholder="请输入姓名" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item label="工号">
-          <el-input v-model="searchForm.jobId" placeholder="请输入工号" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.account" placeholder="请输入工号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -19,22 +19,22 @@
       </div>
       <el-table :data="pagedUsers" style="width: 100%;" class="user-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="100" />
-        <el-table-column prop="role" label="角色" width="150">
+        <el-table-column prop="roleCode" label="角色" width="150">
           <template #default="scope">
-            <el-tag :type="getRoleTagType(scope.row.role)" size="large">
-              {{ scope.row.role }}
+            <el-tag :type="getRoleTagType(scope.row.roleCode)" size="large">
+              {{ ROLE_MAP[scope.row.roleCode]?.name || scope.row.roleCode }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="jobId" label="工号" width="120" />
-        <el-table-column prop="name" label="姓名" width="120" />
+        <el-table-column prop="account" label="工号" width="180" />
+        <el-table-column prop="userName" label="姓名" width="240" />
         <el-table-column label="照片" width="120">
           <template #default="scope">
             <el-image 
-              :src="scope.row.photo || '/src/assets/default-avatar.svg'" 
+              :src="scope.row.avatar || '/src/assets/default-avatar.svg'" 
               style="width: 60px; height: 60px; border-radius: 8px;"
               fit="cover"
-              :preview-src-list="[scope.row.photo || '/src/assets/default-avatar.svg']"
+              :preview-src-list="[scope.row.avatar || '/src/assets/default-avatar.svg']"
             >
               <template #error>
                 <div style="width: 60px; height: 60px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">
@@ -44,12 +44,12 @@
             </el-image>
           </template>
         </el-table-column>
-        <el-table-column prop="desc" label="描述" width="200" show-overflow-tooltip>
+        <el-table-column prop="remark" label="描述" width="240" show-overflow-tooltip>
           <template #default="scope">
-            <div class="desc-cell">{{ scope.row.desc || '-' }}</div>
+            <div class="desc-cell">{{ scope.row.remark || '-' }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="添加时间" width="240" />
+        <!-- <el-table-column prop="createdAt" label="添加时间" width="240" /> -->
         <el-table-column label="操作" width="400">
           <template #default="scope">
             <el-button size="large" @click="openDialog('edit', scope.$index)">编辑</el-button>
@@ -93,19 +93,19 @@
         <!-- 新增用户：显示步骤 -->
         <template v-if="dialog.mode === 'add'">
           <template v-if="dialog.step === 0">
-            <el-form-item label="角色" prop="role">
-              <el-radio-group v-model="dialog.form.role" style="width: 100%;">
-                <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ r }}</el-radio>
+            <el-form-item label="角色" prop="roleCode">
+              <el-radio-group v-model="dialog.form.roleCode" style="width: 100%;">
+                <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ ROLE_MAP[r].name }}</el-radio>
               </el-radio-group>
             </el-form-item>
-                      <el-form-item label="工号" prop="jobId">
-            <el-input v-model="dialog.form.jobId" placeholder="请输入工号" size="large" />
+                      <el-form-item label="工号" prop="account">
+            <el-input v-model="dialog.form.account" placeholder="请输入工号" size="large" />
           </el-form-item>
-          <el-form-item label="姓名" prop="name">
-            <el-input v-model="dialog.form.name" placeholder="请输入姓名" size="large" />
+          <el-form-item label="姓名" prop="userName">
+            <el-input v-model="dialog.form.userName" placeholder="请输入姓名" size="large" />
           </el-form-item>
-          <el-form-item label="描述" prop="desc">
-            <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
+          <el-form-item label="描述" prop="remark">
+            <el-input v-model="dialog.form.remark" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
           </el-form-item>
           </template>
           
@@ -139,19 +139,19 @@
         
         <!-- 编辑用户：只显示基本信息 -->
         <template v-else-if="dialog.mode === 'edit'">
-          <el-form-item label="角色" prop="role">
-            <el-radio-group v-model="dialog.form.role" style="width: 100%;">
-              <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ r }}</el-radio>
+          <el-form-item label="角色" prop="roleCode">
+            <el-radio-group v-model="dialog.form.roleCode" style="width: 100%;">
+              <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ ROLE_MAP[r].name }}</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="工号" prop="jobId">
-            <el-input v-model="dialog.form.jobId" placeholder="请输入工号" size="large" />
+          <el-form-item label="工号" prop="account">
+            <el-input v-model="dialog.form.account" placeholder="请输入工号" size="large" />
           </el-form-item>
-          <el-form-item label="姓名" prop="name">
-            <el-input v-model="dialog.form.name" placeholder="请输入姓名" size="large" />
+          <el-form-item label="姓名" prop="userName">
+            <el-input v-model="dialog.form.userName" placeholder="请输入姓名" size="large" />
           </el-form-item>
-          <el-form-item label="描述" prop="desc">
-            <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
+          <el-form-item label="描述" prop="remark">
+            <el-input v-model="dialog.form.remark" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
           </el-form-item>
         </template>
       </el-form>
@@ -260,8 +260,8 @@ import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser } from '../request/api'
 import { pageSizeCalculators } from '../utils/pagination'
-
-const roles = ['物料员', '高级操作员', '操作员']
+import { ROLE_MAP } from '../utils/roleMap'
+const roles = Object.keys(ROLE_MAP)
 
 // 获取角色标签类型
 function getRoleTagType(role) {
@@ -278,8 +278,8 @@ function getRoleTagType(role) {
 }
 
 const searchForm = reactive({
-  name: '',
-  jobId: ''
+  userName: '',
+  account: ''
 })
 
 const users = ref([])
@@ -302,8 +302,8 @@ async function fetchUsers() {
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
-      name: searchForm.name,
-      jobId: searchForm.jobId
+      userName: searchForm.userName,
+      account: searchForm.account
     }
     const response = await getUserList(params)
     users.value = response.data || []
@@ -325,8 +325,8 @@ async function handleSearch() {
   await fetchUsers()
 }
 async function resetSearch() {
-  searchForm.name = ''
-  searchForm.jobId = ''
+  searchForm.userName = ''
+  searchForm.account = ''
   currentPage.value = 1
   await fetchUsers()
 }
@@ -346,12 +346,12 @@ const dialog = reactive({
   mode: 'add', // add/edit
   step: 1, // 1: 基本信息, 2: 拍照
   index: null,
-  form: { role: '', jobId: '', name: '', desc: '', photo: '' },
+  form: { roleCode: '', account: '', userName: '', remark: '', avatar: '' },
   rules: {
-    role: [ { required: true, message: '请选择角色', trigger: 'change' } ],
-    jobId: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
-    name: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
-    desc: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
+    roleCode: [ { required: true, message: '请选择角色', trigger: 'change' } ],
+    account: [ { required: true, message: '请输入工号', trigger: 'blur' } ],
+    userName: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
+    remark: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
   }
 })
 const dialogFormRef = ref()
@@ -392,13 +392,11 @@ function openDialog(mode, index = null) {
   photoTaken.value = false
   stopCamera() // 停止之前的摄像头
   if (mode === 'edit' && index !== null) {
+    // 先重置form，避免残留
+    dialog.form = { roleCode: '', account: '', userName: '', remark: '', avatar: '' }
     Object.assign(dialog.form, users.value[index])
   } else {
-    dialog.form.role = ''
-    dialog.form.jobId = ''
-    dialog.form.name = ''
-    dialog.form.desc = ''
-    dialog.form.photo = ''
+    dialog.form = { roleCode: '', account: '', userName: '', remark: '', avatar: '' }
   }
 }
 
@@ -412,22 +410,19 @@ async function handleDialogOk() {
       }
       await createUser(dialog.form)
       ElMessage.success('新增成功')
+      dialog.visible = false
+      stopCamera() // 停止摄像头
+      await fetchUsers() // 新增后立即刷新列表
     } else if (dialog.mode === 'edit' && dialog.index !== null) {
-      // 编辑模式：直接保存
       dialogFormRef.value.validate(async valid => {
         if (!valid) return
-        
-        const user = users.value[dialog.index]
-        await updateUser(user.id, dialog.form)
+        await updateUser(dialog.form.userId, dialog.form)
         ElMessage.success('编辑成功')
         dialog.visible = false
-        await fetchUsers() // 重新获取列表
+        await fetchUsers() // 编辑后立即刷新列表
       })
       return
     }
-    dialog.visible = false
-    stopCamera() // 停止摄像头
-    await fetchUsers() // 重新获取列表
   } catch (error) {
     ElMessage.error('操作失败')
   }
@@ -443,7 +438,7 @@ async function handleDeleteUser() {
   if (deleteDialog.index !== null) {
     try {
       const user = users.value[deleteDialog.index]
-      await deleteUser(user.id)
+      await deleteUser(user.userId)
       ElMessage.success('删除成功')
       deleteDialog.visible = false
       deleteDialog.index = null
@@ -495,7 +490,7 @@ function takePhoto() {
   
   // 转换为base64图片数据
   const photoData = canvas.toDataURL('image/jpeg', 0.8)
-  dialog.form.photo = photoData
+  dialog.form.avatar = photoData
   photoTaken.value = true
   
   ElMessage.success('拍照成功')
@@ -584,7 +579,7 @@ async function handleUpdatePhoto() {
       const canvas = photoCanvasRef.value
       const photoData = canvas.toDataURL('image/jpeg', 0.8)
       
-      await updateUser(user.id, { ...user, photo: photoData })
+      await updateUser(user.userId, { ...user, avatar: photoData })
       ElMessage.success('照片更新成功')
       photoDialog.visible = false
       stopPhotoCamera()

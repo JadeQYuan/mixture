@@ -1,14 +1,14 @@
 import axios from 'axios'
 
 const http = axios.create({
-  baseURL: import.meta.env.DEV ? '' : '/api', // 开发环境直接请求，生产环境使用 /api
+  baseURL: import.meta.env.DEV ? 'http://localhost:8090' : '/api', // 开发环境直接请求，生产环境使用 /api
   timeout: 10000
 })
 
 // 请求拦截器，可加token
 http.interceptors.request.use(config => {
-  // const token = localStorage.getItem('token')
-  // if (token) config.headers.Authorization = `Bearer ${token}`
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `${token}`
   return config
 }, err => Promise.reject(err))
 
@@ -25,4 +25,5 @@ http.interceptors.response.use(
   }
 )
 
+// 移除接口实现，只保留http实例和拦截器
 export default http 
