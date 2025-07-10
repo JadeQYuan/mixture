@@ -24,7 +24,7 @@
         a.user_name like CONCAT('%', #{userName}, '%')
       </if>
     </where>
-    order by create_time desc
+    order by a.create_time desc
   </select>
 
   <select id="getUserInfoByNameAndNo" resultType="com.tee.pojo.vo.User" >

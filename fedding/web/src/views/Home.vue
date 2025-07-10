@@ -5,6 +5,7 @@
       请点击进入系统
     </div>
     <div class="login-link" @click.stop="goToLogin">密码登录</div>
+    <el-button class="back-btn" size="large" @click.stop="goToLogin">返回</el-button>
   </div>
 </template>
 
@@ -131,5 +132,14 @@ onUnmounted(() => {
 .login-link:hover {
   background: #e3f0fd;
   color: #1256a6;
+}
+.back-btn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 1000;
+  font-size: 1.2em;
+  padding: 16px 32px;
+  border-radius: 12px;
 }
 </style> 

@@ -11,9 +11,13 @@ public class Bucket {
 
     private String userId;
 
-    private int bucketNo;
+    private String userName;
+
+    private String bucketNo;
 
     private BigDecimal capacity; // 容量
+
+    private String spec;
 
     private BigDecimal capacityDdd; // 加料
 

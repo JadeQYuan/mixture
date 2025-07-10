@@ -2,9 +2,9 @@
   <div class="return-apply-container">
     <div class="return-apply-card">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px" class="return-form">
-        <el-form-item label="料罐" prop="tank">
-          <el-select v-model="form.tank" placeholder="请选择料罐" size="large">
-            <el-option v-for="tank in tankOptions" :key="tank" :label="tank" :value="tank" />
+        <el-form-item label="料罐" prop="bucketNo">
+          <el-select v-model="form.bucketNo" placeholder="请选择料罐" size="large">
+            <el-option v-for="tank in tankOptions" :key="tank.value" :label="tank.label" :value="tank.value" />
           </el-select>
         </el-form-item>
         <el-form-item class="form-btn-item">
@@ -18,17 +18,28 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { returnApply } from '../request/api'
+import { returnApply, getMyTankList } from '../request/api'
+import { onMounted } from 'vue'
 
-const tankOptions = ['T001', 'T002', 'T003'] // 可根据实际料罐动态获取
+const tankOptions = ref([])
 
 const formRef = ref()
 const form = reactive({
-  tank: ''
+  bucketNo: ''
 })
 const rules = {
-  tank: [ { required: true, message: '请选择料罐', trigger: 'change' } ]
+  bucketNo: [ { required: true, message: '请选择料罐', trigger: 'change' } ]
 }
+
+onMounted(async () => {
+  try {
+    const res = await getMyTankList()
+    tankOptions.value = (res.data || []).map(item => ({
+      label: item.bucketNo,
+      value: item.id
+    }))
+  } catch (e) {}
+})
 
 function submit() {
   formRef.value.validate(async valid => {

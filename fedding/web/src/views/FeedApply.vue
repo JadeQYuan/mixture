@@ -2,9 +2,9 @@
   <div class="feed-apply-container">
     <div class="feed-apply-card">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px" class="feed-form">
-        <el-form-item label="料罐" prop="tank">
-          <el-select v-model="form.tank" placeholder="请选择料罐" size="large">
-            <el-option v-for="tank in tankOptions" :key="tank" :label="tank" :value="tank" />
+        <el-form-item label="料罐" prop="bucketNo">
+          <el-select v-model="form.bucketNo" placeholder="请选择料罐" size="large">
+            <el-option v-for="tank in tankOptions" :key="tank.value" :label="tank.label" :value="tank.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="加料规格" prop="spec">
@@ -12,8 +12,8 @@
             <el-option v-for="spec in specOptions" :key="spec" :label="spec" :value="spec" />
           </el-select>
         </el-form-item>
-        <el-form-item label="计划加料重量" prop="weight">
-          <el-input-number v-model="form.weight" :min="0.01" :precision="2" placeholder="请输入重量" size="large" style="width: 100%;" />
+        <el-form-item label="计划加料重量" prop="capacity">
+          <el-input-number v-model="form.capacity" :min="0.01" :precision="2" placeholder="请输入重量" size="large" style="width: 100%;" />
         </el-form-item>
         <el-form-item class="form-btn-item">
           <el-button type="primary" size="large" class="submit-btn" @click="submit">提交申请</el-button>
@@ -24,24 +24,34 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedApply } from '../request/api'
+import { feedApply, getFeedTankList } from '../request/api'
 
-const tankOptions = ['T001', 'T002', 'T003'] // 可根据实际料罐动态获取
+const tankOptions = ref([])
 const specOptions = ['10kg', '20kg', '50kg', '100kg']
 
 const formRef = ref()
 const form = reactive({
-  tank: '',
+  bucketNo: '',
   spec: '',
-  weight: null
+  capacity: null
 })
 const rules = {
-  tank: [ { required: true, message: '请选择料罐', trigger: 'change' } ],
+  bucketNo: [ { required: true, message: '请选择料罐', trigger: 'change' } ],
   spec: [ { required: true, message: '请选择加料规格', trigger: 'change' } ],
-  weight: [ { required: true, message: '请输入计划加料重量', trigger: 'blur' } ]
+  capacity: [ { required: true, message: '请输入计划加料重量', trigger: 'blur' } ]
 }
+
+onMounted(async () => {
+  try {
+    const res = await getFeedTankList()
+    tankOptions.value = (res.data || []).map(item => ({
+      label: item.bucketNo,
+      value: item.id
+    }))
+  } catch (e) {}
+})
 
 function submit() {
   formRef.value.validate(async valid => {

@@ -1,4 +1,6 @@
 import axios from 'axios'
+import CryptoJS from 'crypto-js'
+import { ElMessage } from 'element-plus'
 
 const http = axios.create({
   baseURL: import.meta.env.DEV ? 'http://localhost:8090' : '/api', // 开发环境直接请求，生产环境使用 /api
@@ -16,14 +18,25 @@ http.interceptors.request.use(config => {
 http.interceptors.response.use(
   res => res.data,
   err => {
+    // 登录接口不弹窗，交由页面处理
     if (err.response) {
-      alert(err.response.data.message || '请求出错')
+      ElMessage.error(err.response.data.message || '请求出错')
     } else {
-      alert('网络错误')
+      ElMessage.error('网络错误')
     }
     return Promise.reject(err)
   }
 )
+
+// AES加密密码工具方法
+const AES_KEY = import.meta.env.VITE_AES_KEY || '3a9F7bE2cD5gH1jK'
+export function encryptPassword(password) {
+  const key = CryptoJS.enc.Utf8.parse(AES_KEY)
+  return CryptoJS.AES.encrypt(password, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  }).toString()
+}
 
 // 移除接口实现，只保留http实例和拦截器
 export default http 

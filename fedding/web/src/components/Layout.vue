@@ -8,6 +8,7 @@
         text-color="#333"
         active-text-color="#1976d2"
         :default-active="activeMenu"
+        v-if="currentRole"
       >
         <el-menu-item
           v-for="route in filteredMenuRoutes"
@@ -55,15 +56,16 @@ const userInfo = computed(() => store.state.userInfo || {})
 const userAvatar = computed(() => userInfo.value.avatar || defaultAvatar)
 const userAccount = computed(() => store.state.userInfo?.account || '')
 const userName = computed(() => store.state.userInfo?.userName || '')
-const currentRole = computed(() => store.state.userInfo?.roleCode || '').value
+const currentRole = computed(() => userInfo.value.roleCode)
 
 const filteredMenuRoutes = computed(() => {
+  if (!currentRole.value) return []
   // 找到SidebarLayout一级路由
   const sidebarRoute = router.getRoutes().find(r => r.path === '/app')
   if (!sidebarRoute || !sidebarRoute.children) return []
   // 只显示有meta且有roles的子路由，且当前角色在roles中
   return sidebarRoute.children.filter(r => {
-    return r.meta && r.meta.roles && r.meta.roles.includes(currentRole)
+    return r.meta && r.meta.roles && r.meta.roles.includes(currentRole.value)
   })
 })
 

@@ -13,9 +13,11 @@ public class BucketQo {
 
     private String userName;
 
-    private int bucketNo;
+    private String bucketNo;
 
     private BigDecimal capacity; // 罐底，容量
+
+    private String spec;
 
     private BigDecimal capacityAdd; // 增加容量
 
@@ -28,4 +30,6 @@ public class BucketQo {
     private String startTime;
 
     private String endTime;
+
+    private String remark;
 }

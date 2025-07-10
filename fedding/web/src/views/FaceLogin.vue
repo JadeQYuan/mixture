@@ -21,6 +21,7 @@
         </el-button>
       </div>
     </div>
+    <el-button class="back-btn" size="large" @click="goHome">返回</el-button>
   </div>
 </template>
 
@@ -67,6 +68,10 @@ async function facePass() {
   } catch (e) {
     ElMessage.error('人脸识别请求失败')
   }
+}
+
+const goHome = () => {
+  router.push('/')
 }
 
 onMounted(async () => {
@@ -233,5 +238,14 @@ onBeforeUnmount(() => {
     min-height: 80px;
     border-radius: 20px;
   }
+}
+.back-btn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 1000;
+  font-size: 1.2em;
+  padding: 16px 32px;
+  border-radius: 12px;
 }
 </style> 

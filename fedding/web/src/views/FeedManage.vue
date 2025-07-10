@@ -6,7 +6,7 @@
           <el-input v-model="searchForm.person" placeholder="请输入人员" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item label="罐号">
-          <el-input v-model="searchForm.tank" placeholder="请输入罐号" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.bucketNo" placeholder="请输入罐号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -19,12 +19,12 @@
       </div>
       <el-table :data="pagedRecords" style="width: 100%;" class="feed-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="person" label="人员" width="160" />
-        <el-table-column prop="tank" label="罐号" width="160" />
+        <el-table-column prop="userName" label="人员" width="160" />
+        <el-table-column prop="bucketNo" label="罐号" width="160" />
         <el-table-column prop="spec" label="计划加料规格" width="160" />
-        <el-table-column prop="weight" label="计划加料重量" width="160">
+        <el-table-column prop="capacity" label="计划加料重量" width="160">
           <template #default="scope">
-            {{ scope.row.weight }} kg
+            {{ scope.row.capacity }} kg
           </template>
         </el-table-column>
         <el-table-column prop="time" label="时间" />
@@ -67,40 +67,40 @@
       <el-form :model="feedDialog.form" :rules="feedDialog.rules" ref="feedFormRef" label-width="180px" style="margin-top: 32px;">
         <template v-if="feedDialog.step === 0">
           <el-form-item label="罐号">
-            <el-input v-model="feedDialog.form.tank" disabled size="large" />
+            <el-input v-model="feedDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="feedDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
         </template>
         <template v-else-if="feedDialog.step === 1">
           <el-form-item label="罐号">
-            <el-input v-model="feedDialog.form.tank" disabled size="large" />
+            <el-input v-model="feedDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="feedDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
           <el-form-item label="加料重量">
-            <el-input v-model="feedDialog.form.feedWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacityAdd" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
         </template>
         <template v-else-if="feedDialog.step === 2">
           <el-form-item label="罐号">
-            <el-input v-model="feedDialog.form.tank" disabled size="large" />
+            <el-input v-model="feedDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="feedDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
           <el-form-item label="加料重量">
-            <el-input v-model="feedDialog.form.feedWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacityAdd" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
@@ -112,20 +112,20 @@
         </template>
         <template v-else-if="feedDialog.step === 3">
           <el-form-item label="罐号">
-            <el-input v-model="feedDialog.form.tank" disabled size="large" />
+            <el-input v-model="feedDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="feedDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
           <el-form-item label="加料重量">
-            <el-input v-model="feedDialog.form.feedWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.capacityAdd" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
           <el-form-item label="阻燃粉重量" label-width="180px">
-            <el-input v-model="feedDialog.form.flameWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="feedDialog.form.abs" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
@@ -151,7 +151,7 @@ import { pageSizeCalculators } from '../utils/pagination'
 
 const searchForm = reactive({
   person: '',
-  tank: ''
+  bucketNo: ''
 })
 
 const records = ref([])
@@ -175,7 +175,7 @@ async function fetchRecords() {
       page: currentPage.value,
       pageSize: pageSize.value,
       person: searchForm.person,
-      tank: searchForm.tank
+      bucketNo: searchForm.bucketNo
     }
     const response = await getFeedManageList(params)
     records.value = response.data || []
@@ -217,9 +217,9 @@ const feedDialog = reactive({
   visible: false,
   step: 0,
   index: null,
-  form: { tank: '', baseWeight: null, feedWeight: null, flameWeight: null },
+  form: { bucketNo: '', capacity: null, capacityAdd: null, abs: null },
   rules: {
-    flameWeight: [ { required: true, message: '请输入阻燃粉重量', trigger: 'blur' } ]
+    abs: [ { required: true, message: '请输入阻燃粉重量', trigger: 'blur' } ]
   }
 })
 const feedFormRef = ref()
@@ -236,22 +236,22 @@ function openFeedDialog(index) {
   feedDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
-    feedDialog.form.tank = record.tank
-    currentTankId.value = record.tank // 设置当前罐号
+    feedDialog.form.bucketNo = record.bucketNo
+    currentTankId.value = record.bucketNo // 设置当前罐号
     // 启动第一步定时器，获取底罐重量
     startWeightTimer(0)
   } else {
-    feedDialog.form.tank = ''
+    feedDialog.form.bucketNo = ''
     currentTankId.value = null
   }
-  feedDialog.form.baseWeight = null
-  feedDialog.form.feedWeight = null
-  feedDialog.form.flameWeight = null
+  feedDialog.form.capacity = null
+  feedDialog.form.capacityAdd = null
+  feedDialog.form.abs = null
 }
 function nextStep() {
   if (feedDialog.step === 0) {
     // 第0步：检查底罐重量是否已获取
-    if (feedDialog.form.baseWeight !== null && feedDialog.form.baseWeight !== undefined) {
+    if (feedDialog.form.baseWeight !== null && feedDialog.form.capacity !== undefined) {
       // 底罐重量确定，进入第二步
       stopWeightTimer()
       feedDialog.step++
@@ -260,7 +260,7 @@ function nextStep() {
     } else {
       // 如果数据还未获取，立即获取一次
       fetchWeightData(0).then(() => {
-        if (feedDialog.form.baseWeight !== null && feedDialog.form.baseWeight !== undefined) {
+        if (feedDialog.form.capacity !== null && feedDialog.form.capacity !== undefined) {
           stopWeightTimer()
           feedDialog.step++
           startWeightTimer(1)
@@ -271,7 +271,7 @@ function nextStep() {
     }
   } else if (feedDialog.step === 1) {
     // 第1步：检查加料重量是否已获取
-    if (feedDialog.form.feedWeight !== null && feedDialog.form.feedWeight !== undefined) {
+    if (feedDialog.form.capacityAdd !== null && feedDialog.form.capacityAdd !== undefined) {
       // 加料重量确定，进入第三步
       stopWeightTimer()
       feedDialog.step++
@@ -279,7 +279,7 @@ function nextStep() {
     } else {
       // 如果数据还未获取，立即获取一次
       fetchWeightData(1).then(() => {
-        if (feedDialog.form.feedWeight !== null && feedDialog.form.feedWeight !== undefined) {
+        if (feedDialog.form.capacityAdd !== null && feedDialog.form.capacityAdd !== undefined) {
           stopWeightTimer()
           feedDialog.step++
         } else {
@@ -289,7 +289,7 @@ function nextStep() {
     }
   } else if (feedDialog.step === 2) {
     // 第三步：验证阻燃粉重量输入
-    feedFormRef.value.validateField('flameWeight', valid => {
+    feedFormRef.value.validateField('abs', valid => {
       if (valid) {
         feedDialog.step++
         // 第四步不需要定时器，显示确认信息
@@ -324,10 +324,10 @@ async function fetchWeightData(step) {
       if (response.data) {
         if (step === 0) {
           // 第一步：只获取底罐重量
-          feedDialog.form.baseWeight = response.data.baseWeight
+          feedDialog.form.capacity = response.data.capacity
         } else if (step === 1) {
           // 第二步：获取加料重量
-          feedDialog.form.feedWeight = response.data.feedWeight
+          feedDialog.form.capacityAdd = response.data.capacityAdd
         }
       }
     } catch (error) {

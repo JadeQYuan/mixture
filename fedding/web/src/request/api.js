@@ -14,29 +14,42 @@ export function updateUser(id, data) {
 }
 
 export function deleteUser(id) {
-  return http.delete(`/service/user/delete`, { params: { userId: id } })
+  return http.delete(`/service/user/delete`, { data: { userId: id } })
+}
+
+// 修改密码接口
+export function updateUserPassword(data) {
+  return http.put('/service/user/updatePassword', data)
 }
 
 // 料罐管理接口
 export function getTankList(params) {
-  return http.get('/tanks', { params })
+  return http.get('/service/bucket/addBucketList', { params })
 }
 
 export function createTank(data) {
-  return http.post('/tanks', data)
+  return http.post('/service/bucket/addBucket', data)
 }
 
 export function updateTank(id, data) {
-  return http.put(`/tanks/${id}`, data)
+  return http.put(`/service/bucket/updateBucket`, data)
 }
 
 export function deleteTank(id) {
-  return http.delete(`/tanks/${id}`)
+  return http.delete(`/service/bucket/deleteBucket`, { data: { id } })
+}
+
+export function getFeedTankList() {
+  return http.get('/service/bucket/list')
+}
+
+export function getMyTankList() {
+  return http.get('/service/bucket/listMy')
 }
 
 // 加料管理接口
 export function getFeedManageList(params) {
-  return http.get('/feed-manage', { params })
+  return http.get('/service/bucket/bucketList', { params })
 }
 
 export function submitFeedOperation(data) {
@@ -50,7 +63,7 @@ export function getTankWeightData(tankId) {
 
 // 退料管理接口
 export function getReturnManageList(params) {
-  return http.get('/return-manage', { params })
+  return http.get('/service/bucket/delBucketList', { params })
 }
 
 export function submitReturnOperation(data) {
@@ -64,12 +77,12 @@ export function getFeedRecordList(params) {
 
 // 加料申请接口
 export function feedApply(data) {
-  return http.post('/feed-apply', data)
+  return http.post('/service/bucket/bucketApplyAdd', data)
 }
 
 // 退料申请接口
 export function returnApply(data) {
-  return http.post('/return-apply', data)
+  return http.post('/service/bucket/bucketApplyDel', data)
 }
 
 // 获取当前用户信息接口

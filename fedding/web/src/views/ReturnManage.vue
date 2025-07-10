@@ -6,7 +6,7 @@
           <el-input v-model="searchForm.person" placeholder="请输入人员" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item label="罐号">
-          <el-input v-model="searchForm.tank" placeholder="请输入罐号" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.bucketNo" placeholder="请输入罐号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -19,8 +19,8 @@
       </div>
       <el-table :data="pagedRecords" style="width: 100%;" class="return-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="person" label="人员" width="160" />
-        <el-table-column prop="tank" label="罐号" width="160" />
+        <el-table-column prop="userName" label="人员" width="160" />
+        <el-table-column prop="bucketNo" label="罐号" width="160" />
         <el-table-column prop="time" label="时间" />
         <el-table-column label="操作" width="240">
           <template #default="scope">
@@ -122,7 +122,7 @@ async function fetchRecords() {
       page: currentPage.value,
       pageSize: pageSize.value,
       person: searchForm.person,
-      tank: searchForm.tank
+      bucketNo: searchForm.bucketNo
     }
     const response = await getReturnManageList(params)
     records.value = response.data || []
@@ -145,7 +145,7 @@ async function handleSearch() {
 }
 async function resetSearch() {
   searchForm.person = ''
-  searchForm.tank = ''
+  searchForm.bucketNo = ''
   currentPage.value = 1
   await fetchRecords()
 }

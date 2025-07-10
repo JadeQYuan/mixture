@@ -258,9 +258,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser } from '../request/api'
+import { getUserList, createUser, updateUser, deleteUser, updateUserPassword } from '../request/api'
 import { pageSizeCalculators } from '../utils/pagination'
 import { ROLE_MAP } from '../utils/roleMap'
+import { encryptPassword } from '../utils/http'
 const roles = Object.keys(ROLE_MAP)
 
 // 获取角色标签类型
@@ -601,20 +602,17 @@ function openPasswordDialog(index) {
 async function handleUpdatePassword() {
   passwordFormRef.value.validate(async valid => {
     if (!valid) return
-    
-    if (passwordDialog.form.newPassword !== passwordDialog.form.confirmPassword) {
-      ElMessage.error('两次输入的密码不一致')
-      return
-    }
-    
+    const user = users.value[passwordDialog.index]
     try {
-      const user = users.value[passwordDialog.index]
-      // 这里应该调用修改密码的API
-      // await updateUserPassword(user.id, { newPassword: passwordDialog.form.newPassword })
+      // 前端AES加密
+      const encrypted = encryptPassword(passwordDialog.form.newPassword)
+      await updateUserPassword({ userId: user.userId, password: encrypted })
       ElMessage.success('密码修改成功')
       passwordDialog.visible = false
-    } catch (error) {
-      ElMessage.error('修改密码失败')
+      passwordDialog.form.newPassword = ''
+      passwordDialog.form.confirmPassword = ''
+    } catch (e) {
+      ElMessage.error('密码修改失败')
     }
   })
 }

@@ -53,9 +53,7 @@ public class UserController {
 
 
         User userInfo = userInfoList.get(0);
-        String password1 = userInfo.getPassword();
-        String decrypt = AESUtil.decrypt(password1);
-        if (!password.equals(decrypt)) {
+        if (!password.equals(userInfo.getPassword())) {
             return Result.error("账号或密码错误");
         }
 
@@ -114,7 +112,6 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userQo, user);
-        user.setPassword(AESUtil.encrypt(defaultPassword));
         // roleCode已由前端传递，无需再查name
         user.setUserId(UIdUtil.generateUUID());
         userService.insertUserInfo(user);
@@ -129,7 +126,7 @@ public class UserController {
      * @return
      */
     @PutMapping("/updatePassword")
-    public Result updatePassword(@Valid @RequestBody UserQo userQo) {
+    public Result updatePassword(@RequestBody UserQo userQo) {
         String userId = userQo.getUserId();
         List<User> userInfo = userService.getUserInfo(userId);
         if (CollectionUtils.isEmpty(userInfo)) {
@@ -140,9 +137,9 @@ public class UserController {
             return Result.error("密码不能为空");
         }
         User user = new User();
-        user.setPassword(AESUtil.encrypt(password));
         user.setUserId(userId);
-        userService.insertUserInfo(user);
+        user.setPassword(password);
+        userService.updateUserInfo(user);
 
         return Result.success();
     }
@@ -174,7 +171,7 @@ public class UserController {
      * @return
      */
     @DeleteMapping("/delete")
-    public Result deleteUserInfo(@Valid @RequestBody UserQo userQo) {
+    public Result deleteUserInfo(@RequestBody UserQo userQo) {
         String userId = userQo.getUserId();
         List<User> userInfo = userService.getUserInfo(userId);
         if (CollectionUtils.isEmpty(userInfo)) {

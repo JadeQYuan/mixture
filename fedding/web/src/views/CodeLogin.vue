@@ -2,7 +2,7 @@
   <div class="code-login-container">
     <div class="code-login-card">
       <h2 class="login-title">密码登录</h2>
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="login-form">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="login-form" @keyup.enter="login">
         <el-form-item label="工号" prop="account">
           <el-input v-model="form.account" placeholder="请输入工号" size="large" />
         </el-form-item>
@@ -14,6 +14,7 @@
         </el-form-item>
       </el-form>
     </div>
+    <el-button class="back-btn" size="large" @click="goHome">返回</el-button>
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { accountLogin, getCurrentUser } from '../request/api'
 import { useStore } from 'vuex'
+import { encryptPassword } from '../utils/http'
 
 const router = useRouter()
 const formRef = ref()
@@ -39,7 +41,9 @@ async function login() {
   formRef.value.validate(async valid => {
     if (!valid) return
     try {
-      const res = await accountLogin(form.value.account, form.value.password)
+      // 前端AES加密
+      const encrypted = encryptPassword(form.value.password)
+      const res = await accountLogin(form.value.account, encrypted)
       if (res.code === 200) {
         localStorage.setItem('token', res.data)
         // 登录成功后获取用户信息
@@ -57,9 +61,13 @@ async function login() {
         ElMessage.error(res.message || '登录失败')
       }
     } catch (e) {
-      // 错误已由http拦截器处理
+      // 错误已由http拦截器处理，不再重复提示
     }
   })
+}
+
+const goHome = () => {
+  router.push('/')
 }
 </script>
 
@@ -117,6 +125,15 @@ async function login() {
   padding: 18px 0;
   border-radius: 12px;
   letter-spacing: 2px;
+}
+.back-btn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 1000;
+  font-size: 1.2em;
+  padding: 16px 32px;
+  border-radius: 12px;
 }
 @media (max-width: 600px) {
   .code-login-card {

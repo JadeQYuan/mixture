@@ -6,6 +6,7 @@ import com.tee.pojo.qo.BucketQo;
 import com.tee.pojo.vo.Bucket;
 import com.tee.pojo.vo.User;
 import com.tee.service.BucketService;
+import com.tee.service.UserService;
 import com.tee.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class BucketController {
     @Autowired
     private BucketService bucketService;
 
+    @Autowired
+    private UserService userService;
+
     @Value("${user.default.password}")
     private String defaultPassword;
 
@@ -39,7 +43,7 @@ public class BucketController {
      * @throws Exception
      */
     @GetMapping("/bucketList")
-    public Result bucketList(@RequestParam(value = "bucketNo", required = false) int bucketNo, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
+    public Result bucketList(@RequestParam(value = "bucketNo", required = false) String bucketNo, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
         BucketQo bucketQo = new BucketQo();
         bucketQo.setBucketNo(bucketNo);
         bucketQo.setType("add");
@@ -62,7 +66,7 @@ public class BucketController {
      * @throws Exception
      */
     @GetMapping("/delBucketList")
-    public Result delBucketList(@RequestParam(value = "bucketNo", required = false) int bucketNo, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
+    public Result delBucketList(@RequestParam(value = "bucketNo", required = false) String bucketNo, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
         BucketQo bucketQo = new BucketQo();
         bucketQo.setBucketNo(bucketNo);
         bucketQo.setType("del");
@@ -72,7 +76,7 @@ public class BucketController {
             return Result.success();
         }
 
-        PageInfo<User> pageInfo = new PageInfo(bucketInfo);
+        PageInfo<Bucket> pageInfo = new PageInfo(bucketInfo);
         return Result.success(pageInfo.getList(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getTotal());
     }
 
@@ -85,11 +89,12 @@ public class BucketController {
     @PostMapping("/bucketApplyAdd")
     public Result bucketApplyAdd(@RequestBody BucketQo bucketQo) {
         String userId = bucketQo.getUserId();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId) || bucketNo <= 0) {
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(bucketNo)) {
             Result.error("输入参数有误");
         }
         bucketQo.setType("add");
+        bucketQo.setUserId(userService.getCurrentUser().getUserId());
         // 增加校验当天申请一次，待优化
         bucketService.insertBucketApply(bucketQo);
         return Result.success();
@@ -108,6 +113,7 @@ public class BucketController {
             Result.error("输入参数有误");
         }
         bucketQo.setType("del");
+        bucketQo.setUserId(userService.getCurrentUser().getUserId());
         // 增加校验当天申请一次，待优化
         bucketService.insertBucketApply(bucketQo);
         return Result.success();
@@ -125,8 +131,8 @@ public class BucketController {
         BigDecimal capacity = bucketQo.getCapacity();
         BigDecimal capacityAdd = bucketQo.getCapacityAdd();
         BigDecimal abs = bucketQo.getAbs();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId)|| bucketNo <= 0 || capacity == null || capacityAdd == null || abs == null) {
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(userId)|| StringUtils.isEmpty(bucketNo) || capacity == null || capacityAdd == null || abs == null) {
             Result.error("输入参数有误");
         }
         capacity = capacity.add(capacityAdd);
@@ -148,8 +154,8 @@ public class BucketController {
     public Result bucketDel(@RequestBody BucketQo bucketQo) {
         String userId = bucketQo.getUserId();
         BigDecimal capacity = bucketQo.getCapacity();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId) || capacity == null || bucketNo <= 0) {
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(userId) || capacity == null || StringUtils.isEmpty(bucketNo)) {
             Result.error("输入参数有误");
         }
 
@@ -167,7 +173,7 @@ public class BucketController {
      * @throws Exception
      */
     @GetMapping("/bucketLogList")
-    public Result bucketLogList(@RequestParam(value = "bucketNo", required = false) int bucketNo,
+    public Result bucketLogList(@RequestParam(value = "bucketNo", required = false) String bucketNo,
                                 @RequestParam(value = "userName", required = false) String userName,
                                 @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
 
@@ -191,7 +197,7 @@ public class BucketController {
      * @throws Exception
      */
     @GetMapping("/addBucketList")
-    public Result addBucketList(@RequestParam(value = "bucketNo", required = false) int bucketNo, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
+    public Result addBucketList(String bucketNo, @RequestParam(defaultValue = "1") int pageNo, @RequestParam(defaultValue = "10") int size) {
 
         BucketQo bucketQo = new BucketQo();
         bucketQo.setBucketNo(bucketNo);
@@ -205,6 +211,27 @@ public class BucketController {
         return Result.success(pageInfo.getList(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getTotal());
     }
 
+    @GetMapping("/list")
+    public Result bucketList() {
+        BucketQo bucketQo = new BucketQo();
+        List<Bucket> bucketInfo = bucketService.getBucketInfo(bucketQo);
+        if (CollectionUtils.isEmpty(bucketInfo)) {
+            return Result.success();
+        }
+        return Result.success(bucketInfo);
+    }
+
+    @GetMapping("/listMy")
+    public Result myBucketList() {
+        BucketQo bucketQo = new BucketQo();
+        bucketQo.setUserId(userService.getCurrentUser().getUserId());
+        List<Bucket> bucketInfo = bucketService.getBucketInfo(bucketQo);
+        if (CollectionUtils.isEmpty(bucketInfo)) {
+            return Result.success();
+        }
+        return Result.success(bucketInfo);
+    }
+
     /**
      * 新增料罐
      *
@@ -215,8 +242,8 @@ public class BucketController {
     public Result addBucket(@RequestBody BucketQo bucketQo) {
         String userId = bucketQo.getUserId();
         BigDecimal capacity = bucketQo.getCapacity();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId) || capacity == null || bucketNo <= 0) {
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(userId) || capacity == null || StringUtils.isEmpty(bucketNo)) {
             Result.error("输入参数有误");
         }
 
@@ -238,8 +265,8 @@ public class BucketController {
         String id = bucketQo.getId();
         String userId = bucketQo.getUserId();
         BigDecimal capacity = bucketQo.getCapacity();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(id) || StringUtils.isEmpty(userId) || capacity == null || bucketNo <= 0) {
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(id) || StringUtils.isEmpty(userId) || capacity == null || StringUtils.isEmpty(bucketNo)) {
             Result.error("输入参数有误");
         }
 
@@ -256,8 +283,7 @@ public class BucketController {
     @DeleteMapping("/deleteBucket")
     public Result deleteBucket(@RequestBody BucketQo bucketQo) {
         String id = bucketQo.getId();
-        int bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(id) || bucketNo <= 0) {
+        if (StringUtils.isEmpty(id)) {
             Result.error("输入参数有误");
         }
 

@@ -8,8 +8,8 @@
     from bucket_info a
     left join user_info b on a.user_id = b.user_id
     <where>
-      <if test="userName != null and userName !=''">
-        b.user_name = #{userName}
+      <if test="userId != null and userId !=''">
+        b.user_id = #{userId}
       </if>
       <if test="bucketNo != null and bucketNo !=''">
         a.bucket_no = #{bucketNo}
@@ -49,7 +49,7 @@
 
   <select id="getBucketApplyLog" resultType="com.tee.pojo.vo.Bucket" >
     select
-    <include refid="bucket_corn" />
+    <include refid="bucket_corn" />, a.spec
     from bucket_apply_log a
     left join user_info b on a.user_id = b.user_id
     <where>
@@ -74,8 +74,8 @@
 
 
   <insert id="insertBucketApply">
-    insert into bucket_apply_log(user_id, bucket_no, capacity, type, status, remark, create_time, update_time)
-    values(#{userId}, #{bucketNo}, #{capacity}, #{type}, '0', #{remark}, datetime('now'), datetime('now'))
+    insert into bucket_apply_log(user_id, bucket_no, capacity, spec, type, status, remark, create_time, update_time)
+    values(#{userId}, #{bucketNo}, #{capacity}, #{spec}, #{type}, '0', #{remark}, datetime('now'), datetime('now'))
   </insert>
 
   <update id="updateBucketApply">
@@ -152,12 +152,12 @@
   </insert>
 
   <delete id="deleteBucket">
-    delete from bucket_info where id = #{id} and bucket_no = #{bucketNo}
+    delete from bucket_info where id = #{id}
   </delete>
 
   <sql id="bucket_corn">
     a.id as id,a.user_id as userId, b.user_name as userName, a.bucket_no as bucketNo, a.capacity as capacity,
-        a.abs as abs, a.remark as remark, a.create_time as createTime, a.update_time as updateTime
+        a.remark as remark, a.create_time as createTime, a.update_time as updateTime
   </sql>
 
 

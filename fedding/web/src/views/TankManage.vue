@@ -3,7 +3,7 @@
     <el-card class="tank-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="编号">
-          <el-input v-model="searchForm.code" placeholder="请输入编号" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.bucketNo" placeholder="请输入编号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
@@ -16,11 +16,11 @@
       </div>
       <el-table :data="pagedTanks" style="width: 100%;" class="tank-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="code" label="编号" width="160" />
+        <el-table-column prop="bucketNo" label="编号" width="160" />
         <el-table-column prop="person" label="当前人员" width="160" />
-        <el-table-column prop="desc" label="描述" width="500" show-overflow-tooltip>
+        <el-table-column prop="remark" label="描述" width="500" show-overflow-tooltip>
           <template #default="scope">
-            <div class="desc-cell">{{ scope.row.desc || '-' }}</div>
+            <div class="desc-cell">{{ scope.row.remark || '-' }}</div>
           </template>
         </el-table-column>
         <el-table-column prop="updatedAt" label="修改时间" width="240" />
@@ -56,11 +56,11 @@
         </div>
       </template>
       <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="180px" style="margin-top: 32px;">
-        <el-form-item label="编号" prop="code">
-          <el-input v-model="dialog.form.code" placeholder="请输入编号" size="large" />
+        <el-form-item label="编号" prop="bucketNo">
+          <el-input v-model="dialog.form.bucketNo" placeholder="请输入编号" size="large" />
         </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="dialog.form.desc" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
+        <el-form-item label="描述" prop="remark">
+          <el-input v-model="dialog.form.remark" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -96,7 +96,7 @@ import { pageSizeCalculators } from '../utils/pagination'
 const currentPerson = localStorage.getItem('username') || '张三'
 
 const searchForm = reactive({
-  code: ''
+  bucketNo: ''
 })
 
 const tanks = ref([])
@@ -119,7 +119,7 @@ async function fetchTanks() {
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
-      code: searchForm.code
+      bucketNo: searchForm.bucketNo
     }
     const response = await getTankList(params)
     tanks.value = response.data || []
@@ -141,7 +141,7 @@ async function handleSearch() {
   await fetchTanks()
 }
 async function resetSearch() {
-  searchForm.code = ''
+  searchForm.bucketNo = ''
   currentPage.value = 1
   await fetchTanks()
 }
@@ -160,10 +160,10 @@ const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
   index: null,
-  form: { code: '', desc: '' },
+  form: { bucketNo: '', remark: '' },
   rules: {
-    code: [ { required: true, message: '请输入编号', trigger: 'blur' } ],
-    desc: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
+    bucketNo: [ { required: true, message: '请输入编号', trigger: 'blur' } ],
+    remark: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
   }
 })
 const dialogFormRef = ref()
@@ -175,8 +175,8 @@ function openDialog(mode, index = null) {
   if (mode === 'edit' && index !== null) {
     Object.assign(dialog.form, tanks.value[index])
   } else {
-    dialog.form.code = ''
-    dialog.form.desc = ''
+    dialog.form.bucketNo = ''
+    dialog.form.remark = ''
   }
 }
 

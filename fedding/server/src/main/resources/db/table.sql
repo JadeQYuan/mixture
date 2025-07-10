@@ -26,11 +26,10 @@ CREATE TABLE user_info (
 CREATE TABLE bucket_info (
                              id INTEGER PRIMARY KEY,
                              user_id text,
-                             bucket_no INTEGER,
-
+                             bucket_no text,
                              capacity real,
                              abs real,
-                             remake text,
+                             remark text,
                              create_time text,
                              update_time text
 );
@@ -39,11 +38,12 @@ CREATE TABLE bucket_info (
 CREATE TABLE bucket_apply_log (
                                   id INTEGER PRIMARY KEY,
                                   user_id text,
-                                  bucket_no INTEGER,
+                                  bucket_no text,
+                                  spec text,
                                   capacity real,
                                   type text,
                                   status text,
-                                  remake text,
+                                  remark text,
                                   create_time text,
                                   update_time text
 );
@@ -52,11 +52,11 @@ CREATE TABLE bucket_apply_log (
 CREATE TABLE bucket_operate_log (
                                     id INTEGER PRIMARY KEY,
                                     user_id text,
-                                    bucket_no INTEGER,
+                                    bucket_no text,
                                     capacity real,
                                     capacity_add real,
                                     abs real,
-                                    remake text,
+                                    remark text,
                                     create_time text,
                                     update_time text
 );
