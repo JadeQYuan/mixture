@@ -11,7 +11,7 @@ import java.util.Date;
 
 
 public class JwtUtils {
-    private static final long EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 设置Cookie的有效期为（7天）
+    private static final long EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 设置tookie的有效期为（7天）
 
     public static String generateToken(String content) {
         return Jwts.builder()

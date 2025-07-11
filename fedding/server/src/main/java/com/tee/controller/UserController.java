@@ -57,10 +57,6 @@ public class UserController {
             return Result.error("账号或密码错误");
         }
 
-        String facePath = userInfo.getFacePath();
-        if (!StringUtils.isEmpty(facePath)) {
-            userInfo.setFacePath(Base64Util.fileToBase64(facePath));
-        }
         String jwtToken = JwtUtils.generateToken(userInfo.getUserId());
         return Result.success(jwtToken);
     }
@@ -68,6 +64,10 @@ public class UserController {
     @GetMapping("/info")
     public Result getUserInfo() {
         User userInfo = userService.getCurrentUser();
+        String facePath = userInfo.getFacePath();
+        if (!StringUtils.isEmpty(facePath)) {
+            userInfo.setFacePath(Base64Util.fileToBase64(facePath));
+        }
         return Result.success(userInfo);
     }
 

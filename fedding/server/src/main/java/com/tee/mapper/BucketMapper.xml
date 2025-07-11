@@ -8,8 +8,11 @@
     from bucket_info a
     left join user_info b on a.user_id = b.user_id
     <where>
-      <if test="userId != null and userId !=''">
-        b.user_id = #{userId}
+      <if test="userId != null and userId !='EMPTY'">
+        a.user_id = #{userId}
+      </if>
+      <if test="userId != null and userId =='EMPTY'">
+        a.user_id is null
       </if>
       <if test="bucketNo != null and bucketNo !=''">
         a.bucket_no = #{bucketNo}
@@ -49,7 +52,7 @@
 
   <select id="getBucketApplyLog" resultType="com.tee.pojo.vo.Bucket" >
     select
-    <include refid="bucket_corn" />, a.spec
+    <include refid="bucket_corn" />, a.spec,a.status
     from bucket_apply_log a
     left join user_info b on a.user_id = b.user_id
     <where>
@@ -110,13 +113,17 @@
         <if test="capacity != null and capacity != ''">
           capacity = #{capacity},
         </if>
+        <if test="userId != null and userId !='EMPTY'">
+          user_id = #{userId},
+        </if>
+        <if test="userId != null and userId =='EMPTY'">
+          user_id = null,
+        </if>
         update_time = datetime('now')
       </trim>
     </set>
     <where>
-      <if test="userId != null and userId !=''">
-        user_id = #{userId}
-      </if>
+
       <if test="bucketNo != null and bucketNo !=''">
         and bucket_no = #{bucketNo}
       </if>

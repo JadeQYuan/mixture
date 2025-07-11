@@ -193,8 +193,8 @@ public class FaceController {
         if (!StringUtils.isEmpty(facePath)) {
             user.setFacePath(Base64Util.fileToBase64(facePath));
         }
-        CookieUtils.setCookie(userId, response);
-        return Result.success(user);
+        String jwtToken = JwtUtils.generateToken(userId);
+        return Result.success(jwtToken);
     }
 
 

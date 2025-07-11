@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 料罐信息管理
@@ -88,15 +89,21 @@ public class BucketController {
      */
     @PostMapping("/bucketApplyAdd")
     public Result bucketApplyAdd(@RequestBody BucketQo bucketQo) {
-        String userId = bucketQo.getUserId();
         String bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(bucketNo)) {
-            Result.error("输入参数有误");
+        if (StringUtils.isEmpty(bucketNo)) {
+            Result.error("料罐号不能为空！");
+        }
+        bucketQo.setType("add");
+        List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
+        if (!CollectionUtils.isEmpty(bucketInfo)) {
+            Result.error("改料罐已经申请加料，请先处理上一笔申请！");
         }
         bucketQo.setType("add");
         bucketQo.setUserId(userService.getCurrentUser().getUserId());
         // 增加校验当天申请一次，待优化
         bucketService.insertBucketApply(bucketQo);
+        // 修改当前料罐责任人为申请人
+        bucketService.updateBucketNum(bucketQo);
         return Result.success();
     }
 
@@ -108,10 +115,16 @@ public class BucketController {
      */
     @PostMapping("/bucketApplyDel")
     public Result bucketApplyDel(@RequestBody BucketQo bucketQo) {
-        String userId = bucketQo.getUserId();
-        if (StringUtils.isEmpty(userId)) {
-            Result.error("输入参数有误");
+        String bucketNo = bucketQo.getBucketNo();
+        if (StringUtils.isEmpty(bucketNo)) {
+            Result.error("料罐号不能为空！");
         }
+        bucketQo.setType("del");
+        List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
+        if (!CollectionUtils.isEmpty(bucketInfo)) {
+            Result.error("改料罐已经申请退料，请先处理上一笔申请！");
+        }
+
         bucketQo.setType("del");
         bucketQo.setUserId(userService.getCurrentUser().getUserId());
         // 增加校验当天申请一次，待优化
@@ -127,14 +140,23 @@ public class BucketController {
      */
     @PostMapping("/bucketAdd")
     public Result bucketAdd(@RequestBody BucketQo bucketQo) {
-        String userId = bucketQo.getUserId();
         BigDecimal capacity = bucketQo.getCapacity();
         BigDecimal capacityAdd = bucketQo.getCapacityAdd();
         BigDecimal abs = bucketQo.getAbs();
         String bucketNo = bucketQo.getBucketNo();
-        if (StringUtils.isEmpty(userId)|| StringUtils.isEmpty(bucketNo) || capacity == null || capacityAdd == null || abs == null) {
+        if (StringUtils.isEmpty(bucketNo) || capacity == null || capacityAdd == null || abs == null) {
             Result.error("输入参数有误");
         }
+        List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
+        if (CollectionUtils.isEmpty(bucketInfo)) {
+            Result.error("加料申请不存在！");
+        }
+        Bucket bucket = bucketInfo.get(0);
+        String status = bucket.getStatus();
+        if ("1".equals(status)) {
+            Result.error("加料申请已处理！");
+        }
+
         capacity = capacity.add(capacityAdd);
         bucketQo.setCapacity(capacity);
         bucketService.updateBucketNum(bucketQo); // 加料
@@ -158,8 +180,17 @@ public class BucketController {
         if (StringUtils.isEmpty(userId) || capacity == null || StringUtils.isEmpty(bucketNo)) {
             Result.error("输入参数有误");
         }
+        List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
+        if (CollectionUtils.isEmpty(bucketInfo)) {
+            Result.error("退料申请不存在！");
+        }
+        Bucket bucket = bucketInfo.get(0);
+        String status = bucket.getStatus();
+        if ("1".equals(status)) {
+            Result.error("退料申请已处理！");
+        }
 
-        bucketQo.setCapacity(BigDecimal.ZERO);
+        bucketQo.setUserId("EMPTY");
         bucketService.updateBucketNum(bucketQo);
         bucketQo.setStatus("1");
         bucketService.updateBucketApply(bucketQo);
@@ -186,7 +217,7 @@ public class BucketController {
             return Result.success();
         }
 
-        PageInfo<User> pageInfo = new PageInfo(bucketInfo);
+        PageInfo<Bucket> pageInfo = new PageInfo(bucketInfo);
         return Result.success(pageInfo.getList(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getTotal());
     }
 
@@ -207,21 +238,16 @@ public class BucketController {
             return Result.success();
         }
 
-        PageInfo<User> pageInfo = new PageInfo(bucketInfo);
+        PageInfo<Bucket> pageInfo = new PageInfo(bucketInfo);
         return Result.success(pageInfo.getList(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getTotal());
     }
 
-    @GetMapping("/list")
-    public Result bucketList() {
-        BucketQo bucketQo = new BucketQo();
-        List<Bucket> bucketInfo = bucketService.getBucketInfo(bucketQo);
-        if (CollectionUtils.isEmpty(bucketInfo)) {
-            return Result.success();
-        }
-        return Result.success(bucketInfo);
-    }
-
-    @GetMapping("/listMy")
+    /**
+     * 在自己名下的料罐列表
+     *
+     * @return
+     */
+    @GetMapping("/myBucketList")
     public Result myBucketList() {
         BucketQo bucketQo = new BucketQo();
         bucketQo.setUserId(userService.getCurrentUser().getUserId());
@@ -229,7 +255,37 @@ public class BucketController {
         if (CollectionUtils.isEmpty(bucketInfo)) {
             return Result.success();
         }
-        return Result.success(bucketInfo);
+        List<String> bucketList = bucketInfo.stream().map(Bucket::getBucketNo).collect(Collectors.toList());
+        return Result.success(bucketList);
+    }
+
+    /**
+     * 可申请料罐列表
+     *
+     * @return
+     */
+    @GetMapping("/bucketAvailableList")
+    public Result bucketAvailableList() {
+        BucketQo bucketQo = new BucketQo();
+        bucketQo.setUserId("EMPTY");
+        List<Bucket> bucketInfo = bucketService.getBucketInfo(bucketQo);
+        if (CollectionUtils.isEmpty(bucketInfo)) {
+            return Result.success();
+        }
+        List<String> bucketList = bucketInfo.stream().map(Bucket::getBucketNo).collect(Collectors.toList());
+        return Result.success(bucketList);
+    }
+
+    /**
+     * 称重
+     *
+     * @return
+     */
+    @GetMapping("/weigh")
+    public Result weigh() {
+
+
+        return Result.success(Math.random());
     }
 
     /**

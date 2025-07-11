@@ -25,6 +25,8 @@ public class Bucket {
 
     private String type; // add 加料，del 退料
 
+    private String status; // 状态 1 已处理，0未处理
+
     private String remark;
 
     private String createTime;
