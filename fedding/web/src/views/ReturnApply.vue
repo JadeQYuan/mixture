@@ -8,7 +8,7 @@
           </el-select>
         </el-form-item>
         <el-form-item class="form-btn-item">
-          <el-button type="primary" size="large" class="submit-btn" @click="submit">提交申请</el-button>
+          <el-button type="primary" size="large" class="submit-btn" @click="submit" :loading="loading">提交申请</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -24,6 +24,7 @@ import { onMounted } from 'vue'
 const tankOptions = ref([])
 
 const formRef = ref()
+const loading = ref(false) // 添加loading状态
 const form = reactive({
   bucketNo: ''
 })
@@ -42,9 +43,12 @@ onMounted(async () => {
 })
 
 function submit() {
+  if (loading.value) return // 防止重复提交
+  
   formRef.value.validate(async valid => {
     if (valid) {
       try {
+        loading.value = true
         const res = await returnApply(form)
         if (res.code === 0) {
           ElMessage.success('退料申请已提交！')
@@ -53,6 +57,8 @@ function submit() {
         }
       } catch (e) {
         // 错误已由http拦截器处理
+      } finally {
+        loading.value = false
       }
     }
   })

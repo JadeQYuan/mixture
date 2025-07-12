@@ -116,7 +116,7 @@ public class UserController {
         user.setUserId(UIdUtil.generateUUID());
         userService.insertUserInfo(user);
 
-        return Result.success();
+        return Result.success(user);
     }
 
     /**

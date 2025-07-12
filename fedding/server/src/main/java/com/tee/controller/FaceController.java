@@ -83,8 +83,7 @@ public class FaceController {
      * @throws Exception
      */
     @PostMapping ("/faceUpload")
-    public Result faceUpload(@RequestParam(value = "imageFile") MultipartFile multipartFile,
-        @RequestParam(value = "userId") String userId) throws Exception{
+    public Result faceUpload(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestPart String userId) throws Exception{
         List<User> userInfo = userService.getUserInfo(userId);
         if (CollectionUtils.isEmpty(userInfo)) {
             return Result.error("用户不存在！");
@@ -185,13 +184,6 @@ public class FaceController {
         List<User> userInfo = userService.getUserInfo(userId);
         if (CollectionUtils.isEmpty(userInfo)) {
             return Result.error("用户不存在");
-        }
-
-
-        User user = userInfo.get(0);
-        String facePath = user.getFacePath();
-        if (!StringUtils.isEmpty(facePath)) {
-            user.setFacePath(Base64Util.fileToBase64(facePath));
         }
         String jwtToken = JwtUtils.generateToken(userId);
         return Result.success(jwtToken);

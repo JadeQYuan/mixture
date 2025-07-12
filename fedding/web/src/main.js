@@ -5,6 +5,7 @@ import router from './router'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import { createStore } from 'vuex'
+import { setupMessage } from './utils/message'
 
 const store = createStore({
   state() {
@@ -35,6 +36,10 @@ async function startApp() {
   app.use(router)
   app.use(ElementPlus)
   app.use(store)
+  
+  // 设置消息管理
+  setupMessage()
+  
   app.mount('#app')
 }
 

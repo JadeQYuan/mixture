@@ -10,8 +10,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const hintStyle = ref({

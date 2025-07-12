@@ -104,8 +104,8 @@
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
-          <el-form-item label="阻燃粉重量" prop="flameWeight" label-width="180px">
-            <el-input v-model="feedDialog.form.flameWeight" type="number" :disabled="feedDialog.step > 2" style="width: 100%;" size="large">
+          <el-form-item label="阻燃粉重量" prop="abs" label-width="180px">
+            <el-input v-model="feedDialog.form.abs" type="number" :disabled="feedDialog.step > 2" style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
@@ -136,7 +136,7 @@
           <el-button @click="closeFeedDialog" size="large">取消</el-button>
           <el-button v-if="feedDialog.step > 0" @click="prevStep" size="large">上一步</el-button>
           <el-button v-if="feedDialog.step < 3" type="primary" @click="nextStep" size="large">下一步</el-button>
-          <el-button v-else type="success" @click="submitFeed" size="large">提交</el-button>
+          <el-button v-else type="success" @click="submitFeed" size="large" :loading="feedDialog.loading">提交</el-button>
         </div>
       </template>
     </el-dialog>
@@ -217,6 +217,7 @@ const feedDialog = reactive({
   visible: false,
   step: 0,
   index: null,
+  loading: false, // 添加loading状态
   form: { bucketNo: '', capacity: null, capacityAdd: null, abs: null },
   rules: {
     abs: [ { required: true, message: '请输入阻燃粉重量', trigger: 'blur' } ]
@@ -320,14 +321,14 @@ function closeFeedDialog() {
 async function fetchWeightData(step) {
   if (currentTankId.value) {
     try {
-      const response = await getTankWeightData(currentTankId.value)
+      const response = await getTankWeightData()
       if (response.data) {
         if (step === 0) {
           // 第一步：只获取底罐重量
-          feedDialog.form.capacity = response.data.capacity
+          feedDialog.form.capacity = response.data
         } else if (step === 1) {
           // 第二步：获取加料重量
-          feedDialog.form.capacityAdd = response.data.capacityAdd
+          feedDialog.form.capacityAdd = response.data
         }
       }
     } catch (error) {
@@ -359,7 +360,10 @@ function stopWeightTimer() {
 }
 
 async function submitFeed() {
+  if (feedDialog.loading) return // 防止重复提交
+  
   try {
+    feedDialog.loading = true
     // 确保清除定时器
     stopWeightTimer()
     currentStep.value = 0
@@ -369,6 +373,8 @@ async function submitFeed() {
     await fetchRecords() // 重新获取列表
   } catch (error) {
     ElMessage.error('提交失败')
+  } finally {
+    feedDialog.loading = false
   }
 }
 

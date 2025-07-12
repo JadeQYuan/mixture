@@ -75,7 +75,7 @@
         <if test="roleCode != null and roleCode != ''">
           role_code = #{roleCode},
         </if>
-        <if test="userName != null and roleCode != ''">
+        <if test="userName != null and userName != ''">
           user_name = #{userName},
         </if>
         <if test="remark != null and remark != ''">

@@ -66,7 +66,7 @@
       <template #footer>
         <div style="padding: 0;">
           <el-button @click="dialog.visible = false" size="large">取消</el-button>
-          <el-button type="primary" @click="handleDialogOk" size="large">确定</el-button>
+          <el-button type="primary" @click="handleDialogOk" size="large" :loading="dialog.loading">确定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -160,6 +160,7 @@ const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
   index: null,
+  loading: false, // 添加loading状态
   form: { bucketNo: '', remark: '' },
   rules: {
     bucketNo: [ { required: true, message: '请输入编号', trigger: 'blur' } ],
@@ -181,10 +182,13 @@ function openDialog(mode, index = null) {
 }
 
 async function handleDialogOk() {
+  if (dialog.loading) return // 防止重复提交
+  
   dialogFormRef.value.validate(async valid => {
     if (!valid) return
     
     try {
+      dialog.loading = true
       const now = new Date().toLocaleString()
       if (dialog.mode === 'add') {
         await createTank({
@@ -206,6 +210,8 @@ async function handleDialogOk() {
       await fetchTanks() // 重新获取列表
     } catch (error) {
       ElMessage.error('操作失败')
+    } finally {
+      dialog.loading = false
     }
   })
 }

@@ -10,7 +10,7 @@
           <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="large" class="login-btn" @click="login">登录</el-button>
+          <el-button type="primary" size="large" class="login-btn" @click="login" :loading="loading">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -27,7 +27,9 @@ import { useStore } from 'vuex'
 import { encryptPassword } from '../utils/http'
 
 const router = useRouter()
+const store = useStore()
 const formRef = ref()
+const loading = ref(false) // 添加loading状态
 const form = ref({
   account: '',
   password: ''
@@ -40,7 +42,10 @@ const rules = {
 async function login() {
   formRef.value.validate(async valid => {
     if (!valid) return
+    if (loading.value) return // 防止重复提交
+    
     try {
+      loading.value = true
       // 前端AES加密
       const encrypted = encryptPassword(form.value.password)
       const res = await accountLogin(form.value.account, encrypted)
@@ -59,9 +64,11 @@ async function login() {
         }, 800)
       } else {
         ElMessage.error(res.message || '登录失败')
+        loading.value = false // 登录失败时重置loading状态
       }
     } catch (e) {
       // 错误已由http拦截器处理，不再重复提示
+      loading.value = false // 发生错误时重置loading状态
     }
   })
 }

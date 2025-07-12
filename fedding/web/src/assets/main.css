@@ -30,3 +30,32 @@ a,
     grid-template-columns: 1fr 1fr;
   }
 } */
+
+/* 大号ElMessage样式 - 全局应用 */
+.el-message {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  margin-bottom: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+}
+
+.el-message .el-message__content {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+}
+
+.el-message .el-message__icon {
+  font-size: 20px !important;
+}
+
+/* 确保消息容器有合适的z-index */
+.el-message-container {
+  z-index: 9999 !important;
+}
+
+/* 优化消息堆叠效果 */
+.el-message + .el-message {
+  margin-top: 10px !important;
+}

@@ -23,8 +23,8 @@
       </el-menu>
       <div class="user-info-box">
         <img class="user-avatar" :src="userAvatar" alt="头像" />
-        <div class="user-account">{{ userInfo.account }}</div>
-        <div class="user-name">{{ userInfo.userName }}</div>
+        <div class="user-account">{{ userAccount }}</div>
+        <div class="user-name">{{ userName }}</div>
       </div>
       <div class="logout-btn-box">
         <el-button color="rgba(140, 166, 191, 1)" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
@@ -53,7 +53,7 @@ const route = useRoute()
 const store = useStore()
 
 const userInfo = computed(() => store.state.userInfo || {})
-const userAvatar = computed(() => userInfo.value.avatar || defaultAvatar)
+const userAvatar = computed(() => userInfo.value.facePath ? "data:image/png;base64," + userInfo.value.facePath :defaultAvatar)
 const userAccount = computed(() => store.state.userInfo?.account || '')
 const userName = computed(() => store.state.userInfo?.userName || '')
 const currentRole = computed(() => userInfo.value.roleCode)
@@ -171,6 +171,12 @@ function logout() {
   margin-bottom: 16px;
   border: 2px solid #e0e0e0;
   background: #fff;
+}
+.user-account {
+  font-size: 0.6em;
+  color: #333;
+  text-align: center;
+  font-weight: bold;
 }
 .user-name {
   font-size: 0.6em;

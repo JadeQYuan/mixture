@@ -16,7 +16,7 @@
           <el-input-number v-model="form.capacity" :min="0.01" :precision="2" placeholder="请输入重量" size="large" style="width: 100%;" />
         </el-form-item>
         <el-form-item class="form-btn-item">
-          <el-button type="primary" size="large" class="submit-btn" @click="submit">提交申请</el-button>
+          <el-button type="primary" size="large" class="submit-btn" @click="submit" :loading="loading">提交申请</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -29,9 +29,10 @@ import { ElMessage } from 'element-plus'
 import { feedApply, getFeedTankList } from '../request/api'
 
 const tankOptions = ref([])
-const specOptions = ['10kg', '20kg', '50kg', '100kg']
+const specOptions = ['10KV', '35KV']
 
 const formRef = ref()
+const loading = ref(false) // 添加loading状态
 const form = reactive({
   bucketNo: '',
   spec: '',
@@ -54,9 +55,12 @@ onMounted(async () => {
 })
 
 function submit() {
+  if (loading.value) return // 防止重复提交
+  
   formRef.value.validate(async valid => {
     if (valid) {
       try {
+        loading.value = true
         const res = await feedApply(form)
         if (res.code === 0) {
           ElMessage.success('申请已提交！')
@@ -65,6 +69,8 @@ function submit() {
         }
       } catch (e) {
         // 错误已由http拦截器处理
+      } finally {
+        loading.value = false
       }
     }
   })

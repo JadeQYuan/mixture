@@ -13,6 +13,15 @@ export function updateUser(id, data) {
   return http.put(`/service/user/updateUserInfo`, data)
 }
 
+export function updateUserPhoto(userId, imageFile) {
+  const formData = new FormData()
+  formData.append('imageFile', imageFile)
+  formData.append('userId', userId)
+  return http.post(`/service/face/faceUpload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
 export function deleteUser(id) {
   return http.delete(`/service/user/delete`, { data: { userId: id } })
 }
@@ -40,11 +49,11 @@ export function deleteTank(id) {
 }
 
 export function getFeedTankList() {
-  return http.get('/service/bucket/list')
+  return http.get('/service/bucket/bucketAvailableList')
 }
 
 export function getMyTankList() {
-  return http.get('/service/bucket/listMy')
+  return http.get('/service/bucket/myBucketList')
 }
 
 // 加料管理接口
@@ -53,12 +62,12 @@ export function getFeedManageList(params) {
 }
 
 export function submitFeedOperation(data) {
-  return http.post('/feed-operation', data)
+  return http.post('/service/bucket/bucketAdd', data)
 }
 
 // 获取底罐重量和加料重量接口
-export function getTankWeightData(tankId) {
-  return http.get(`/tank-weight/${tankId}`)
+export function getTankWeightData() {
+  return http.get(`/service/bucket/weigh`)
 }
 
 // 退料管理接口
@@ -67,7 +76,7 @@ export function getReturnManageList(params) {
 }
 
 export function submitReturnOperation(data) {
-  return http.post('/return-operation', data)
+  return http.post('/service/bucket/bucketDel', data)
 }
 
 // 加料记录接口

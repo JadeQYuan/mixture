@@ -38,6 +38,10 @@ const routes = [
     meta: { title: '主界面' },
     children: [
       {
+        path: '',
+        name: '',
+      },
+      {
         path: 'feed-apply',
         name: 'FeedApply',
         component: FeedApply,

@@ -59,20 +59,20 @@
       <el-form :model="returnDialog.form" :rules="returnDialog.rules" ref="returnFormRef" label-width="180px" style="margin-top: 32px;">
         <template v-if="returnDialog.step === 0">
           <el-form-item label="罐号">
-            <el-input v-model="returnDialog.form.tank" disabled size="large" />
+            <el-input v-model="returnDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="returnDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="returnDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
         </template>
         <template v-else-if="returnDialog.step === 1">
           <el-form-item label="罐号">
-            <el-input v-model="returnDialog.form.tank" disabled size="large" />
+            <el-input v-model="returnDialog.form.bucketNo" disabled size="large" />
           </el-form-item>
           <el-form-item label="底罐重量">
-            <el-input v-model="returnDialog.form.baseWeight" type="number" disabled style="width: 100%;" size="large">
+            <el-input v-model="returnDialog.form.capacity" type="number" disabled style="width: 100%;" size="large">
               <template #suffix>kg</template>
             </el-input>
           </el-form-item>
@@ -83,7 +83,7 @@
           <el-button @click="closeReturnDialog" size="large">取消</el-button>
           <el-button v-if="returnDialog.step > 0" @click="prevStep" size="large">上一步</el-button>
           <el-button v-if="returnDialog.step < 1" type="primary" @click="nextStep" size="large">下一步</el-button>
-          <el-button v-else type="success" @click="submitReturn" size="large">提交</el-button>
+          <el-button v-else type="success" @click="submitReturn" size="large" :loading="returnDialog.loading">提交</el-button>
         </div>
       </template>
     </el-dialog>
@@ -164,9 +164,10 @@ const returnDialog = reactive({
   visible: false,
   step: 0,
   index: null,
-  form: { tank: '', baseWeight: null },
+  loading: false, // 添加loading状态
+  form: { bucketNo: '', capacity: null },
   rules: {
-    baseWeight: [ { required: true, message: '请输入底罐重量', trigger: 'blur' } ]
+    capacity: [ { required: true, message: '请输入底罐重量', trigger: 'blur' } ]
   }
 })
 const returnFormRef = ref()
@@ -179,9 +180,9 @@ const currentTankId = ref(null)
 async function fetchWeightData() {
   if (currentTankId.value) {
     try {
-      const response = await getTankWeightData(currentTankId.value)
+      const response = await getTankWeightData()
       if (response.data) {
-        returnDialog.form.baseWeight = response.data.baseWeight
+        returnDialog.form.capacity = response.data
       }
     } catch (error) {
       ElMessage.error('获取重量数据失败')
@@ -262,7 +263,10 @@ function closeReturnDialog() {
 }
 
 async function submitReturn() {
+  if (returnDialog.loading) return // 防止重复提交
+  
   try {
+    returnDialog.loading = true
     // 确保清除定时器
     stopWeightTimer()
     await submitReturnOperation(returnDialog.form)
@@ -271,6 +275,8 @@ async function submitReturn() {
     await fetchRecords() // 重新获取列表
   } catch (error) {
     ElMessage.error('提交失败')
+  } finally {
+    returnDialog.loading = false
   }
 }
 

@@ -21,7 +21,7 @@
         <el-table-column type="index" label="序号" width="100" />
         <el-table-column prop="roleCode" label="角色" width="150">
           <template #default="scope">
-            <el-tag :type="getRoleTagType(scope.row.roleCode)" size="large">
+            <el-tag :type="getRoleTagType(scope.row.roleCode)" size="large" effect="dark">
               {{ ROLE_MAP[scope.row.roleCode]?.name || scope.row.roleCode }}
             </el-tag>
           </template>
@@ -31,13 +31,13 @@
         <el-table-column label="照片" width="120">
           <template #default="scope">
             <el-image 
-              :src="scope.row.avatar || '/src/assets/default-avatar.svg'" 
-              style="width: 60px; height: 60px; border-radius: 8px;"
+              :src="scope.row.facePath ? `data:image/png;base64,${scope.row.facePath}` : '/src/assets/avatar.svg'" 
+              style="width: 60px; height: 60px; border-radius: 8px; cursor: pointer;"
               fit="cover"
-              :preview-src-list="[scope.row.avatar || '/src/assets/default-avatar.svg']"
+              @click="openAvatarPreview(scope.row)"
             >
               <template #error>
-                <div style="width: 60px; height: 60px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">
+                <div style="width: 60px; height: 60px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; cursor: pointer;">
                   无照片
                 </div>
               </template>
@@ -53,7 +53,7 @@
         <el-table-column label="操作" width="400">
           <template #default="scope">
             <el-button size="large" @click="openDialog('edit', scope.$index)">编辑</el-button>
-            <el-button size="large" type="warning" @click="openPhotoDialog(scope.$index)">修改照片</el-button>
+            <el-button size="large" type="warning" @click="openPhotoDialog(scope.$index)">人脸录入</el-button>
             <el-button size="large" type="info" @click="openPasswordDialog(scope.$index)">修改密码</el-button>
             <el-button size="large" type="danger" @click="confirmDelete(scope.$index)">删除</el-button>
           </template>
@@ -84,21 +84,17 @@
         </div>
       </template>
       
-      <el-steps v-if="dialog.mode === 'add'" :active="dialog.step" finish-status="success" align-center style="margin-bottom: 24px; margin-top: 32px;">
-        <el-step title="基本信息" />
-        <el-step title="拍摄照片" />
-      </el-steps>
+
       
       <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="180px" style="margin-top: 32px;">
-        <!-- 新增用户：显示步骤 -->
+        <!-- 新增用户：只显示基本信息 -->
         <template v-if="dialog.mode === 'add'">
-          <template v-if="dialog.step === 0">
-            <el-form-item label="角色" prop="roleCode">
-              <el-radio-group v-model="dialog.form.roleCode" style="width: 100%;">
-                <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ ROLE_MAP[r].name }}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-                      <el-form-item label="工号" prop="account">
+          <el-form-item label="角色" prop="roleCode">
+            <el-radio-group v-model="dialog.form.roleCode" style="width: 100%;">
+              <el-radio v-for="r in roles" :key="r" :label="r" size="large">{{ ROLE_MAP[r].name }}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="工号" prop="account">
             <el-input v-model="dialog.form.account" placeholder="请输入工号" size="large" />
           </el-form-item>
           <el-form-item label="姓名" prop="userName">
@@ -107,34 +103,6 @@
           <el-form-item label="描述" prop="remark">
             <el-input v-model="dialog.form.remark" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
           </el-form-item>
-          </template>
-          
-          <template v-else-if="dialog.step === 1">
-            <div style="text-align: center; margin-bottom: 20px;">
-              <div style="margin-bottom: 16px; font-size: 16px; color: #333;">
-                请拍摄用户照片
-              </div>
-                          <div style="position: relative; display: inline-block;">
-              <video 
-                ref="videoRef" 
-                autoplay 
-                style="width: 500px; height: 375px; border-radius: 16px; border: 2px solid #409EFF;"
-              ></video>
-              <canvas ref="canvasRef" style="display: none;"></canvas>
-            </div>
-              <div style="margin-top: 16px;">
-                <el-button type="primary" size="large" @click="takePhoto" :disabled="photoTaken">
-                  {{ photoTaken ? '已拍照' : '拍照' }}
-                </el-button>
-                <el-button size="large" @click="startCamera" v-if="!stream">
-                  重新启动摄像头
-                </el-button>
-              </div>
-              <div v-if="photoTaken" style="margin-top: 12px; color: #67C23A;">
-                ✓ 照片已拍摄完成
-              </div>
-            </div>
-          </template>
         </template>
         
         <!-- 编辑用户：只显示基本信息 -->
@@ -158,18 +126,16 @@
       
       <template #footer>
         <div style="padding: 0;">
-          <!-- 新增用户：显示步骤按钮 -->
+          <!-- 新增用户：只显示确定和取消按钮 -->
           <template v-if="dialog.mode === 'add'">
             <el-button @click="dialog.visible = false" size="large">取消</el-button>
-            <el-button v-if="dialog.step > 0" @click="prevStep" size="large">上一步</el-button>
-            <el-button v-if="dialog.step < 1" type="primary" @click="nextStep" size="large">下一步</el-button>
-            <el-button v-else type="success" @click="handleDialogOk" size="large">提交</el-button>
+            <el-button type="primary" @click="handleDialogOk" size="large" :loading="dialog.loading">确定</el-button>
           </template>
           
           <!-- 编辑用户：只显示确定和取消按钮 -->
           <template v-else-if="dialog.mode === 'edit'">
             <el-button @click="dialog.visible = false" size="large">取消</el-button>
-            <el-button type="primary" @click="handleDialogOk" size="large">确定</el-button>
+            <el-button type="primary" @click="handleDialogOk" size="large" :loading="dialog.loading">确定</el-button>
           </template>
         </div>
       </template>
@@ -189,42 +155,113 @@
       </template>
     </el-dialog>
 
-    <!-- 修改照片对话框 -->
-    <el-dialog v-model="photoDialog.visible" title="修改照片" width="600px">
+    <!-- 头像预览对话框 -->
+    <el-dialog v-model="avatarPreviewDialog.visible" title="头像预览" width="700px" :close-on-click-modal="true">
       <template #header>
         <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
-          修改照片
+          头像预览
         </div>
       </template>
-      <div style="text-align: center; margin-bottom: 20px; margin-top: 32px;">
-        <div style="margin-bottom: 16px; font-size: 18px; color: #333;">
-          请重新拍摄用户照片
+      <div style="text-align: center; margin-top: 20px;">
+        <el-image 
+          :src="avatarPreviewDialog.imageSrc" 
+          style="max-width: 600px; max-height: 450px; border-radius: 12px;"
+          fit="contain"
+        >
+          <template #error>
+            <div style="width: 600px; height: 450px; background: #f5f5f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 18px;">
+              无照片
+            </div>
+          </template>
+        </el-image>
+      </div>
+      <template #footer>
+        <div style="padding: 0; text-align: center;">
+          <el-button @click="avatarPreviewDialog.visible = false" size="large">关闭</el-button>
         </div>
-        <div style="position: relative; display: inline-block;">
-          <video 
-            ref="photoVideoRef" 
-            autoplay 
-            style="width: 500px; height: 375px; border-radius: 16px; border: 2px solid #409EFF;"
-          ></video>
-          <canvas ref="photoCanvasRef" style="display: none;"></canvas>
+      </template>
+    </el-dialog>
+
+    <!-- 人脸录入对话框 -->
+    <el-dialog v-model="photoDialog.visible" title="人脸录入" width="800px">
+      <template #header>
+        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
+          人脸录入
         </div>
-        <div style="margin-top: 16px;">
-          <el-button type="primary" size="large" @click="takePhotoForEdit" :disabled="photoTakenForEdit">
-            {{ photoTakenForEdit ? '已拍照' : '拍照' }}
-          </el-button>
-          <el-button size="large" @click="startPhotoCamera" v-if="!photoStream">
-            重新启动摄像头
-          </el-button>
+      </template>
+      <div style="margin-top: 32px;">
+        <!-- 照片展示区域 -->
+        <div v-if="photoDialog.photos.length > 0" style="margin-bottom: 30px;">
+          <div style="margin-bottom: 16px; font-size: 16px; color: #333; text-align: center;">
+            已拍摄的照片
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+            <div 
+              v-for="(photo, index) in photoDialog.photos" 
+              :key="index"
+              style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;"
+              :class="{ 'selected-avatar': photo.isAvatar }"
+            >
+              <img 
+                :src="photo.dataUrl" 
+                style="width: 120px; height: 90px; object-fit: cover;"
+                @click="selectAsAvatar(index)"
+              />
+              <div style="position: absolute; top: 4px; right: 4px;">
+                <el-button 
+                  type="danger" 
+                  size="small" 
+                  circle 
+                  @click="deletePhoto(index)"
+                  style="width: 24px; height: 24px; padding: 0;"
+                >
+                  ×
+                </el-button>
+              </div>
+              <div 
+                v-if="photo.isAvatar" 
+                style="position: absolute; bottom: 4px; left: 4px; background: #67C23A; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;"
+              >
+                头像
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; text-align: center; color: #666; font-size: 14px;">
+            点击照片可设为头像，点击 × 可删除照片
+          </div>
         </div>
-        <div v-if="photoTakenForEdit" style="margin-top: 12px; color: #67C23A; font-size: 16px;">
-          ✓ 照片已拍摄完成
+        
+        <!-- 拍摄区域 -->
+        <div style="text-align: center;">
+          <div style="margin-bottom: 16px; font-size: 18px; color: #333;">
+            请拍摄用户人脸照片 (最多5张)
+          </div>
+          <div style="position: relative; display: inline-block;">
+            <video 
+              ref="photoVideoRef" 
+              autoplay 
+              style="width: 600px; height: 450px; border-radius: 24px; border: 2px solid #409EFF;"
+            ></video>
+            <canvas ref="photoCanvasRef" style="display: none;"></canvas>
+          </div>
+          <div style="margin-top: 16px;">
+            <el-button type="primary" size="large" @click="takePhotoForEdit" :disabled="photoDialog.photos.length >= 5">
+              {{ photoDialog.photos.length >= 5 ? '已达上限' : '拍摄' }}
+            </el-button>
+            <el-button size="large" @click="startPhotoCamera" v-if="!photoStream">
+              重新启动摄像头
+            </el-button>
+          </div>
+          <div style="margin-top: 12px; color: #666; font-size: 14px;">
+            已拍摄 {{ photoDialog.photos.length }}/5 张照片
+          </div>
         </div>
       </div>
       <template #footer>
         <div style="padding: 0;">
           <el-button @click="photoDialog.visible = false" size="large">取消</el-button>
-          <el-button type="primary" @click="handleUpdatePhoto" :disabled="!photoTakenForEdit" size="large">
-            确定
+          <el-button type="primary" @click="handleUpdatePhoto" :disabled="photoDialog.photos.length === 0" size="large" :loading="photoDialog.loading">
+            确定 ({{ photoDialog.photos.length }}张)
           </el-button>
         </div>
       </template>
@@ -248,7 +285,7 @@
       <template #footer>
         <div style="padding: 0;">
           <el-button @click="passwordDialog.visible = false" size="large">取消</el-button>
-          <el-button type="primary" @click="handleUpdatePassword" size="large">确定</el-button>
+          <el-button type="primary" @click="handleUpdatePassword" size="large" :loading="passwordDialog.loading">确定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -258,20 +295,21 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserPassword } from '../request/api'
+import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '../request/api'
 import { pageSizeCalculators } from '../utils/pagination'
 import { ROLE_MAP } from '../utils/roleMap'
 import { encryptPassword } from '../utils/http'
+import { getCameraErrorMessage, startGlobalCamera } from '../utils/camera'
 const roles = Object.keys(ROLE_MAP)
 
 // 获取角色标签类型
 function getRoleTagType(role) {
   switch (role) {
-    case '物料员':
-      return 'success'
-    case '高级操作员':
+    case 'MaterialClerk':
+      return 'primary'
+    case 'SeniorOperator':
       return 'warning'
-    case '操作员':
+    case 'Operator':
       return 'info'
     default:
       return 'info'
@@ -345,8 +383,8 @@ async function handleSizeChange(size) {
 const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
-  step: 1, // 1: 基本信息, 2: 拍照
   index: null,
+  loading: false, // 添加loading状态
   form: { roleCode: '', account: '', userName: '', remark: '', avatar: '' },
   rules: {
     roleCode: [ { required: true, message: '请选择角色', trigger: 'change' } ],
@@ -357,26 +395,24 @@ const dialog = reactive({
 })
 const dialogFormRef = ref()
 
-// 摄像头相关
-const videoRef = ref()
-const canvasRef = ref()
-const stream = ref(null)
-const photoTaken = ref(false)
+
 
 // 修改照片相关
 const photoDialog = reactive({
   visible: false,
-  index: null
+  index: null,
+  loading: false, // 添加loading状态
+  photos: [] // 存储多张照片
 })
 const photoVideoRef = ref()
 const photoCanvasRef = ref()
 const photoStream = ref(null)
-const photoTakenForEdit = ref(false)
 
 // 修改密码相关
 const passwordDialog = reactive({
   visible: false,
   index: null,
+  loading: false, // 添加loading状态
   form: { newPassword: '', confirmPassword: '' },
   rules: {
     newPassword: [ { required: true, message: '请输入新密码', trigger: 'blur' } ],
@@ -385,13 +421,21 @@ const passwordDialog = reactive({
 })
 const passwordFormRef = ref()
 
+// 头像预览相关
+const avatarPreviewDialog = reactive({
+  visible: false,
+  imageSrc: ''
+})
+
+function openAvatarPreview(user) {
+  avatarPreviewDialog.imageSrc = user.facePath ? `data:image/png;base64,${user.facePath}` : '/src/assets/avatar.svg'
+  avatarPreviewDialog.visible = true
+}
+
 function openDialog(mode, index = null) {
   dialog.mode = mode
-  dialog.step = 0
   dialog.visible = true
   dialog.index = index
-  photoTaken.value = false
-  stopCamera() // 停止之前的摄像头
   if (mode === 'edit' && index !== null) {
     // 先重置form，避免残留
     dialog.form = { roleCode: '', account: '', userName: '', remark: '', avatar: '' }
@@ -402,30 +446,61 @@ function openDialog(mode, index = null) {
 }
 
 async function handleDialogOk() {
+  if (dialog.loading) return // 防止重复提交
+  
   try {
+    dialog.loading = true
     if (dialog.mode === 'add') {
-      // 新增模式：提交步骤
-      if (!photoTaken.value) {
-        ElMessage.warning('请先拍摄用户照片')
-        return
-      }
-      await createUser(dialog.form)
-      ElMessage.success('新增成功')
-      dialog.visible = false
-      stopCamera() // 停止摄像头
-      await fetchUsers() // 新增后立即刷新列表
+      // 新增模式：直接提交表单
+      dialogFormRef.value.validate(async valid => {
+        if (!valid) {
+          dialog.loading = false
+          return
+        }
+        try {
+          const result = await createUser(dialog.form)
+          ElMessage.success('新增成功')
+          dialog.visible = false
+          await fetchUsers() // 新增后立即刷新列表
+          
+          // 新增成功后自动打开人脸录入
+          if (result && result.data) {
+            // 使用返回的用户信息
+            const newUser = result.data
+                          // 延迟一下确保对话框已关闭
+              setTimeout(() => {
+                openPhotoDialog(users.value.findIndex(user => user.userId === newUser.userId))
+              }, 300)
+          }
+        } catch (error) {
+          ElMessage.error('操作失败')
+        } finally {
+          dialog.loading = false
+        }
+      })
+      return
     } else if (dialog.mode === 'edit' && dialog.index !== null) {
       dialogFormRef.value.validate(async valid => {
-        if (!valid) return
-        await updateUser(dialog.form.userId, dialog.form)
-        ElMessage.success('编辑成功')
-        dialog.visible = false
-        await fetchUsers() // 编辑后立即刷新列表
+        if (!valid) {
+          dialog.loading = false
+          return
+        }
+        try {
+          await updateUser(dialog.form.userId, dialog.form)
+          ElMessage.success('编辑成功')
+          dialog.visible = false
+          await fetchUsers() // 编辑后立即刷新列表
+        } catch (error) {
+          ElMessage.error('操作失败')
+        } finally {
+          dialog.loading = false
+        }
       })
       return
     }
   } catch (error) {
     ElMessage.error('操作失败')
+    dialog.loading = false
   }
 }
 
@@ -450,114 +525,38 @@ async function handleDeleteUser() {
   }
 }
 
-// 摄像头相关函数
-async function startCamera() {
-  try {
-    stream.value = await navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        width: 640, 
-        height: 480,
-        facingMode: 'user' // 前置摄像头
-      } 
-    })
-    if (videoRef.value) {
-      videoRef.value.srcObject = stream.value
-    }
-  } catch (error) {
-    ElMessage.error('无法访问摄像头，请检查权限设置')
-  }
-}
-
-function stopCamera() {
-  if (stream.value) {
-    stream.value.getTracks().forEach(track => track.stop())
-    stream.value = null
-  }
-}
-
-function takePhoto() {
-  if (!videoRef.value || !canvasRef.value) return
-  
-  const video = videoRef.value
-  const canvas = canvasRef.value
-  const context = canvas.getContext('2d')
-  
-  // 设置canvas尺寸
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  
-  // 绘制视频帧到canvas
-  context.drawImage(video, 0, 0, canvas.width, canvas.height)
-  
-  // 转换为base64图片数据
-  const photoData = canvas.toDataURL('image/jpeg', 0.8)
-  dialog.form.avatar = photoData
-  photoTaken.value = true
-  
-  ElMessage.success('拍照成功')
-}
-
-function nextStep() {
-  if (dialog.step === 0) {
-    dialogFormRef.value.validate(async valid => {
-      if (!valid) return
-      dialog.step = 1
-      // 延迟启动摄像头，确保DOM已更新
-      setTimeout(() => {
-        startCamera()
-      }, 100)
-    })
-  }
-}
-
-function prevStep() {
-  if (dialog.step > 0) {
-    dialog.step--
-    if (dialog.step === 0) {
-      stopCamera()
-      photoTaken.value = false
-    }
-  }
-}
-
 // 修改照片相关函数
 function openPhotoDialog(index) {
   photoDialog.visible = true
   photoDialog.index = index
-  photoTakenForEdit.value = false
-  stopPhotoCamera()
-  // 延迟启动摄像头
-  setTimeout(() => {
-    startPhotoCamera()
-  }, 100)
+  photoDialog.photos = [] // 清空照片数组
+  // 启动摄像头
+  startPhotoCamera()
 }
 
 async function startPhotoCamera() {
   try {
-    photoStream.value = await navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        width: 640, 
-        height: 480,
-        facingMode: 'user'
-      } 
-    })
+    // 使用智能摄像头启动
+    photoStream.value = await startGlobalCamera()
+    
     if (photoVideoRef.value) {
       photoVideoRef.value.srcObject = photoStream.value
     }
   } catch (error) {
-    ElMessage.error('无法访问摄像头，请检查权限设置')
-  }
-}
-
-function stopPhotoCamera() {
-  if (photoStream.value) {
-    photoStream.value.getTracks().forEach(track => track.stop())
-    photoStream.value = null
+    console.error('摄像头启动失败:', error)
+    
+    // 使用统一的错误信息处理
+    const errorMessage = getCameraErrorMessage(error)
+    ElMessage.error(errorMessage)
   }
 }
 
 function takePhotoForEdit() {
   if (!photoVideoRef.value || !photoCanvasRef.value) return
+  if (photoDialog.photos.length >= 5) {
+    ElMessage.warning('已达到最大照片数量限制')
+    return
+  }
   
   const video = photoVideoRef.value
   const canvas = photoCanvasRef.value
@@ -567,26 +566,79 @@ function takePhotoForEdit() {
   canvas.height = video.videoHeight
   context.drawImage(video, 0, 0, canvas.width, canvas.height)
   
+  // 将照片添加到数组中
   const photoData = canvas.toDataURL('image/jpeg', 0.8)
-  photoTakenForEdit.value = true
+  photoDialog.photos.push({
+    dataUrl: photoData,
+    isAvatar: photoDialog.photos.length === 0 // 第一张照片自动设为头像
+  })
   
-  ElMessage.success('拍照成功')
+  ElMessage.success('拍摄成功')
+}
+
+// 删除照片
+function deletePhoto(index) {
+  const isAvatar = photoDialog.photos[index].isAvatar
+  photoDialog.photos.splice(index, 1)
+  
+  // 如果删除的是头像，且还有其他照片，则将第一张设为头像
+  if (isAvatar && photoDialog.photos.length > 0) {
+    photoDialog.photos[0].isAvatar = true
+  }
+  
+  ElMessage.success('照片已删除')
+}
+
+// 选择为头像
+function selectAsAvatar(index) {
+  // 先取消所有照片的头像状态
+  photoDialog.photos.forEach(photo => {
+    photo.isAvatar = false
+  })
+  // 设置选中的照片为头像
+  photoDialog.photos[index].isAvatar = true
+  ElMessage.success('已设为头像')
 }
 
 async function handleUpdatePhoto() {
   if (photoDialog.index !== null) {
+    if (photoDialog.loading) return // 防止重复提交
+    if (photoDialog.photos.length === 0) {
+      ElMessage.warning('请至少拍摄一张照片')
+      return
+    }
+    
     try {
+      photoDialog.loading = true
       const user = users.value[photoDialog.index]
-      const canvas = photoCanvasRef.value
-      const photoData = canvas.toDataURL('image/jpeg', 0.8)
       
-      await updateUser(user.userId, { ...user, avatar: photoData })
-      ElMessage.success('照片更新成功')
+      // 找到头像照片
+      const avatarPhoto = photoDialog.photos.find(photo => photo.isAvatar)
+      if (!avatarPhoto) {
+        ElMessage.error('请选择一张照片作为头像')
+        photoDialog.loading = false
+        return
+      }
+      
+      // 将头像照片转换为File对象
+      const base64Data = avatarPhoto.dataUrl
+      const byteCharacters = atob(base64Data.split(',')[1])
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: 'image/jpeg' })
+      const imageFile = new File([blob], 'user_avatar.jpg', { type: 'image/jpeg' })
+      
+      await updateUserPhoto(user.userId, imageFile)
+      ElMessage.success('人脸录入成功')
       photoDialog.visible = false
-      stopPhotoCamera()
       await fetchUsers() // 重新获取列表
     } catch (error) {
-      ElMessage.error('更新照片失败')
+      ElMessage.error('人脸录入失败')
+    } finally {
+      photoDialog.loading = false
     }
   }
 }
@@ -600,10 +652,13 @@ function openPasswordDialog(index) {
 }
 
 async function handleUpdatePassword() {
+  if (passwordDialog.loading) return // 防止重复提交
+  
   passwordFormRef.value.validate(async valid => {
     if (!valid) return
     const user = users.value[passwordDialog.index]
     try {
+      passwordDialog.loading = true
       // 前端AES加密
       const encrypted = encryptPassword(passwordDialog.form.newPassword)
       await updateUserPassword({ userId: user.userId, password: encrypted })
@@ -613,6 +668,8 @@ async function handleUpdatePassword() {
       passwordDialog.form.confirmPassword = ''
     } catch (e) {
       ElMessage.error('密码修改失败')
+    } finally {
+      passwordDialog.loading = false
     }
   })
 }
@@ -626,18 +683,6 @@ onMounted(() => {
   window.addEventListener('resize', calculatePageSize)
 })
 
-// 监听对话框关闭，停止摄像头
-watch(() => dialog.visible, (newVal) => {
-  if (!newVal) {
-    stopCamera()
-  }
-})
-
-watch(() => photoDialog.visible, (newVal) => {
-  if (!newVal) {
-    stopPhotoCamera()
-  }
-})
 
 // 组件卸载时清理事件监听
 onUnmounted(() => {
@@ -938,4 +983,13 @@ onUnmounted(() => {
 :deep(.el-pagination .el-pagination__jump .el-pagination__goto input) {
   font-size: 16px;
 }
+
+/* 选中的头像样式 */
+.selected-avatar {
+  border-color: #67C23A !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 8px rgba(103, 194, 58, 0.3);
+}
+
+
 </style> 

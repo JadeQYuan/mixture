@@ -92,9 +92,8 @@ public class Base64Util {
     }
 
     public static String fileToBase64(String facePath) {
-        Resource imageResource = new ClassPathResource(facePath);
         String base64Image = null;
-        try(FileInputStream fileInputStream = new FileInputStream(imageResource.getFile());
+        try(FileInputStream fileInputStream = new FileInputStream(facePath);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int bytesRead;
