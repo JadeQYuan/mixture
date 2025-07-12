@@ -5,6 +5,9 @@
         <el-form-item label="编号">
           <el-input v-model="searchForm.bucketNo" placeholder="请输入编号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
+        <el-form-item label="用户">
+          <el-input v-model="searchForm.userKey" placeholder="请输入人员姓名/工号" clearable size="large" class="fixed-width-input" />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleSearch">查询</el-button>
           <el-button size="large" @click="resetSearch">重置</el-button>
@@ -17,17 +20,30 @@
       <el-table :data="pagedTanks" style="width: 100%;" class="tank-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
         <el-table-column prop="bucketNo" label="编号" width="160" />
-        <el-table-column prop="person" label="当前人员" width="160" />
+        <el-table-column label="当前人员" width="160">
+          <template #default="scope">
+            <template v-if="scope.row.userName && scope.row.account">
+              {{ scope.row.userName }}({{ scope.row.account }})
+            </template>
+            <template v-else>
+              -
+            </template>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" label="描述" width="500" show-overflow-tooltip>
           <template #default="scope">
             <div class="desc-cell">{{ scope.row.remark || '-' }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="updatedAt" label="修改时间" width="240" />
+        <el-table-column prop="updateTime" label="修改时间" width="240" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button size="large" @click="openDialog('edit', scope.$index)">编辑</el-button>
-            <el-button size="large" type="danger" @click="confirmDelete(scope.$index)">删除</el-button>
+            <el-button size="large" @click="openDialog('edit', scope.$index)"
+              :disabled="scope.row.userName && scope.row.account"
+            >编辑</el-button>
+            <el-button size="large" type="danger" @click="confirmDelete(scope.$index)"
+              :disabled="scope.row.person && scope.row.account"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,7 +112,8 @@ import { pageSizeCalculators } from '../utils/pagination'
 const currentPerson = localStorage.getItem('username') || '张三'
 
 const searchForm = reactive({
-  bucketNo: ''
+  bucketNo: '',
+  userKey: ''
 })
 
 const tanks = ref([])
@@ -119,7 +136,8 @@ async function fetchTanks() {
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
-      bucketNo: searchForm.bucketNo
+      bucketNo: searchForm.bucketNo,
+      userKey: searchForm.userKey
     }
     const response = await getTankList(params)
     tanks.value = response.data || []
@@ -142,6 +160,7 @@ async function handleSearch() {
 }
 async function resetSearch() {
   searchForm.bucketNo = ''
+  searchForm.userkey = ''
   currentPage.value = 1
   await fetchTanks()
 }
@@ -347,7 +366,7 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏分页组件的英文文本 */
+/* 分页组件样式 */
 :deep(.el-pagination .el-pagination__total) {
   font-size: 16px;
 }
@@ -360,18 +379,8 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏英文文本，只显示中文 */
+/* 分页组件按钮样式 */
 :deep(.el-pagination .el-pagination__total) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__total::before) {
-  content: "共 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__total::after) {
-  content: " 条";
   font-size: 16px;
 }
 
@@ -380,42 +389,19 @@ onUnmounted(() => {
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner input) {
   font-size: 16px;
-  padding-right: 50px;
 }
 
-/* 隐藏下拉选项中的英文文本 */
+/* 分页组件下拉选项样式 */
 :deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__jump .el-pagination__goto) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::before) {
-  content: "前往第 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::after) {
-  content: " 页";
   font-size: 16px;
 }
 

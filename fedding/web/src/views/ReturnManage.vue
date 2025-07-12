@@ -3,7 +3,7 @@
     <el-card class="return-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="人员">
-          <el-input v-model="searchForm.person" placeholder="请输入人员" clearable size="large" class="fixed-width-input" />
+          <el-input v-model="searchForm.userKey" placeholder="请输入人员姓名/工号" clearable size="large" class="fixed-width-input" />
         </el-form-item>
         <el-form-item label="罐号">
           <el-input v-model="searchForm.bucketNo" placeholder="请输入罐号" clearable size="large" class="fixed-width-input" />
@@ -19,9 +19,13 @@
       </div>
       <el-table :data="pagedRecords" style="width: 100%;" class="return-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="userName" label="人员" width="160" />
+        <el-table-column label="人员" width="160">
+          <template #default="scope">
+            {{ scope.row.userName }}({{ scope.row.account }})
+          </template>
+        </el-table-column>
         <el-table-column prop="bucketNo" label="罐号" width="160" />
-        <el-table-column prop="time" label="时间" />
+        <el-table-column prop="updateTime" label="时间" />
         <el-table-column label="操作" width="240">
           <template #default="scope">
             <el-button size="large" type="primary" @click="openReturnDialog(scope.$index)">退料</el-button>
@@ -98,7 +102,7 @@ import { pageSizeCalculators } from '../utils/pagination'
 
 const searchForm = reactive({
   person: '',
-  tank: ''
+  bucketNo: ''
 })
 
 const records = ref([])
@@ -121,7 +125,7 @@ async function fetchRecords() {
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
-      person: searchForm.person,
+      userKey: searchForm.userKey,
       bucketNo: searchForm.bucketNo
     }
     const response = await getReturnManageList(params)
@@ -144,7 +148,7 @@ async function handleSearch() {
   await fetchRecords()
 }
 async function resetSearch() {
-  searchForm.person = ''
+  searchForm.userKey = ''
   searchForm.bucketNo = ''
   currentPage.value = 1
   await fetchRecords()
@@ -217,26 +221,26 @@ function openReturnDialog(index) {
   returnDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
-    returnDialog.form.tank = record.tank
-    currentTankId.value = record.tank // 设置当前罐号
+    returnDialog.form.bucketNo = record.bucketNo
+    currentTankId.value = record.id // 设置当前罐号ID
     // 启动定时器，立即获取底罐重量
     startWeightTimer()
   } else {
-    returnDialog.form.tank = ''
+    returnDialog.form.bucketNo = ''
     currentTankId.value = null
   }
-  returnDialog.form.baseWeight = null
+  returnDialog.form.capacity = null
 }
 function nextStep() {
   // 第0步：检查底罐重量是否已获取
-  if (returnDialog.form.baseWeight !== null && returnDialog.form.baseWeight !== undefined) {
-    // 底罐重量确定，进入第二步
+  if (returnDialog.form.capacity !== null && returnDialog.form.capacity !== undefined) {
+    // 底罐重量确定，进入下一步
     stopWeightTimer()
     returnDialog.step++
   } else {
     // 如果数据还未获取，立即获取一次
     fetchWeightData().then(() => {
-      if (returnDialog.form.baseWeight !== null && returnDialog.form.baseWeight !== undefined) {
+      if (returnDialog.form.capacity !== null && returnDialog.form.capacity !== undefined) {
         stopWeightTimer()
         returnDialog.step++
       } else {
@@ -435,7 +439,7 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏分页组件的英文文本 */
+/* 分页组件样式 */
 :deep(.el-pagination .el-pagination__total) {
   font-size: 16px;
 }
@@ -448,18 +452,8 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏英文文本，只显示中文 */
+/* 分页组件按钮样式 */
 :deep(.el-pagination .el-pagination__total) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__total::before) {
-  content: "共 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__total::after) {
-  content: " 条";
   font-size: 16px;
 }
 
@@ -468,42 +462,19 @@ onUnmounted(() => {
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner input) {
   font-size: 16px;
-  padding-right: 50px;
 }
 
-/* 隐藏下拉选项中的英文文本 */
+/* 分页组件下拉选项样式 */
 :deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__jump .el-pagination__goto) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::before) {
-  content: "前往第 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::after) {
-  content: " 页";
   font-size: 16px;
 }
 

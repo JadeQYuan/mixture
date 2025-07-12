@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { createStore } from 'vuex'
 import { setupMessage } from './utils/message'
 
@@ -34,7 +35,9 @@ async function startApp() {
 
   const app = createApp(App)
   app.use(router)
-  app.use(ElementPlus)
+  app.use(ElementPlus, {
+    locale: zhCn,
+  })
   app.use(store)
   
   // 设置消息管理

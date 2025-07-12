@@ -31,7 +31,11 @@
       </div>
       <el-table :data="pagedRecords" style="width: 100%;" class="feed-record-table" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="person" label="人员" width="160" />
+        <el-table-column label="人员" width="160">
+          <template #default="scope">
+            {{ scope.row.person }}({{ scope.row.account }})
+          </template>
+        </el-table-column>
         <el-table-column prop="tank" label="罐号" width="160" />
         <el-table-column prop="baseWeight" label="罐底重量" width="160">
           <template #default="scope">
@@ -104,7 +108,7 @@ async function fetchRecords() {
       page: currentPage.value,
       pageSize: pageSize.value,
       person: searchForm.person,
-      tank: searchForm.tank,
+      bucketNo: searchForm.tank,
       startTime: searchForm.time?.[0],
       endTime: searchForm.time?.[1]
     }
@@ -274,7 +278,7 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏分页组件的英文文本 */
+/* 分页组件样式 */
 :deep(.el-pagination .el-pagination__total) {
   font-size: 16px;
 }
@@ -287,18 +291,8 @@ onUnmounted(() => {
   font-size: 16px;
 }
 
-/* 隐藏英文文本，只显示中文 */
+/* 分页组件按钮样式 */
 :deep(.el-pagination .el-pagination__total) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__total::before) {
-  content: "共 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__total::after) {
-  content: " 条";
   font-size: 16px;
 }
 
@@ -307,42 +301,19 @@ onUnmounted(() => {
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__sizes .el-select .el-input__inner input) {
   font-size: 16px;
-  padding-right: 50px;
 }
 
-/* 隐藏下拉选项中的英文文本 */
+/* 分页组件下拉选项样式 */
 :deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__sizes .el-select-dropdown .el-select-dropdown__item::after) {
-  content: " 条/页";
   font-size: 16px;
-  color: #606266;
 }
 
 :deep(.el-pagination .el-pagination__jump .el-pagination__goto) {
-  font-size: 0;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::before) {
-  content: "前往第 ";
-  font-size: 16px;
-}
-
-:deep(.el-pagination .el-pagination__jump .el-pagination__goto::after) {
-  content: " 页";
   font-size: 16px;
 }
 

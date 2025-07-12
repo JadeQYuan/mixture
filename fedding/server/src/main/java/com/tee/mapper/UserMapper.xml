@@ -21,7 +21,7 @@
     left join face_info b on a.user_id = b.user_id
     <where>
       <if test="userName != null and userName !=''">
-        a.user_name like CONCAT('%', #{userName}, '%')
+        a.user_name like '%' || #{userName} || '%'
       </if>
     </where>
     order by a.create_time desc

@@ -65,18 +65,18 @@ export function submitFeedOperation(data) {
   return http.post('/service/bucket/bucketAdd', data)
 }
 
-// 获取底罐重量和加料重量接口
-export function getTankWeightData() {
-  return http.get(`/service/bucket/weigh`)
-}
-
 // 退料管理接口
 export function getReturnManageList(params) {
   return http.get('/service/bucket/delBucketList', { params })
 }
 
 export function submitReturnOperation(data) {
-  return http.post('/service/bucket/bucketDel', data)
+  return http.post('/service/bucket/returnAdd', data)
+}
+
+// 获取底罐重量和加料重量接口
+export function getTankWeightData() {
+  return http.get(`/service/bucket/weigh`)
 }
 
 // 加料记录接口
