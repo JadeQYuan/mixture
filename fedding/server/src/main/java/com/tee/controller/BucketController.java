@@ -48,6 +48,7 @@ public class BucketController {
         BucketQo bucketQo = new BucketQo();
         bucketQo.setBucketNo(bucketNo);
         bucketQo.setType("add");
+        bucketQo.setStatus("0");
         PageHelper.startPage(pageNo, size);
         List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
         if (CollectionUtils.isEmpty(bucketInfo)) {
@@ -71,6 +72,7 @@ public class BucketController {
         BucketQo bucketQo = new BucketQo();
         bucketQo.setBucketNo(bucketNo);
         bucketQo.setType("del");
+        bucketQo.setStatus("0");
         PageHelper.startPage(pageNo, size);
         List<Bucket> bucketInfo = bucketService.getBucketApplyLog(bucketQo);
         if (CollectionUtils.isEmpty(bucketInfo)) {
@@ -255,8 +257,7 @@ public class BucketController {
         if (CollectionUtils.isEmpty(bucketInfo)) {
             return Result.success();
         }
-        List<String> bucketList = bucketInfo.stream().map(Bucket::getBucketNo).collect(Collectors.toList());
-        return Result.success(bucketList);
+        return Result.success(bucketInfo);
     }
 
     /**
@@ -272,8 +273,7 @@ public class BucketController {
         if (CollectionUtils.isEmpty(bucketInfo)) {
             return Result.success();
         }
-        List<String> bucketList = bucketInfo.stream().map(Bucket::getBucketNo).collect(Collectors.toList());
-        return Result.success(bucketList);
+        return Result.success(bucketInfo);
     }
 
     /**

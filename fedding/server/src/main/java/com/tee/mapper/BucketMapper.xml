@@ -15,7 +15,7 @@
         a.user_id is null
       </if>
       <if test="bucketNo != null and bucketNo !=''">
-        a.bucket_no = #{bucketNo}
+        a.bucket_no like '%' || #{bucketNo} || '%'
       </if>
       <if test="startTime != null and startTime !=''">
         a.create_time >= #{startTime}
@@ -35,16 +35,16 @@
     left join user_info b on a.user_id = b.user_id
     <where>
       <if test="userName != null and userName !=''">
-        b.user_name = #{userName}
+        and b.user_name = #{userName}
       </if>
       <if test="bucketNo != null and bucketNo !=''">
-        a.bucket_no = like '%' || #{bucketNo} || '%'
+        and a.bucket_no = like '%' || #{bucketNo} || '%'
       </if>
       <if test="startTime != null and startTime !=''">
-        a.create_time >= #{startTime}
+        and a.create_time >= #{startTime}
       </if>
       <if test="endTime != null and endTime !=''">
-        a.create_time &lt;= #{endTime}
+        and a.create_time &lt;= #{endTime}
       </if>
     </where>
     order by a.create_time desc
@@ -57,19 +57,22 @@
     left join user_info b on a.user_id = b.user_id
     <where>
       <if test="userName != null and userName !=''">
-        b.user_name = #{userName}
+        and b.user_name = #{userName}
       </if>
       <if test="bucketNo != null and bucketNo !=''">
-        a.bucket_no = #{bucketNo}
+        and a.bucket_no = #{bucketNo}
       </if>
       <if test="type != null and type !=''">
-        a.type = #{type}
+        and a.type = #{type}
       </if>
       <if test="startTime != null and startTime !=''">
-        a.create_time >= #{startTime}
+        and a.create_time >= #{startTime}
       </if>
       <if test="endTime != null and endTime !=''">
-        a.create_time &lt;= #{endTime}
+        and a.create_time &lt;= #{endTime}
+      </if>
+      <if test="status != null and status !=''">
+        and a.status &lt;= #{status}
       </if>
     </where>
     order by a.create_time desc
@@ -125,7 +128,7 @@
     <where>
 
       <if test="bucketNo != null and bucketNo !=''">
-        and bucket_no = #{bucketNo}
+        and id = #{bucketNo}
       </if>
     </where>
   </update>
@@ -163,7 +166,7 @@
   </delete>
 
   <sql id="bucket_corn">
-    a.id as id,a.user_id as userId, b.user_name as userName, a.bucket_no as bucketNo, a.capacity as capacity,
+    a.id as id,a.user_id as userId, b.user_name as userName, b.account as account, a.bucket_no as bucketNo, a.capacity as capacity,
         a.remark as remark, a.create_time as createTime, a.update_time as updateTime
   </sql>
 
