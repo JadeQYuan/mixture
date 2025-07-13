@@ -1,4 +1,4 @@
-import http from '../utils/http'
+import http from '@/utils/http'
 
 // 用户管理接口
 export function getUserList(params) {
@@ -40,7 +40,7 @@ export function createTank(data) {
   return http.post('/service/bucket/addBucket', data)
 }
 
-export function updateTank(id, data) {
+export function updateTank(data) {
   return http.put(`/service/bucket/updateBucket`, data)
 }
 

@@ -18,7 +18,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { returnApply, getMyTankList } from '../request/api'
+import { returnApply, getMyTankList } from '@/request/api'
 import { onMounted } from 'vue'
 
 const tankOptions = ref([])

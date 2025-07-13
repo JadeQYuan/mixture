@@ -1,20 +1,20 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import activityMonitor from '../utils/activityMonitor'
+import activityMonitor from '@/utils/activityMonitor'
 import { ElMessage } from 'element-plus'
 
 // 引入页面组件
-import Home from '../views/Home.vue'
-import Layout from '../components/Layout.vue'
-import UserManage from '../views/UserManage.vue'
-import TankManage from '../views/TankManage.vue'
-import FeedApply from '../views/FeedApply.vue'
-import ReturnApply from '../views/ReturnApply.vue'
-import FeedManage from '../views/FeedManage.vue'
-import ReturnManage from '../views/ReturnManage.vue'
-import FeedRecord from '../views/FeedRecord.vue'
-import FaceLogin from '../views/FaceLogin.vue'
-import CodeLogin from '../views/CodeLogin.vue'
+import Home from '@/views/Home.vue'
+import Layout from '@/components/Layout.vue'
+import UserManage from '@/views/UserManage'
+import TankManage from '@/views/TankManage'
+import FeedApply from '@/views/FeedApply.vue'
+import ReturnApply from '@/views/ReturnApply.vue'
+import FeedManage from '@/views/FeedManage'
+import ReturnManage from '@/views/ReturnManage'
+import FeedRecord from '@/views/FeedRecord'
+import FaceLogin from '@/views/FaceLogin.vue'
+import CodeLogin from '@/views/CodeLogin.vue'
 
 
 const routes = [
