@@ -38,7 +38,7 @@
         b.user_name = #{userName}
       </if>
       <if test="bucketNo != null and bucketNo !=''">
-        a.bucket_no = #{bucketNo}
+        a.bucket_no = like '%' || #{bucketNo} || '%'
       </if>
       <if test="startTime != null and startTime !=''">
         a.create_time >= #{startTime}
