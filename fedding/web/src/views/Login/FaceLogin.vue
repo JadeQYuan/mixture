@@ -34,9 +34,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
-import { faceLogin, getCurrentUser } from '../request/api'
+import { faceLogin, getCurrentUser } from '@/request/api'
 import { useStore } from 'vuex'
-import { startGlobalCamera, getCameraErrorMessage } from '../utils/camera'
+import { startGlobalCamera, getCameraErrorMessage } from '@/utils/camera'
 
 const router = useRouter()
 const store = useStore()

@@ -16,44 +16,39 @@
       @header-action="handleHeaderAction"
     />
 
-    <!-- 罐管理对话框 -->
-    <el-dialog v-model="dialog.visible" :title="dialog.mode === 'add' ? '新增料罐' : '编辑料罐'" width="700px" :close-on-click-modal="false">
-      <template #header>
-        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
-          {{ dialog.mode === 'add' ? '新增料罐' : '编辑料罐' }}
-        </div>
-      </template>
-      <el-form :model="dialog.form" :rules="dialog.rules" ref="dialogFormRef" label-width="180px" style="margin-top: 32px;">
-        <el-form-item label="编号" prop="bucketNo">
-          <el-input v-model="dialog.form.bucketNo" placeholder="请输入编号" size="large" />
-        </el-form-item>
-        <el-form-item label="描述" prop="remark">
-          <el-input v-model="dialog.form.remark" placeholder="请输入描述" type="textarea" :rows="3" size="large" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div style="padding: 0;">
-          <el-button @click="dialog.visible = false" size="large">取消</el-button>
-          <el-button type="primary" @click="handleDialogOk" size="large" :loading="dialog.loading">确定</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <!-- 料罐管理对话框 -->
+    <Dialog
+      :visible="dialog.visible"
+      :title="dialog.config.title"
+      :width="dialog.config.width"
+      :header-config="dialog.config.headerConfig"
+      @update:visible="val => dialog.visible = val"
+    >
+      <Form
+        :fields="dialog.config.fields"
+        :rules="dialog.config.rules"
+        :form-data="dialog.form"
+        :loading="dialog.loading"
+        :footer-buttons="dialog.config.buttons"
+        @submit="handleDialogOk"
+        @cancel="dialog.visible = false"
+        @footer-action="handleFooterAction"
+      />
+    </Dialog>
 
     <!-- 删除确认对话框 -->
-    <el-dialog v-model="deleteDialog.visible" title="确认删除" width="400px">
-      <template #header>
-        <div style="text-align: center; font-size: 24px; font-weight: 900; color: #000;">
-          确认删除
-        </div>
-      </template>
-      <span style="font-size: 18px; margin-top: 32px; display: block;">确定要删除该料罐吗？</span>
-      <template #footer>
-        <div style="padding: 0;">
-          <el-button @click="deleteDialog.visible = false" size="large">取消</el-button>
-          <el-button type="danger" @click="handleDeleteTank" size="large">删除</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <ConfirmDialog
+      :visible="deleteDialog.visible"
+      title="确认删除"
+      message="确定要删除该料罐吗？删除后无法恢复。"
+      icon="Warning"
+      icon-type="danger"
+      confirm-text="删除"
+      confirm-type="danger"
+      @update:visible="val => deleteDialog.visible = val"
+      @confirm="handleDeleteTank"
+      @cancel="closeDeleteDialog"
+    />
   </div>
 </template>
 
@@ -62,7 +57,10 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getTankList, createTank, updateTank, deleteTank } from '@/request/api'
 import DataTable from '@/components/DataTable'
+import { Dialog, ConfirmDialog } from '@/components/Dialog'
+import Form from '@/components/Form'
 import { searchFields, columns, actionButtons, headerButtons } from './config'
+import { getTankFormConfig } from './formConfig'
 
 // 数据
 const records = ref([])
@@ -76,18 +74,13 @@ const dialog = reactive({
   index: null,
   loading: false,
   form: { bucketNo: '', remark: '' },
-  rules: {
-    bucketNo: [ { required: true, message: '请输入编号', trigger: 'blur' } ],
-    remark: [ { required: false, message: '请输入描述', trigger: 'blur' } ]
-  }
+  config: getTankFormConfig()
 })
 
 const deleteDialog = reactive({
   visible: false,
   index: null
 })
-
-const dialogFormRef = ref()
 
 // 事件处理函数
 async function handleSearch(params) {
@@ -148,45 +141,57 @@ function openDialog(mode, index = null) {
   dialog.mode = mode
   dialog.visible = true
   dialog.index = index
+  
+  // 更新对话框标题
+  dialog.config.title = mode === 'add' ? '新增料罐' : '编辑料罐'
+  
   if (mode === 'edit' && index !== null) {
     Object.assign(dialog.form, records.value[index])
   } else {
-    dialog.form.bucketNo = ''
-    dialog.form.remark = ''
+    dialog.form = { bucketNo: '', remark: '' }
   }
 }
 
-async function handleDialogOk() {
-  dialogFormRef.value.validate(async (valid) => {
-    if (valid) {
-      dialog.loading = true
-      try {
-        if (dialog.mode === 'add') {
-          await createTank(dialog.form)
-          ElMessage.success('新增料罐成功')
-        } else {
-          // 确保编辑时包含ID
-          const updateData = { ...dialog.form }
-          if (dialog.index !== null && records.value[dialog.index]) {
-            updateData.id = records.value[dialog.index].id
-          }
-          await updateTank(updateData)
-          ElMessage.success('编辑料罐成功')
-        }
-        dialog.visible = false
-        await handleSearch({ page: 1, pageSize: 10 })
-      } catch (error) {
-        ElMessage.error(dialog.mode === 'add' ? '新增料罐失败' : '编辑料罐失败')
-      } finally {
-        dialog.loading = false
+// 处理底部按钮点击事件
+function handleFooterAction({ action, formData }) {
+  if (action === 'submit') {
+    handleDialogOk(formData)
+  } else if (action === 'cancel') {
+    dialog.visible = false
+  }
+}
+
+async function handleDialogOk(formData) {
+  dialog.loading = true
+  try {
+    if (dialog.mode === 'add') {
+      await createTank(formData)
+      ElMessage.success('新增料罐成功')
+    } else {
+      // 确保编辑时包含ID
+      const updateData = { ...formData }
+      if (dialog.index !== null && records.value[dialog.index]) {
+        updateData.id = records.value[dialog.index].id
       }
+      await updateTank(updateData)
+      ElMessage.success('编辑料罐成功')
     }
-  })
+    dialog.visible = false
+    await handleSearch({ page: 1, pageSize: 10 })
+  } catch (error) {
+    ElMessage.error(dialog.mode === 'add' ? '新增料罐失败' : '编辑料罐失败')
+  } finally {
+    dialog.loading = false
+  }
 }
 
 function confirmDelete(index) {
   deleteDialog.index = index
   deleteDialog.visible = true
+}
+
+function closeDeleteDialog() {
+  deleteDialog.visible = false
 }
 
 async function handleDeleteTank() {

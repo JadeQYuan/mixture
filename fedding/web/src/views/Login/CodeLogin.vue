@@ -22,9 +22,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { accountLogin, getCurrentUser } from '../request/api'
+import { accountLogin, getCurrentUser } from '@/request/api'
 import { useStore } from 'vuex'
-import { encryptPassword } from '../utils/http'
+import { encryptPassword } from '@/utils/http'
 
 const router = useRouter()
 const store = useStore()

@@ -8,6 +8,7 @@
       :search-fields="searchFields"
       :action-buttons="actionButtons"
       :header-buttons="headerButtons"
+      :user-role="userRole"
       @search="handleSearch"
       @reset="handleReset"
       @page-change="handlePageChange"
@@ -19,16 +20,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFeedRecordList } from '@/request/api'
 import DataTable from '@/components/DataTable'
 import { searchFields, columns, actionButtons, headerButtons } from './config'
+import { useStore } from 'vuex'
 
 // 数据
 const records = ref([])
 const loading = ref(false)
 const total = ref(0)
+
+// 获取用户角色信息
+const store = useStore()
+const userRole = computed(() => {
+  const userInfo = store.state.userInfo
+  return userInfo ? userInfo.roleCode : ''
+})
 
 // 事件处理函数
 async function handleSearch(params) {
@@ -38,7 +47,7 @@ async function handleSearch(params) {
     records.value = response.data || []
     total.value = response.total || 0
   } catch (error) {
-    ElMessage.error('获取加料记录列表失败')
+    ElMessage.error('获取领料记录列表失败')
   } finally {
     loading.value = false
   }

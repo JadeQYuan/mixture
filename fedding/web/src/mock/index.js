@@ -351,8 +351,25 @@ Mock.mock(/\/feed-records(\?.*)?$/, 'get', (options) => {
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
   const person = url.searchParams.get('person') || ''
   const bucketNo = url.searchParams.get('bucketNo') || ''
-  const startTime = url.searchParams.get('startTime') || ''
-  const endTime = url.searchParams.get('endTime') || ''
+  const tank = url.searchParams.get('tank') || ''
+  
+  // 处理时间范围参数 - 支持多种参数名
+  let startTime = url.searchParams.get('startTime') || ''
+  let endTime = url.searchParams.get('endTime') || ''
+  
+  // 如果时间参数是数组格式（el-date-picker的默认格式）
+  const timeRange = url.searchParams.get('time')
+  if (timeRange && !startTime && !endTime) {
+    try {
+      const timeArray = JSON.parse(timeRange)
+      if (Array.isArray(timeArray) && timeArray.length === 2) {
+        startTime = timeArray[0]
+        endTime = timeArray[1]
+      }
+    } catch (e) {
+      // 如果解析失败，忽略
+    }
+  }
 
   // 生成更多数据用于分页测试
   const totalCount = 35 // 总共35条数据
@@ -375,8 +392,9 @@ Mock.mock(/\/feed-records(\?.*)?$/, 'get', (options) => {
   if (person) {
     filteredData = filteredData.filter(item => item.person.includes(person))
   }
-  if (bucketNo) {
-    filteredData = filteredData.filter(item => item.bucketNo.includes(bucketNo))
+  if (bucketNo || tank) {
+    const searchTank = bucketNo || tank
+    filteredData = filteredData.filter(item => item.bucketNo.includes(searchTank))
   }
   if (startTime && endTime) {
     filteredData = filteredData.filter(item => {

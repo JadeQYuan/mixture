@@ -8,7 +8,52 @@
           :key="field.key" 
           :label="field.label"
         >
+          <!-- 时间范围选择器 -->
+          <el-date-picker
+            v-if="field.type === 'datetimerange'"
+            v-model="searchForm[field.key]"
+            type="datetimerange"
+            :placeholder="field.placeholder"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :default-value="field.defaultValue"
+            size="large"
+            class="fixed-width-input"
+            style="width: 400px;"
+          />
+          <!-- 日期范围选择器 -->
+          <el-date-picker
+            v-else-if="field.type === 'daterange'"
+            v-model="searchForm[field.key]"
+            type="daterange"
+            :placeholder="field.placeholder"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            :default-value="field.defaultValue"
+            size="large"
+            class="fixed-width-input"
+            style="width: 300px;"
+          />
+          <!-- 下拉选择框 -->
+          <el-select
+            v-else-if="field.type === 'select'"
+            v-model="searchForm[field.key]"
+            :placeholder="field.placeholder"
+            size="large"
+            class="fixed-width-input"
+            style="width: 180px;"
+            clearable
+          >
+            <el-option
+              v-for="opt in field.options || []"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+          <!-- 默认输入框 -->
           <el-input 
+            v-else
             v-model="searchForm[field.key]" 
             :placeholder="field.placeholder" 
             clearable 
@@ -30,6 +75,7 @@
           <el-button
             v-for="button in headerButtons"
             :key="button.action"
+            v-show="hasButtonPermission(button)"
             :type="button.type || 'primary'"
             :size="button.size || 'large'"
             :disabled="button.disabled"
@@ -207,6 +253,11 @@ const props = defineProps({
   headerButtons: {
     type: Array,
     default: () => []
+  },
+  // 当前用户角色
+  userRole: {
+    type: String,
+    default: ''
   }
 })
 
@@ -229,7 +280,8 @@ const currentPage = ref(1)
 // 初始化搜索表单
 const initSearchForm = () => {
   props.searchFields.forEach(field => {
-    searchForm[field.key] = ''
+    // 如果有默认值，使用默认值；否则使用空字符串
+    searchForm[field.key] = field.defaultValue || ''
   })
 }
 
@@ -243,27 +295,99 @@ function calculatePageSize() {
 // 搜索处理
 function handleSearch() {
   currentPage.value = 1
-  emit('search', { ...searchForm, page: currentPage.value, pageSize: pageSize.value })
+  
+  // 处理搜索参数，特别是时间范围
+  const searchParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
+  
+  // 处理时间范围参数
+  props.searchFields.forEach(field => {
+    if (field.type === 'datetimerange' || field.type === 'daterange') {
+      const timeValue = searchForm[field.key]
+      if (Array.isArray(timeValue) && timeValue.length === 2) {
+        // 将时间范围数组转换为开始和结束时间
+        searchParams[`startTime`] = timeValue[0]
+        searchParams[`endTime`] = timeValue[1]
+        // 保留原始时间范围参数
+        searchParams[field.key] = timeValue
+      }
+    }
+  })
+  
+  emit('search', searchParams)
 }
 
 // 重置搜索
 function resetSearch() {
   initSearchForm()
   currentPage.value = 1
-  emit('reset', { page: currentPage.value, pageSize: pageSize.value })
+  
+  // 处理重置参数，特别是时间范围
+  const resetParams = { page: currentPage.value, pageSize: pageSize.value }
+  
+  // 处理时间范围参数
+  props.searchFields.forEach(field => {
+    if (field.type === 'datetimerange' || field.type === 'daterange') {
+      const timeValue = searchForm[field.key]
+      if (Array.isArray(timeValue) && timeValue.length === 2) {
+        // 将时间范围数组转换为开始和结束时间
+        resetParams[`startTime`] = timeValue[0]
+        resetParams[`endTime`] = timeValue[1]
+        // 保留原始时间范围参数
+        resetParams[field.key] = timeValue
+      }
+    }
+  })
+  
+  emit('reset', resetParams)
 }
 
 // 页码变化
 function handlePageChange(page) {
   currentPage.value = page
-  emit('page-change', { ...searchForm, page: currentPage.value, pageSize: pageSize.value })
+  
+  // 处理分页参数，特别是时间范围
+  const pageParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
+  
+  // 处理时间范围参数
+  props.searchFields.forEach(field => {
+    if (field.type === 'datetimerange' || field.type === 'daterange') {
+      const timeValue = searchForm[field.key]
+      if (Array.isArray(timeValue) && timeValue.length === 2) {
+        // 将时间范围数组转换为开始和结束时间
+        pageParams[`startTime`] = timeValue[0]
+        pageParams[`endTime`] = timeValue[1]
+        // 保留原始时间范围参数
+        pageParams[field.key] = timeValue
+      }
+    }
+  })
+  
+  emit('page-change', pageParams)
 }
 
 // 每页大小变化
 function handleSizeChange(size) {
   pageSize.value = size
   currentPage.value = 1
-  emit('size-change', { ...searchForm, page: currentPage.value, pageSize: pageSize.value })
+  
+  // 处理分页参数，特别是时间范围
+  const sizeParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
+  
+  // 处理时间范围参数
+  props.searchFields.forEach(field => {
+    if (field.type === 'datetimerange' || field.type === 'daterange') {
+      const timeValue = searchForm[field.key]
+      if (Array.isArray(timeValue) && timeValue.length === 2) {
+        // 将时间范围数组转换为开始和结束时间
+        sizeParams[`startTime`] = timeValue[0]
+        sizeParams[`endTime`] = timeValue[1]
+        // 保留原始时间范围参数
+        sizeParams[field.key] = timeValue
+      }
+    }
+  })
+  
+  emit('size-change', sizeParams)
 }
 
 // 处理自定义操作
@@ -291,6 +415,17 @@ function handleCustomClick(event, row, index) {
 // 处理操作按钮点击
 function handleActionButtonClick(action, row, index) {
   emit('action', { action, row, index })
+}
+
+// 检查按钮权限
+function hasButtonPermission(button) {
+  // 如果按钮没有设置角色限制，则所有角色都可以访问
+  if (!button.roles || button.roles.length === 0) {
+    return true
+  }
+  
+  // 检查当前用户角色是否在允许的角色列表中
+  return button.roles.includes(props.userRole)
 }
 
 // 处理头部按钮点击

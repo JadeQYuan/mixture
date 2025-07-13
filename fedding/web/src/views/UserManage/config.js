@@ -1,4 +1,8 @@
 // UserManage页面配置
+import { ROLE_MAP } from '@/utils/roleMap'
+
+
+
 export const searchFields = [
   {
     key: 'userName',
@@ -18,12 +22,7 @@ export const columns = [
     label: '角色',
     width: '150',
     render: (row) => {
-      const roleMap = {
-        'MaterialClerk': '材料员',
-        'SeniorOperator': '高级操作员',
-        'Operator': '操作员'
-      }
-      return roleMap[row.roleCode] || row.roleCode
+      return ROLE_MAP[row.roleCode]?.name || row.roleCode
     }
   },
   {

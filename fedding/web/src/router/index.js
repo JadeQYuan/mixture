@@ -8,13 +8,14 @@ import Home from '@/views/Home.vue'
 import Layout from '@/components/Layout.vue'
 import UserManage from '@/views/UserManage'
 import TankManage from '@/views/TankManage'
-import FeedApply from '@/views/FeedApply.vue'
-import ReturnApply from '@/views/ReturnApply.vue'
+import FeedApply from '@/views/FeedApply'
+import ReturnApply from '@/views/ReturnApply'
 import FeedManage from '@/views/FeedManage'
 import ReturnManage from '@/views/ReturnManage'
 import FeedRecord from '@/views/FeedRecord'
-import FaceLogin from '@/views/FaceLogin.vue'
-import CodeLogin from '@/views/CodeLogin.vue'
+import FaceLogin from '@/views/Login/FaceLogin'
+import CodeLogin from '@/views/Login/CodeLogin'
+
 
 
 const routes = [
@@ -69,7 +70,7 @@ const routes = [
         path: 'feed-record',
         name: 'FeedRecord',
         component: FeedRecord,
-        meta: { roles: ['MaterialClerk'], title: '加料记录' }
+        meta: { roles: ['MaterialClerk', 'Accountant'], title: '领料记录' }
       },
       {
         path: 'tank-manage',
@@ -83,6 +84,7 @@ const routes = [
         component: UserManage,
         meta: { roles: ['MaterialClerk'], title: '用户管理' }
       },
+
 
     ]
   }

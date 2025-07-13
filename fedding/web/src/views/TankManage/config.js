@@ -48,12 +48,6 @@ export const actionButtons = [
     type: 'danger',
     size: 'large',
     disabled: (row) => row.status === 'active' // 正常状态禁用删除
-  },
-  {
-    action: 'view',
-    text: '查看',
-    type: 'info',
-    size: 'large'
   }
 ]
 
