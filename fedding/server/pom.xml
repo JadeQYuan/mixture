@@ -125,6 +125,14 @@
             <systemPath>${basedir}/libs/arcsoft-sdk-face-3.0.0.0.jar</systemPath>
         </dependency>
 
+        <!-- Modbus 客户端 -->
+        <dependency>
+            <groupId>com.intelligt.modbus</groupId>
+            <artifactId>jlibmodbus</artifactId>
+            <version>1.2.9.7</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/jlibmodbus-1.2.9.7.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

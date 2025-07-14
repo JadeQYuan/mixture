@@ -69,18 +69,18 @@ const feedDialog = reactive({
 const weightTimer = ref(null)
 const currentTankId = ref(null)
 const currentStep = ref(0)
+const weightTimerActive = ref(false)
 
-// 获取重量数据的函数
-async function fetchWeightData(step) {
+// 修改后的递归定时器逻辑
+async function fetchWeightDataWithDelay(step) {
+  if (!weightTimerActive.value) return;
   if (currentTankId.value) {
     try {
       const response = await getTankWeightData()
       if (response.data) {
         if (step === 0) {
-          // 第一步：只获取底罐重量
           feedDialog.form.capacity = response.data
         } else if (step === 1) {
-          // 第二步：获取加料重量
           feedDialog.form.capacityAdd = response.data
         }
       }
@@ -88,26 +88,22 @@ async function fetchWeightData(step) {
       ElMessage.error('获取重量数据失败')
     }
   }
+  if (weightTimerActive.value) {
+    weightTimer.value = setTimeout(() => fetchWeightDataWithDelay(step), 1000)
+  }
 }
 
-// 启动重量数据定时器
 function startWeightTimer(step) {
-  stopWeightTimer() // 先停止之前的定时器
+  stopWeightTimer()
   currentStep.value = step
-  
-  // 立即获取一次数据
-  fetchWeightData(step)
-  
-  // 启动定时器，每秒获取一次
-  weightTimer.value = setInterval(() => {
-    fetchWeightData(step)
-  }, 1000)
+  weightTimerActive.value = true
+  fetchWeightDataWithDelay(step)
 }
 
-// 停止重量数据定时器
 function stopWeightTimer() {
+  weightTimerActive.value = false
   if (weightTimer.value) {
-    clearInterval(weightTimer.value)
+    clearTimeout(weightTimer.value)
     weightTimer.value = null
   }
 }

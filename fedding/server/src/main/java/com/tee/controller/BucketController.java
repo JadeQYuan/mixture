@@ -2,21 +2,22 @@ package com.tee.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.tee.modbus.ModbusService;
 import com.tee.pojo.qo.BucketQo;
 import com.tee.pojo.vo.Bucket;
 import com.tee.pojo.vo.User;
 import com.tee.service.BucketService;
 import com.tee.service.UserService;
-import com.tee.util.*;
+import com.tee.util.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 料罐信息管理
@@ -32,6 +33,9 @@ public class BucketController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private ModbusService modbusService;
 
     @Value("${user.default.password}")
     private String defaultPassword;
@@ -283,9 +287,17 @@ public class BucketController {
      */
     @GetMapping("/weigh")
     public Result weigh() {
-
-
-        return Result.success(Math.random());
+        try {
+            Double weight = modbusService.readWeight();
+            if (weight != null) {
+                return Result.success(weight);
+            } else {
+                return Result.error("无法从Modbus设备读取重量数据");
+            }
+        } catch (Exception e) {
+            log.error("读取重量数据时发生错误: ", e);
+            return Result.error("读取重量数据失败: " + e.getMessage());
+        }
     }
 
     /**
