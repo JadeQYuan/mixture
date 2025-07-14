@@ -1,39 +1,43 @@
-// 退料申请表单配置
-export function getReturnApplyFormConfig() {
+// ReturnManage 页面表单配置
+
+// 退料操作步骤配置
+export const returnOperationSteps = [
+  {
+    title: '底罐重量',
+    description: '记录底罐重量'
+  },
+  {
+    title: '确认提交',
+    description: '确认所有信息并提交'
+  }
+]
+
+// 退料操作字段配置
+export const returnOperationFields = [
+  {
+    prop: 'bucketNo',
+    label: '罐号',
+    type: 'input',
+    disabled: true,
+    size: 'large'
+  },
+  {
+    prop: 'capacity',
+    label: '当前重量',
+    type: 'input',
+    disabled: true,
+    size: 'large',
+    suffix: 'kg',
+    style: { width: '100%' }
+  },
+]
+
+// 获取退料操作表单配置
+export function getReturnOperationConfig() {
   return {
-    // 表单字段配置
-    fields: [
-      {
-        prop: 'bucketNo',
-        label: '料罐',
-        type: 'select',
-        placeholder: '请选择料罐',
-        required: true,
-        options: [], // 动态加载
-        size: 'large',
-        style: { width: '100%' }
-      }
-    ],
-    
-    // 表单验证规则
-    rules: {
-      bucketNo: [
-        { required: true, message: '请选择料罐', trigger: 'change' }
-      ]
-    },
-    
-    // 表单样式配置
-    labelWidth: '120px',
-    labelPosition: 'left',
-    
-    // 底部按钮配置
-    footerButtons: [
-      {
-        action: 'submit',
-        text: '提交申请',
-        type: 'primary',
-        size: 'large'
-      }
-    ]
+    title: '退料操作',
+    width: '700px',
+    fields: returnOperationFields,
+    steps: returnOperationSteps
   }
 } 

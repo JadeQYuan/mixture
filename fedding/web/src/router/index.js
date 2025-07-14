@@ -11,7 +11,6 @@ import TankManage from '@/views/TankManage'
 import FeedApply from '@/views/FeedApply'
 import ReturnApply from '@/views/ReturnApply'
 import FeedManage from '@/views/FeedManage'
-import ReturnManage from '@/views/ReturnManage'
 import FeedRecord from '@/views/FeedRecord'
 import FaceLogin from '@/views/Login/FaceLogin'
 import CodeLogin from '@/views/Login/CodeLogin'
@@ -52,7 +51,7 @@ const routes = [
         path: 'return-apply',
         name: 'ReturnApply',
         component: ReturnApply,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '退料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '退料' }
       },
       {
         path: 'feed-manage',
@@ -61,16 +60,10 @@ const routes = [
         meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '加料管理' }
       },
       {
-        path: 'return-manage',
-        name: 'ReturnManage',
-        component: ReturnManage,
-        meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '退料管理' }
-      },
-      {
         path: 'feed-record',
         name: 'FeedRecord',
         component: FeedRecord,
-        meta: { roles: ['MaterialClerk', 'Accountant'], title: '领料记录' }
+        meta: { roles: ['MaterialClerk', 'Accountant'], title: '加料记录' }
       },
       {
         path: 'tank-manage',

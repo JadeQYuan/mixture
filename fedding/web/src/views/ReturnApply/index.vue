@@ -1,120 +1,216 @@
 <template>
-  <div class="return-apply-container">
-    <div class="return-apply-card">
-      <h2 class="page-title">退料申请</h2>
+  <div class="return-container">
+    <CardGrid
+      :data="records"
+      :loading="loading"
+      :page-loading="pageLoading"
+      :display-fields="displayFields"
+      :action-buttons="actionButtons"
+      :header-buttons="headerButtons"
+      :auto-refresh="true"
+      :refresh-interval="5000"
+      @refresh="handleRefresh"
+      @action="handleAction"
+      @header-action="handleHeaderAction"
+    />
+
+    <!-- 退料操作对话框 -->
+    <Dialog
+      :visible="returnDialog.visible"
+      :title="returnDialogConfig.title"
+      :width="returnDialogConfig.width"
+      @update:visible="val => returnDialog.visible = val"
+    >
       <Form
-        :fields="formConfig.fields"
-        :rules="formConfig.rules"
-        :form-data="form"
-        :loading="loading"
-        :label-width="formConfig.labelWidth"
-        :label-position="formConfig.labelPosition"
-        :footer-buttons="formConfig.footerButtons"
-        @submit="handleSubmit"
+        :fields="returnDialogConfig.fields"
+        :rules="returnDialogConfig.rules"
+        :steps="returnDialogConfig.steps"
+        :current-step="returnDialog.step"
+        :form-data="returnDialog.form"
+        :loading="returnDialog.loading"
+        @submit="handleReturnSubmit"
+        @next-step="handleNextStep"
+        @prev-step="handlePrevStep"
+        @cancel="closeReturnDialog"
       />
-    </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { returnApply, getMyTankList } from '@/request/api'
+import { getMyTankList, submitReturnOperation, getTankWeightData } from '@/request/api'
+import CardGrid from '@/components/CardGrid'
+import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { getReturnApplyFormConfig } from './formConfig'
+import { displayFields, actionButtons, headerButtons } from './config'
+import { getReturnOperationConfig } from './formConfig'
 
-// 表单配置
-const formConfig = getReturnApplyFormConfig()
+// 数据
+const records = ref([])
+const loading = ref(false)
+const pageLoading = ref(false)
 
-// 表单数据
-const form = reactive({
-  bucketNo: ''
+// 退料对话框配置
+const returnDialogConfig = getReturnOperationConfig()
+
+// 退料对话框
+const returnDialog = reactive({
+  visible: false,
+  step: 0,
+  index: null,
+  loading: false,
+  form: { bucketNo: '', currentWeight: null, returnWeight: null }
 })
 
-const loading = ref(false)
+// 定时器相关
+const weightTimer = ref(null)
+const currentTankId = ref(null)
+const weightTimerActive = ref(false)
 
-// 加载料罐选项
-async function loadTankOptions() {
-  try {
-    const res = await getMyTankList()
-    const tankOptions = (res.data || []).map(item => ({
-      label: item.bucketNo,
-      value: item.id
-    }))
-    
-    // 更新表单配置中的料罐选项
-    const bucketField = formConfig.fields.find(field => field.prop === 'bucketNo')
-    if (bucketField) {
-      bucketField.options = tankOptions
+// 修改后的递归定时器逻辑
+async function fetchWeightDataWithDelay() {
+  if (!weightTimerActive.value) return;
+  if (currentTankId.value) {
+    try {
+      const response = await getTankWeightData()
+      if (response.data) {
+        returnDialog.form.capacity = response.data
+      }
+    } catch (error) {
+      ElMessage.error('获取重量数据失败')
     }
-  } catch (error) {
-    console.error('加载料罐选项失败:', error)
+  }
+  if (weightTimerActive.value) {
+    weightTimer.value = setTimeout(fetchWeightDataWithDelay, 1000)
   }
 }
 
-// 提交处理
-async function handleSubmit(formData) {
-  if (loading.value) return
-  
+function startWeightTimer() {
+  stopWeightTimer()
+  weightTimerActive.value = true
+  fetchWeightDataWithDelay()
+}
+
+function stopWeightTimer() {
+  weightTimerActive.value = false
+  if (weightTimer.value) {
+    clearTimeout(weightTimer.value)
+    weightTimer.value = null
+  }
+}
+
+// 事件处理函数
+async function handleRefresh() {
+  loading.value = true
   try {
-    loading.value = true
-    const res = await returnApply(formData)
-      ElMessage.success('退料申请已提交！')
-      // 重置表单
-      Object.assign(form, {
-        bucketNo: ''
-      })
+    const response = await getMyTankList({})
+    records.value = response.data || []
   } catch (error) {
-    // 错误已由http拦截器处理
+    ElMessage.error('获取退料列表失败')
   } finally {
     loading.value = false
   }
 }
 
-// 页面加载时获取料罐选项
+// 页面初始化加载
+async function initPage() {
+  pageLoading.value = true
+  try {
+    await handleRefresh()
+  } finally {
+    pageLoading.value = false
+  }
+}
+
+function handleAction({ action, row, index }) {
+  if (action === 'return') {
+    openReturnDialog(index)
+  }
+}
+
+function handleHeaderAction({ action }) {
+  // 移除导出功能处理
+}
+
+// 退料对话框相关函数
+function openReturnDialog(index) {
+  returnDialog.visible = true
+  returnDialog.step = 0
+  returnDialog.index = index
+  if (index >= 0) {
+    const record = records.value[index]
+    returnDialog.form.bucketNo = record.bucketNo
+    currentTankId.value = record.bucketNo // 设置当前罐号
+    // 启动定时器，获取当前重量
+    startWeightTimer()
+  } else {
+    returnDialog.form.bucketNo = ''
+    currentTankId.value = null
+  }
+  returnDialog.form.capacity = null
+}
+
+function handleNextStep(step) {
+  if (step === 1) {
+    // 第0步：检查当前重量是否已获取
+    if (!returnDialog.form.capacity) {
+      ElMessage.warning('正在获取当前重量数据，请稍候')
+    } else {
+      // 当前重量确定，进入第二步
+      stopWeightTimer()
+      returnDialog.step = step
+    }
+  } 
+}
+
+function handlePrevStep(step) {
+  returnDialog.step = step
+  // 如果返回到需要获取数据的步骤，重新启动定时器
+  if (step === 0) {
+    startWeightTimer()
+  }
+}
+
+function closeReturnDialog() {
+  returnDialog.visible = false
+  stopWeightTimer()
+  returnDialog.step = 0
+  returnDialog.form = { bucketNo: '', currentWeight: null, returnWeight: null }
+}
+
+async function handleReturnSubmit(formData) {
+  if (returnDialog.loading) return // 防止重复提交
+  
+  try {
+    returnDialog.loading = true
+    // 确保清除定时器
+    stopWeightTimer()
+    await submitReturnOperation(formData)
+    ElMessage.success('退料操作成功')
+    closeReturnDialog()
+    await handleRefresh() // 重新获取列表
+  } catch (error) {
+    ElMessage.error('退料操作失败')
+  } finally {
+    returnDialog.loading = false
+  }
+}
+
+// 页面加载时获取数据
 onMounted(() => {
-  loadTankOptions()
+  initPage()
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  stopWeightTimer()
 })
 </script>
 
 <style scoped>
-.return-apply-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-}
-
-.return-apply-card {
-  background: rgba(255,255,255,0.8);
-  border-radius: 32px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-  padding: 64px 56px 48px 56px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 480px;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-@media (max-width: 600px) {
-  .return-apply-card {
-    min-width: 0;
-    width: 96vw;
-    padding: 32px 8vw 24px 8vw;
-  }
-  
-  .page-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
+.return-container {
+  height: 100vh;
 }
 </style> 

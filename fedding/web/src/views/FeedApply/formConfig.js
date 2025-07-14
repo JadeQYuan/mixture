@@ -1,15 +1,16 @@
 // 加料申请表单配置
 export function getFeedApplyFormConfig() {
   return {
+    title: '加料申请',
+    width: '500px',
     // 表单字段配置
     fields: [
       {
         prop: 'bucketNo',
-        label: '料罐',
-        type: 'select',
-        placeholder: '请选择料罐',
-        required: true,
-        options: [], // 动态加载
+        label: '料罐编号',
+        type: 'input',
+        placeholder: '料罐编号',
+        disabled: true,
         size: 'large',
         style: { width: '100%' }
       },
@@ -46,7 +47,7 @@ export function getFeedApplyFormConfig() {
     // 表单验证规则
     rules: {
       bucketNo: [
-        { required: true, message: '请选择料罐', trigger: 'change' }
+        { required: true, message: '料罐编号不能为空', trigger: 'blur' }
       ],
       spec: [
         { required: true, message: '请选择加料规格', trigger: 'change' }
