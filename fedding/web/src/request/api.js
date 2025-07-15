@@ -17,7 +17,7 @@ export function updateUserPhoto(userId, imageFile) {
   const formData = new FormData()
   formData.append('imageFile', imageFile)
   formData.append('userId', userId)
-  return http.post(`/service/face/faceUpload`, formData, {
+  return http.post(`/service/user/uploadPhoto`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
@@ -48,12 +48,12 @@ export function deleteTank(id) {
   return http.delete(`/service/tank/delete`, { data: { id } })
 }
 
-export function getFeedTankList() {
-  return http.get('/service/feeding/availableTankList')
+export function getAvailableTankList( ) {
+  return http.get('/service/tank/available')
 }
 
 export function getMyTankList() {
-  return http.get('/service/feeding/myTankList')
+  return http.get('/service/tank/my')
 }
 
 // 加料管理接口

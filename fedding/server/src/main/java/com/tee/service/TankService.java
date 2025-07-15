@@ -9,6 +9,7 @@ import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
 import com.tee.util.Result;
 import com.tee.exception.AppException;
+import com.tee.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -29,7 +30,7 @@ public class TankService {
 
     public PageVo<Tank> getTankList(String tankNo, PageQo pageQo) {
         PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<Tank> tankList = (Page<Tank>)tankMapper.selectByTankNo(tankNo);
+        Page<Tank> tankList = (Page<Tank>)tankMapper.selectByCondition(tankNo);
         return new PageVo<>(tankList);
     }
 
@@ -62,6 +63,11 @@ public class TankService {
     public List<Tank> getAvailableTanks() {
         // 获取所有可用的料罐（没有被占用的）
         return tankMapper.selectAvailableTanks();
+    }
+
+    public List<Tank> getMyTanks() {
+        // 获取所有可用的料罐（没有被占用的）
+        return tankMapper.selectMyTanks(TokenUtil.getToken());
     }
 
     public void insertTank(Tank tank) {

@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 料罐信息管理
  */
@@ -49,5 +51,18 @@ public class TankController {
     @DeleteMapping("/delete")
     public void deleteTank(@RequestParam Integer id) {
         tankService.deleteTank(id);
+    }
+
+    /**
+     * 获取料罐列表
+     */
+    @GetMapping("/available")
+    public List<Tank> getAvailableTanks() {
+        return tankService.getAvailableTanks();
+    }
+
+    @GetMapping("/my")
+    public List<Tank> getMyTanks() {
+        return tankService.getMyTanks();
     }
 }

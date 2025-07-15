@@ -38,7 +38,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedApply, getFeedTankList } from '@/request/api'
+import { feedApply, getAvailableTankList } from '@/request/api'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -64,8 +64,8 @@ const applyDialog = reactive({
 async function handleRefresh() {
   loading.value = true
   try {
-    const response = await getFeedTankList({})
-    records.value = response.data || []
+    const response = await getAvailableTankList()
+    records.value = response || []
   } catch (error) {
     ElMessage.error('获取料罐列表失败')
   } finally {

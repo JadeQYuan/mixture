@@ -12,25 +12,29 @@ import java.util.List;
 @Mapper
 public interface TankMapper {
 
-    /**
-     * 查询所有料罐信息
-     * @return 料罐信息列表
-     */
-    @Select("SELECT t.*, u.user_name as current_user, u.account as current_account " +
-            "FROM tank_info t " +
+    @Select({
+            "<script>",
+            "SELECT t.id, t.tank_no as tankNo, t.remark, t.update_time as updateTime, u.user_name as userName, u.account as userAccount " +
+            "FROM tank_info t ",
             "LEFT JOIN user_info u ON t.user_id = u.id " +
-            "ORDER BY t.create_time DESC")
-    List<Tank> selectAll();
+            "<where>",
+            "<if test='tankNo != null and tankNo != \"\"'>",
+            " t.tank_no LIKE '%' || #{tankNo} || '%'",
+            "</if>",
+            "</where>",
+            "ORDER BY t.create_time DESC",
+            "</script>"
+    })
+    List<Tank> selectByCondition(@Param("tankNo") String tankNo);
 
     /**
      * 根据ID查询料罐信息
      * @param id 料罐ID
      * @return 料罐信息对象
      */
-    @Select("SELECT t.*, u.user_name as current_user, u.account as current_account " +
-            "FROM tank_info t " +
-            "LEFT JOIN user_info u ON t.user_id = u.id " +
-            "WHERE t.id = #{id}")
+    @Select("SELECT id, tank_no as tankNo, remark  " +
+            "FROM tank_info " +
+            "WHERE id = #{id}")
     Tank selectById(Integer id);
 
     /**
@@ -58,11 +62,20 @@ public interface TankMapper {
      * 查询可用料罐（未被占用的料罐）
      * @return 可用料罐列表
      */
-    @Select("SELECT t.*, u.user_name as current_user, u.account as current_account " +
+    @Select("<script>" +
+            "SELECT t.id, t.tank_no as tankNo, t.remark " +
             "FROM tank_info t " +
-            "LEFT JOIN user_info u ON t.user_id = u.id " +
-            "WHERE t.user_id IS NULL OR t.user_id = ''")
+            "WHERE user_id is null" +
+            "</script>")
     List<Tank> selectAvailableTanks();
+
+    @Select("<script>" +
+            "SELECT t.id, t.tank_no as tankNo, t.remark " +
+            "FROM tank_info t " +
+            "WHERE t.user_id = #{userId} " +
+            "AND user_id is null " +
+            "</script>")
+    List<Tank> selectMyTanks(Integer userId);
 
     /**
      * 插入料罐信息
@@ -79,9 +92,11 @@ public interface TankMapper {
      * @param tank 料罐信息对象
      * @return 影响行数
      */
-    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, " +
-            "user_id = #{userId}, update_time = #{updateTime} WHERE id = #{id}")
+    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, update_time = #{updateTime} WHERE id = #{id}")
     int updateById(Tank tank);
+
+    @Update("UPDATE tank_info SET user_id = #{userId}, update_time = #{updateTime} WHERE id = #{id}")
+    int updateUser(int id, int userId);
 
     /**
      * 根据ID删除料罐信息
@@ -90,4 +105,4 @@ public interface TankMapper {
      */
     @Delete("DELETE FROM tank_info WHERE id = #{id}")
     int deleteById(Integer id);
-} 
+}

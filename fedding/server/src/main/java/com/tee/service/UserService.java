@@ -1,10 +1,10 @@
 package com.tee.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.toolkit.ImageInfoEx;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.tee.constant.Contants;
 import com.tee.entity.User;
 import com.tee.exception.AppException;
 import com.tee.mapper.UserMapper;
@@ -13,35 +13,29 @@ import com.tee.pojo.PageVo;
 import com.tee.util.Base64Util;
 import com.tee.util.JwtUtils;
 import com.tee.util.TokenUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 public class UserService {
 
     @Autowired
-    UserMapper userMapper;
-
-    @Autowired
-    HttpServletRequest httpServletRequest;
+    private UserMapper userMapper;
 
     @Autowired
     private ArcFaceService arcFaceService;
+
     public User getCurrentUserInfo() {
-        String authorization = httpServletRequest.getHeader(Contants.AUTHORIZATION);
-        if (authorization == null) {
+        Integer userId = TokenUtil.getToken();
+        if (userId == null) {
             throw new AppException("未登录");
         }
-        Integer userId = TokenUtil.getToken();
         User userInfo = userMapper.getUserInfo(userId);
         if (userInfo == null) {
             throw new AppException("用户不存在");
@@ -54,13 +48,12 @@ public class UserService {
     }
 
     public User getById(Integer userId) {
-        User userInfo = userMapper.getUserInfo(userId);
-        return userInfo;
+        return userMapper.getUserInfo(userId);
     }
 
     public PageVo<User> getUserList(String userName, String account, PageQo pageQo) {
         PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userName);
+        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userName, account);
         if (CollectionUtils.isEmpty(userList)) {
             return new PageVo<>();
         }
@@ -80,49 +73,36 @@ public class UserService {
         if (!CollectionUtils.isEmpty(userInfo)) {
             throw new AppException("用户已存在");
         }
-//        User user = new User();
-//        BeanUtils.copyProperties(user, user);
         userMapper.insertUserInfo(user);
         return user;
     }
 
     public void updatePassword(User user) {
-//        Integer userId = user.getId();
-//        List<User> userInfo = userMapper.getUserInfo(userId);
-//        if (CollectionUtils.isEmpty(userInfo)) {
-//            throw new AppException("用户不存在");
-//        }
-//        String password = userQo.getPassword();
-//        if (StringUtils.isEmpty(password)) {
-//            throw new AppException("密码不能为空");
-//        }
-//        User user = new User();
-//        user.setPassword(password);
-//        userMapper.updateUserInfo(user);
+        if (user.getId() == null || StringUtils.isEmpty(user.getPassword())) {
+            throw new AppException("用户ID和密码不能为空");
+        }
+        userMapper.updatePassword(user);
     }
 
     public void updateUserInfo(User user) {
-//        String userId = userQo.getUserId();
-//        List<User> userInfo = userMapper.getUserInfo(userId);
-//        if (CollectionUtils.isEmpty(userInfo)) {
-//            throw new AppException("用户不存在");
-//        }
-//        User user = new User();
-//        BeanUtils.copyProperties(userQo, user);
-//        userMapper.updateUserInfo(user);
+        User userInfo = userMapper.getUserInfo(user.getId());
+        if (userInfo == null) {
+            throw new AppException("用户不存在");
+        }
+        userMapper.updateUserInfo(user);
     }
 
     public void deleteUserInfo(Integer userId) {
         userMapper.deleteUserInfo(userId);
     }
 
-    public void uploadPhoto(MultipartFile multipartFile, Integer userId) throws Exception {
-        User user = userMapper.getUserInfo(userId);
+    public void uploadPhoto(MultipartFile multipartFile, Integer id) throws Exception {
+        User user = userMapper.getUserInfo(id);
         if (user == null) {
             throw new AppException("用户不存在！");
         }
         File file1 = new File("/face/");
-        File file = new File(file1.getAbsolutePath() + "/" + userId + ".png");
+        File file = new File(file1.getAbsolutePath() + "/" + id + ".png");
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
@@ -132,21 +112,12 @@ public class UserService {
             file.delete();
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
         }
-        com.arcsoft.face.FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx());
+        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx());
         if (faceFeature == null) {
             file.delete();
             throw new AppException("人脸特征校验失败，请调整角度重新拍摄！");
         }
-//        face.setUserId(userId);
-//        face.setUserName(user.getUserName());
-//        face.setFacePath(file.getPath());
-//        face.setFaceFeature(com.alibaba.fastjson.JSONObject.toJSONString(faceFeature));
-//        List<com.tee.entity.Face> faceInfo1 = faceService.getFaceInfo(userId);
-//        if (CollectionUtils.isEmpty(faceInfo1)) {
-//            faceService.insertFaceInfo(face);
-//        } else {
-//            faceService.updateFaceInfo(face);
-//        }
+        userMapper.updateFaceInfo(id, file.getPath(), JSONObject.toJSONString(faceFeature));
     }
 
     public String loginByAccount(User user) {

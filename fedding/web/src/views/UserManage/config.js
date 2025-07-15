@@ -26,14 +26,14 @@ export const columns = [
     }
   },
   {
-    prop: 'account',
-    label: '工号',
-    width: '180'
-  },
-  {
     prop: 'userName',
     label: '姓名',
     width: '240'
+  },
+  {
+    prop: 'account',
+    label: '工号',
+    width: '180'
   },
   {
     prop: 'facePath',

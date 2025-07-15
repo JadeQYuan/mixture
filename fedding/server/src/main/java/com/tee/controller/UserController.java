@@ -89,8 +89,8 @@ public class UserController {
      * 用户照片上传/更新
      */
     @PostMapping("/uploadPhoto")
-    public void uploadPhoto(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestParam Integer userId) throws Exception {
-        userService.uploadPhoto(multipartFile, userId);
+    public void uploadPhoto(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestParam Integer id) throws Exception {
+        userService.uploadPhoto(multipartFile, id);
     }
 
 

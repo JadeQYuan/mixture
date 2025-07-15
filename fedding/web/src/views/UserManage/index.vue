@@ -442,18 +442,16 @@ async function submitPhoto() {
       throw new Error('用户数据不存在')
     }
     
-    const userId = user.userId || user.id
-    if (!userId) {
+    const id = user.id
+    if (!id) {
       throw new Error('用户ID为空')
     }
-    
-    console.log('提交照片 - 用户ID:', userId, '用户数据:', user)
     
     // 使用工具类将base64字符串转换为File对象
     const imageFile = base64ToFile(photoDialog.currentPhoto, 'face_photo.png', 'image/png')
     
     // 提交照片逻辑
-    await updateUserPhoto(userId, imageFile)
+    await updateUserPhoto(id, imageFile)
     ElMessage.success('照片提交成功')
     photoDialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
@@ -492,9 +490,8 @@ async function handlePasswordSubmit(formData) {
   try {
     const encryptedPassword = encryptPassword(formData.newPassword)
     const user = records.value[passwordDialog.index]
-    const userId = user.userId || user.id
     const requestData = {
-      userId: userId,
+      id: user.id,
       password: encryptedPassword
     }
     await updateUserPassword(requestData)

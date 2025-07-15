@@ -40,7 +40,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getMyTankList, submitReturnOperation, getTankWeightData } from '@/request/api'
+import { submitReturnOperation, getTankWeightData, getMyTankList } from '@/request/api'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -105,8 +105,8 @@ function stopWeightTimer() {
 async function handleRefresh() {
   loading.value = true
   try {
-    const response = await getMyTankList({})
-    records.value = response.data || []
+    const response = await getMyTankList()
+    records.value = response || []
   } catch (error) {
     ElMessage.error('获取退料列表失败')
   } finally {
