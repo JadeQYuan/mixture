@@ -73,7 +73,7 @@ const dialog = reactive({
   mode: 'add', // add/edit
   index: null,
   loading: false,
-  form: { bucketNo: '', remark: '' },
+  form: { tankNo: '', remark: '' },
   config: getTankFormConfig()
 })
 
@@ -117,7 +117,7 @@ function handleAction({ action, row, index }) {
       confirmDelete(index)
       break
     case 'view':
-      ElMessage.info(`查看料罐: ${row.bucketNo}`)
+      ElMessage.info(`查看料罐: ${row.tankNo}`)
       break
   }
 }
@@ -148,7 +148,7 @@ function openDialog(mode, index = null) {
   if (mode === 'edit' && index !== null) {
     Object.assign(dialog.form, records.value[index])
   } else {
-    dialog.form = { bucketNo: '', remark: '' }
+    dialog.form = { tankNo: '', remark: '' }
   }
 }
 

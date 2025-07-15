@@ -21,13 +21,6 @@ public class JwtUtils {
                 .compact();
     }
 
-    public static Claims parseToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(ConfigUtil.getPropertyFromEnvironment("face.secret.key"))
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
     public static String getSubject(String token) {
         return Jwts.parser()
                 .setSigningKey(ConfigUtil.getPropertyFromEnvironment("face.secret.key"))

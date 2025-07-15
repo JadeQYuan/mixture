@@ -1,21 +1,17 @@
 package com.tee.controller;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.tee.pojo.qo.UserQo;
-import com.tee.pojo.vo.User;
+import com.github.pagehelper.Page;
+import com.tee.entity.User;
+import com.tee.pojo.PageQo;
+import com.tee.pojo.PageVo;
 import com.tee.service.UserService;
-import com.tee.util.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletResponse;
+
 import javax.validation.Valid;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户信息管理
@@ -29,45 +25,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Value("${user.default.password}")
-    private String defaultPassword;
-
-    /**
-     * 账号密码登录
-     *
-     * @param userQo
-     * @return
-     */
-    @PostMapping("/accountLogin")
-    public Result accountLogin(@RequestBody UserQo userQo, HttpServletResponse response) {
-        String account = userQo.getAccount();
-        String password = userQo.getPassword();
-        if (StringUtils.isEmpty(account) || StringUtils.isEmpty(password)) {
-            return Result.error("账号或密码不能为空");
-        }
-        List<User> userInfoList = userService.getUserInfoByNameAndNo(null, account);
-        if (CollectionUtils.isEmpty(userInfoList)) {
-            return Result.error("账号或密码错误");
-        }
-
-
-        User userInfo = userInfoList.get(0);
-        if (!password.equals(userInfo.getPassword())) {
-            return Result.error("账号或密码错误");
-        }
-
-        String jwtToken = JwtUtils.generateToken(userInfo.getUserId());
-        return Result.success(jwtToken);
-    }
-
     @GetMapping("/info")
-    public Result getUserInfo() {
-        User userInfo = userService.getCurrentUser();
-        String facePath = userInfo.getFacePath();
-        if (!StringUtils.isEmpty(facePath)) {
-            userInfo.setFacePath(Base64Util.fileToBase64(facePath));
-        }
-        return Result.success(userInfo);
+    public User getUserInfo() {
+        return userService.getCurrentUserInfo();
     }
 
     /**
@@ -77,109 +37,61 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/list")
-    public Result userList(@RequestParam(value = "userName", required = false) String userName, @RequestParam(value = "pageNo", defaultValue = "1") int pageNo, @RequestParam(value = "size", defaultValue = "10") int size) {
-        PageHelper.startPage(pageNo, size);
-        List<User> userInfo = userService.getUserInfoByName(userName);
-        if (CollectionUtils.isEmpty(userInfo)) {
-            return Result.success();
-        }
-        for (User user : userInfo) {
-            String facePath = user.getFacePath();
-            if (!StringUtils.isEmpty(facePath)) {
-                // 加载图片资源
-                user.setFacePath(Base64Util.fileToBase64(facePath));
-            }
-        }
-
-        PageInfo<User> pageInfo = new PageInfo(userInfo);
-        return Result.success(pageInfo.getList(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getTotal());
+    public PageVo<User> userList(String userName, String account, PageQo pageQo) {
+        return userService.getUserList(userName, account, pageQo);
     }
 
     /**
      * 新增用户
      *
-     * @param userQo
+     * @param user
      * @return
      */
     @PostMapping("/add")
-    public Result addUser(@Valid @RequestBody UserQo userQo) {
-        String userName = userQo.getUserName();
-        String account = userQo.getAccount();
-        List<User> userInfo = userService.getUserInfoByNameAndNo(userName, account);
-        if (!CollectionUtils.isEmpty(userInfo)) {
-            return Result.error("用户已存在");
-        }
-        User user = new User();
-        BeanUtils.copyProperties(userQo, user);
-        // roleCode已由前端传递，无需再查name
-        user.setUserId(UIdUtil.generateUUID());
-        userService.insertUserInfo(user);
-
-        return Result.success(user);
+    public User addUser(@RequestBody User user) {
+        return userService.addUser(user);
     }
 
     /**
      * 修改密码
      *
-     * @param userQo
+     * @param user
      * @return
      */
     @PutMapping("/updatePassword")
-    public Result updatePassword(@RequestBody UserQo userQo) {
-        String userId = userQo.getUserId();
-        List<User> userInfo = userService.getUserInfo(userId);
-        if (CollectionUtils.isEmpty(userInfo)) {
-            return Result.error("用户不存在");
-        }
-        String password = userQo.getPassword();
-        if (StringUtils.isEmpty(password)) {
-            return Result.error("密码不能为空");
-        }
-        User user = new User();
-        user.setUserId(userId);
-        user.setPassword(password);
-        userService.updateUserInfo(user);
-
-        return Result.success();
+    public void updatePassword(@RequestBody User user) {
+        userService.updatePassword(user);
     }
 
     /**
      * 修改用户信息
      *
-     * @param userQo
+     * @param user
      * @return
      */
     @PutMapping("/updateUserInfo")
-    public Result updateUserInfo(@Valid @RequestBody UserQo userQo) {
-        String userId = userQo.getUserId();
-        List<User> userInfo = userService.getUserInfo(userId);
-        if (CollectionUtils.isEmpty(userInfo)) {
-            return Result.error("用户不存在");
-        }
-
-        User user = new User();
-        BeanUtils.copyProperties(userQo, user);
+    public void updateUserInfo(@Valid @RequestBody User user) {
         userService.updateUserInfo(user);
-        return Result.success();
     }
 
     /**
      * 删除用户
      *
-     * @param userQo
+     * @param user
      * @return
      */
     @DeleteMapping("/delete")
-    public Result deleteUserInfo(@RequestBody UserQo userQo) {
-        String userId = userQo.getUserId();
-        List<User> userInfo = userService.getUserInfo(userId);
-        if (CollectionUtils.isEmpty(userInfo)) {
-            return Result.error("用户不存在");
-        }
-        userService.deleteUserInfo(userId);
-        return Result.success();
+    public void deleteUserInfo(@RequestBody User user) {
+        userService.deleteUserInfo(user.getId());
     }
 
+    /**
+     * 用户照片上传/更新
+     */
+    @PostMapping("/uploadPhoto")
+    public void uploadPhoto(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestParam Integer userId) throws Exception {
+        userService.uploadPhoto(multipartFile, userId);
+    }
 
 
 }

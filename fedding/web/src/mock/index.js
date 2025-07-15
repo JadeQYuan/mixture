@@ -126,7 +126,7 @@ Mock.mock(/\/tanks(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
-  const bucketNo = url.searchParams.get('bucketNo') || ''
+  const tankNo = url.searchParams.get('tankNo') || ''
   const userkey = url.searchParams.get('userkey') || ''
 
   // 生成更多数据用于分页测试
@@ -136,22 +136,19 @@ Mock.mock(/\/tanks(\?.*)?$/, 'get', (options) => {
   for (let i = 0; i < totalCount; i++) {
     allData.push({
       id: i + 1,
-      bucketNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      desc: Mock.Random.sentence(3, 8),
+      tankNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      remark: Mock.Random.sentence(3, 8),
       status: Mock.Random.pick(['正常', '维护中', '停用']),
-      capacity: Mock.Random.integer(100, 1000),
-      currentLevel: Mock.Random.integer(0, 100),
-      person: Mock.Random.cname(),
-      userkey: Mock.Random.cname(),
-      createdAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-      updatedAt: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      currentUser: Mock.Random.cname(),
+      currentAccount: Mock.Random.string('number', 6),
+      updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
     })
   }
 
   // 过滤数据
   let filteredData = allData
-  if (bucketNo) {
-    filteredData = filteredData.filter(tank => tank.bucketNo.includes(bucketNo))
+  if (tankNo) {
+    filteredData = filteredData.filter(tank => tank.tankNo.includes(tankNo))
   }
   if (userkey) {
     filteredData = filteredData.filter(tank => tank.userkey.includes(userkey))
@@ -214,8 +211,8 @@ Mock.mock(/\/feed-manage(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
-  const person = url.searchParams.get('person') || ''
-  const bucketNo = url.searchParams.get('bucketNo') || ''
+  const userKey = url.searchParams.get('userKey') || ''
+  const tankNo = url.searchParams.get('tankNo') || ''
 
   // 生成更多数据用于分页测试
   const totalCount = 25 // 总共25条数据
@@ -224,21 +221,26 @@ Mock.mock(/\/feed-manage(\?.*)?$/, 'get', (options) => {
   for (let i = 0; i < totalCount; i++) {
     allData.push({
       id: i + 1,
-      person: Mock.Random.cname(),
-      bucketNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      spec: Mock.Random.pick(['10kg', '20kg', '50kg', '100kg']),
-      weight: Mock.Random.float(10, 100, 2, 2),
-      time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      userName: Mock.Random.cname(),
+      account: Mock.Random.string('number', 6),
+      tankNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      shiftType: Mock.Random.pick(['day', 'night']),
+      materialName: Mock.Random.pick(['10KV', '35KV']),
+      productSpec: Mock.Random.string('upper', 3) + Mock.Random.string('number', 2),
+      planWeight: Mock.Random.float(10, 100, 2, 2),
+      applyTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
     })
   }
 
   // 过滤数据
   let filteredData = allData
-  if (person) {
-    filteredData = filteredData.filter(item => item.person.includes(person))
+  if (userKey) {
+    filteredData = filteredData.filter(item => 
+      item.userName.includes(userKey) || item.account.includes(userKey)
+    )
   }
-  if (bucketNo) {
-    filteredData = filteredData.filter(item => item.bucketNo.includes(bucketNo))
+  if (tankNo) {
+    filteredData = filteredData.filter(item => item.tankNo.includes(tankNo))
   }
 
   // 分页处理
@@ -290,8 +292,8 @@ Mock.mock(/\/return-manage(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
-  const person = url.searchParams.get('person') || ''
-  const bucketNo = url.searchParams.get('bucketNo') || ''
+  const userKey = url.searchParams.get('userKey') || ''
+  const tankNo = url.searchParams.get('tankNo') || ''
 
   // 生成更多数据用于分页测试
   const totalCount = 30 // 总共30条数据
@@ -300,19 +302,25 @@ Mock.mock(/\/return-manage(\?.*)?$/, 'get', (options) => {
   for (let i = 0; i < totalCount; i++) {
     allData.push({
       id: i + 1,
-      person: Mock.Random.cname(),
-      bucketNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      userName: Mock.Random.cname(),
+      account: Mock.Random.string('number', 6),
+      tankNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      shiftType: Mock.Random.pick(['day', 'night']),
+      materialName: Mock.Random.pick(['10KV', '35KV']),
+      productSpec: Mock.Random.string('upper', 3) + Mock.Random.string('number', 2),
       time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
     })
   }
 
   // 过滤数据
   let filteredData = allData
-  if (person) {
-    filteredData = filteredData.filter(item => item.person.includes(person))
+  if (userKey) {
+    filteredData = filteredData.filter(item => 
+      item.userName.includes(userKey) || item.account.includes(userKey)
+    )
   }
-  if (bucketNo) {
-    filteredData = filteredData.filter(item => item.bucketNo.includes(bucketNo))
+  if (tankNo) {
+    filteredData = filteredData.filter(item => item.tankNo.includes(tankNo))
   }
 
   // 分页处理
@@ -349,9 +357,8 @@ Mock.mock(/\/feed-records(\?.*)?$/, 'get', (options) => {
   const url = new URL(options.url, 'http://localhost')
   const page = parseInt(url.searchParams.get('page')) || 1
   const pageSize = parseInt(url.searchParams.get('pageSize')) || 5
-  const person = url.searchParams.get('person') || ''
-  const bucketNo = url.searchParams.get('bucketNo') || ''
-  const tank = url.searchParams.get('tank') || ''
+  const userKey = url.searchParams.get('userKey') || ''
+  const tankNo = url.searchParams.get('tankNo') || ''
   
   // 处理时间范围参数 - 支持多种参数名
   let startTime = url.searchParams.get('startTime') || ''
@@ -378,23 +385,30 @@ Mock.mock(/\/feed-records(\?.*)?$/, 'get', (options) => {
   for (let i = 0; i < totalCount; i++) {
     allData.push({
       id: i + 1,
-      person: Mock.Random.cname(),
-      bucketNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
-      baseWeight: Mock.Random.float(50, 200, 2, 2),
-      feedWeight: Mock.Random.float(10, 100, 2, 2),
-      flameWeight: Mock.Random.float(0, 20, 2, 2),
-      time: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
+      tankNo: Mock.Random.string('upper', 2) + Mock.Random.string('number', 4),
+      shiftType: Mock.Random.pick(['day', 'night']),
+      materialName: Mock.Random.pick(['10KV', '35KV']),
+      productSpec: Mock.Random.string('upper', 3) + Mock.Random.string('number', 2),
+      planWeight: Mock.Random.float(10, 100, 2, 2),
+      bottomWeight: Mock.Random.float(50, 200, 2, 2),
+      fullWeight: Mock.Random.float(150, 300, 2, 2),
+      flameRetardantWeight: Mock.Random.float(0, 20, 2, 2),
+      actualWeight: Mock.Random.float(10, 100, 2, 2),
+      applyTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+      feedingTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
+      returnTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss')
     })
   }
 
   // 过滤数据
   let filteredData = allData
-  if (person) {
-    filteredData = filteredData.filter(item => item.person.includes(person))
+  if (userKey) {
+    filteredData = filteredData.filter(item => 
+      item.userName.includes(userKey) || item.account.includes(userKey)
+    )
   }
-  if (bucketNo || tank) {
-    const searchTank = bucketNo || tank
-    filteredData = filteredData.filter(item => item.bucketNo.includes(searchTank))
+  if (tankNo) {
+    filteredData = filteredData.filter(item => item.tankNo.includes(tankNo))
   }
   if (startTime && endTime) {
     filteredData = filteredData.filter(item => {

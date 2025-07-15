@@ -76,7 +76,7 @@ onMounted(async () => {
   if (localStorage.getItem('token')) {
     try {
       const userInfo = await getCurrentUser()
-      store.dispatch('setUserInfo', userInfo.data)
+      store.dispatch('setUserInfo', userInfo)
     } catch (e) {}
   }
   

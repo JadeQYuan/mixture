@@ -61,7 +61,7 @@ const returnDialog = reactive({
   step: 0,
   index: null,
   loading: false,
-  form: { bucketNo: '', currentWeight: null, returnWeight: null }
+  form: { tankNo: '', currentWeight: null, returnWeight: null }
 })
 
 // 定时器相关
@@ -76,7 +76,7 @@ async function fetchWeightDataWithDelay() {
     try {
       const response = await getTankWeightData()
       if (response.data) {
-        returnDialog.form.capacity = response.data
+        returnDialog.form.currentWeight = response.data
       }
     } catch (error) {
       ElMessage.error('获取重量数据失败')
@@ -141,21 +141,21 @@ function openReturnDialog(index) {
   returnDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
-    returnDialog.form.bucketNo = record.bucketNo
-    currentTankId.value = record.bucketNo // 设置当前罐号
+    returnDialog.form.tankNo = record.tankNo
+    currentTankId.value = record.tankNo // 设置当前罐号
     // 启动定时器，获取当前重量
     startWeightTimer()
   } else {
-    returnDialog.form.bucketNo = ''
+    returnDialog.form.tankNo = ''
     currentTankId.value = null
   }
-  returnDialog.form.capacity = null
+      returnDialog.form.currentWeight = null
 }
 
 function handleNextStep(step) {
   if (step === 1) {
     // 第0步：检查当前重量是否已获取
-    if (!returnDialog.form.capacity) {
+    if (!returnDialog.form.currentWeight) {
       ElMessage.warning('正在获取当前重量数据，请稍候')
     } else {
       // 当前重量确定，进入第二步
@@ -177,7 +177,7 @@ function closeReturnDialog() {
   returnDialog.visible = false
   stopWeightTimer()
   returnDialog.step = 0
-  returnDialog.form = { bucketNo: '', currentWeight: null, returnWeight: null }
+  returnDialog.form = { tankNo: '', currentWeight: null, returnWeight: null }
 }
 
 async function handleReturnSubmit(formData) {

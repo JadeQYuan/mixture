@@ -2,11 +2,11 @@
 export function getFeedApplyFormConfig() {
   return {
     title: '加料申请',
-    width: '500px',
+    width: '600px',
     // 表单字段配置
     fields: [
       {
-        prop: 'bucketNo',
+        prop: 'tankNo',
         label: '料罐编号',
         type: 'input',
         placeholder: '料罐编号',
@@ -15,10 +15,23 @@ export function getFeedApplyFormConfig() {
         style: { width: '100%' }
       },
       {
-        prop: 'spec',
-        label: '加料规格',
+        prop: 'shiftType',
+        label: '班次',
         type: 'select',
-        placeholder: '请选择加料规格',
+        placeholder: '请选择班次',
+        required: true,
+        options: [
+          { label: '白班', value: 'day' },
+          { label: '夜班', value: 'night' }
+        ],
+        size: 'large',
+        style: { width: '100%' }
+      },
+      {
+        prop: 'materialName',
+        label: '材料名称',
+        type: 'select',
+        placeholder: '请选择材料名称',
         required: true,
         options: [
           { label: '10KV', value: '10KV' },
@@ -28,7 +41,16 @@ export function getFeedApplyFormConfig() {
         style: { width: '100%' }
       },
       {
-        prop: 'capacity',
+        prop: 'productSpec',
+        label: '产品规格型号',
+        type: 'input',
+        placeholder: '请输入产品规格型号',
+        required: true,
+        size: 'large',
+        style: { width: '100%' }
+      },
+      {
+        prop: 'planWeight',
         label: '计划加料重量',
         type: 'number',
         placeholder: '请输入重量',
@@ -46,13 +68,19 @@ export function getFeedApplyFormConfig() {
     
     // 表单验证规则
     rules: {
-      bucketNo: [
+      tankNo: [
         { required: true, message: '料罐编号不能为空', trigger: 'blur' }
       ],
-      spec: [
-        { required: true, message: '请选择加料规格', trigger: 'change' }
+      shiftType: [
+        { required: true, message: '请选择班次', trigger: 'change' }
       ],
-      capacity: [
+      materialName: [
+        { required: true, message: '请选择材料名称', trigger: 'change' }
+      ],
+      productSpec: [
+        { required: true, message: '请输入产品规格型号', trigger: 'blur' }
+      ],
+      planWeight: [
         { required: true, message: '请输入计划加料重量', trigger: 'blur' }
       ]
     },

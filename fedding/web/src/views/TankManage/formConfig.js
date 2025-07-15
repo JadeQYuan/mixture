@@ -3,10 +3,10 @@
 // 料罐表单字段配置
 export const tankFormFields = [
   {
-    prop: 'bucketNo',
-    label: '编号',
+    prop: 'tankNo',
+    label: '料罐编号',
     type: 'input',
-    placeholder: '请输入编号',
+    placeholder: '请输入料罐编号',
     size: 'large'
   },
   {
@@ -17,14 +17,14 @@ export const tankFormFields = [
     rows: 3,
     size: 'large',
     // 示例：根据编号是否填写来决定是否显示描述字段
-    visible: (currentStep, formData) => formData.bucketNo && formData.bucketNo.trim() !== ''
+    visible: (currentStep, formData) => formData.tankNo && formData.tankNo.trim() !== ''
   }
 ]
 
 // 料罐表单验证规则
 export const tankFormRules = {
-  bucketNo: [
-    { required: true, message: '请输入编号', trigger: 'blur' }
+  tankNo: [
+    { required: true, message: '请输入料罐编号', trigger: 'blur' }
   ],
   remark: [
     { required: false, message: '请输入描述', trigger: 'blur' }

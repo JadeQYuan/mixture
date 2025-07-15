@@ -57,7 +57,7 @@ const applyDialogConfig = getFeedApplyFormConfig()
 const applyDialog = reactive({
   visible: false,
   loading: false,
-  form: { bucketNo: '', spec: '', capacity: null }
+  form: { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 })
 
 // 事件处理函数
@@ -96,16 +96,18 @@ function handleHeaderAction({ action }) {
 // 加料申请对话框相关函数
 function openApplyDialog(row) {
   applyDialog.visible = true
-  applyDialog.form = {
-    bucketNo: row.bucketNo,
-    spec: '',
-    capacity: null
-  }
+      applyDialog.form = {
+      tankNo: row.tankNo,
+      shiftType: '',
+      materialName: '',
+      productSpec: '',
+      planWeight: null
+    }
 }
 
 function closeApplyDialog() {
   applyDialog.visible = false
-  applyDialog.form = { bucketNo: '', spec: '', capacity: null }
+  applyDialog.form = { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 }
 
 async function handleApplySubmit(formData) {

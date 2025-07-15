@@ -22,11 +22,8 @@ public class WebConfig extends WebMvcConfigurationSupport {
         registrationBean.addUrlPatterns("/*"); // 拦截所有请求路径
         registrationBean.setOrder(0);// 优先级，越低越优先
         List<String> excludedUris = new ArrayList<>();
-        excludedUris.add("/service/face/faceLogin");
-        excludedUris.add("/service/user/accountLogin");
-        excludedUris.add("/service/face/faceDetection");
-        excludedUris.add("/service/face/faceRecognition");
-//        excludedUris.add("/service/face/faceUpload");
+        excludedUris.add("/service/login/account");
+        excludedUris.add("/service/login/face");
         registrationBean.addInitParameter("excludedUris", StringUtils.join(excludedUris, ",")); // 需要排除的uri
         return registrationBean;
     }

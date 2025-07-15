@@ -16,18 +16,28 @@ export const searchFields = [
     placeholder: '请输入姓名/工号'
   },
   {
-    key: 'bucketNo',
-    label: '罐号',
-    placeholder: '请输入罐号'
+    key: 'tankNo',
+    label: '料罐编号',
+    placeholder: '请输入料罐编号'
   },
   {
-    key: 'spec',
-    label: '加料规格',
-    placeholder: '请选择加料规格',
+    key: 'shiftType',
+    label: '班次',
     type: 'select',
+    placeholder: '请选择班次',
+    options: [
+      { label: '白班', value: 'day' },
+      { label: '夜班', value: 'night' }
+    ]
+  },
+  {
+    key: 'materialName',
+    label: '材料名称',
+    type: 'select',
+    placeholder: '请选择材料名称',
     options: [
       { label: '10KV', value: '10KV' },
-      { label: '35KV', value: '35KV' },
+      { label: '35KV', value: '35KV' }
     ]
   },
   {
@@ -41,64 +51,70 @@ export const searchFields = [
 
 export const columns = [
   {
-    prop: 'userName',
-    label: '人员',
-    width: '160',
-    render: (row) => `${row.userName}(${row.account})`
+    prop: 'tankNo',
+    label: '料罐编号',
+    width: '120'
   },
   {
-    prop: 'bucketNo',
-    label: '罐号',
+    prop: 'shiftType',
+    label: '班次',
+    width: '80',
+    render: (row) => row.shiftType === 'day' ? '白班' : row.shiftType === 'night' ? '夜班' : '-'
+  },
+  {
+    prop: 'materialName',
+    label: '材料名称',
     width: '100'
   },
   {
-    prop: 'spec',
-    label: '加料规格',
-    width: '100'
+    prop: 'productSpec',
+    label: '产品规格型号',
+    width: '120'
   },
   {
-    prop: 'spec',
-    label: '计划加料',
-    width: '100',
-    render: (row) => `${row.capacity} kg`
+    prop: 'planWeight',
+    label: '计划加料重量',
+    width: '120',
+    render: (row) => `${row.planWeight} kg`
   },
   {
-    prop: 'userName',
-    label: '领料员',
-    width: '160',
-    render: (row) => `${row.userName}(${row.account})`
-  },
-  {
-    prop: 'spec',
+    prop: 'bottomWeight',
     label: '罐底重量',
     width: '100',
-    render: (row) => `${row.capacity} kg`
+    render: (row) => `${row.bottomWeight} kg`
   },
   {
-    prop: 'capacity',
-    label: '加料重量',
+    prop: 'fullWeight',
+    label: '满罐重量',
     width: '100',
-    render: (row) => `${row.capacity} kg`
+    render: (row) => `${row.fullWeight} kg`
   },
   {
-    prop: 'userName',
-    label: '加料员',
-    width: '160',
-    render: (row) => `${row.userName}(${row.account})`
+    prop: 'flameRetardantWeight',
+    label: '阻燃粉重量',
+    width: '120',
+    render: (row) => `${row.flameRetardantWeight} kg`
   },
   {
-    prop: 'abs',
-    label: '阻燃粉',
-    width: '80',
-    render: (row) => `${row.abs} kg`
+    prop: 'actualWeight',
+    label: '实际用料',
+    width: '100',
+    render: (row) => `${row.actualWeight} kg`
   },
   {
-    prop: 'updateTime',
-    label: '申请时间'
+    prop: 'applyTime',
+    label: '申请时间',
+    width: '160'
   },
   {
-    prop: 'updateTime',
-    label: '操作时间'
+    prop: 'feedingTime',
+    label: '加料时间',
+    width: '160'
+  },
+  {
+    prop: 'returnTime',
+    label: '退料时间',
+    width: '160'
   },
   {
     type: 'actions',

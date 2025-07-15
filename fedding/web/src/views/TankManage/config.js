@@ -1,16 +1,16 @@
 // TankManage页面配置
 export const searchFields = [
   {
-    key: 'bucketNo',
-    label: '罐号',
-    placeholder: '请输入罐号'
+    key: 'tankNo',
+    label: '料罐编号',
+    placeholder: '请输入料罐编号'
   }
 ]
 
 export const columns = [
   {
-    prop: 'bucketNo',
-    label: '罐号',
+    prop: 'tankNo',
+    label: '料罐编号',
     width: '160'
   },
   {

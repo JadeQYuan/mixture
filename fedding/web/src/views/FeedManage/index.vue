@@ -62,7 +62,7 @@ const feedDialog = reactive({
   step: 0,
   index: null,
   loading: false,
-  form: { bucketNo: '', spec: '', capacity: null, capacityAdd: null, abs: null }
+  form: { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: null, actualWeight: null }
 })
 
 // 定时器相关
@@ -79,9 +79,9 @@ async function fetchWeightDataWithDelay(step) {
       const response = await getTankWeightData()
       if (response.data) {
         if (step === 0) {
-          feedDialog.form.capacity = response.data
+          feedDialog.form.bottomWeight = response.data
         } else if (step === 1) {
-          feedDialog.form.capacityAdd = response.data
+          feedDialog.form.fullWeight = response.data
         }
       }
     } catch (error) {
@@ -158,25 +158,30 @@ function openFeedDialog(index) {
   feedDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
-    feedDialog.form.bucketNo = record.bucketNo
-    feedDialog.form.spec = record.spec
-    currentTankId.value = record.bucketNo // 设置当前罐号
+    feedDialog.form.tankNo = record.tankNo
+    feedDialog.form.shiftType = record.shiftType
+    feedDialog.form.materialName = record.materialName
+    feedDialog.form.productSpec = record.productSpec
+    currentTankId.value = record.tankNo // 设置当前罐号
     // 启动第一步定时器，获取底罐重量
     startWeightTimer(0)
   } else {
-    feedDialog.form.bucketNo = ''
-    feedDialog.form.spec = ''
+    feedDialog.form.tankNo = ''
+    feedDialog.form.shiftType = ''
+    feedDialog.form.materialName = ''
+    feedDialog.form.productSpec = ''
     currentTankId.value = null
   }
-  feedDialog.form.capacity = null
-  feedDialog.form.capacityAdd = null
-  feedDialog.form.abs = null
+  feedDialog.form.planWeight = null
+  feedDialog.form.bottomWeight = null
+  feedDialog.form.fullWeight = null
+  feedDialog.form.flameRetardantWeight = null
 }
 
 function handleNextStep(step) {
   if (step === 1) {
     // 第0步：检查底罐重量是否已获取
-    if (!feedDialog.form.capacity) {
+    if (!feedDialog.form.bottomWeight) {
       ElMessage.warning('正在获取底罐重量数据，请稍候');
     } else {
 // 底罐重量确定，进入第二步
@@ -186,7 +191,7 @@ stopWeightTimer()
       startWeightTimer(1)
     }
   } else if (step === 2) {
-    if (!feedDialog.form.capacityAdd) {
+    if (!feedDialog.form.fullWeight) {
       ElMessage.warning('正在获取加料重量数据，请稍候');
     } else { 
             // 加料重量确定，进入第三步
@@ -195,7 +200,7 @@ stopWeightTimer()
       // 第三步不需要定时器，用户手动输入阻燃粉重量 
     }
   } else if (step === 3) {
-    if (!feedDialog.form.abs) {
+    if (!feedDialog.form.flameRetardantWeight) {
       ElMessage.warning('请输入阻燃粉重量');
     } else {
       // 阻燃粉重量确定，进入第四步

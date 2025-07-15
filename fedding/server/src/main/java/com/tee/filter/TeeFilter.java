@@ -1,20 +1,19 @@
 package com.tee.filter;
 
 import com.tee.constant.Contants;
+import com.tee.entity.User;
 import com.tee.exception.AppException;
-import com.tee.pojo.vo.User;
 import com.tee.service.UserService;
 import com.tee.util.JwtUtils;
 import com.tee.util.SpringApplicationContext;
+import com.tee.util.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 public class TeeFilter implements Filter {
@@ -57,12 +56,13 @@ public class TeeFilter implements Filter {
                 }
                 // 查库 校验userId是否存在即可
                 UserService userService = SpringApplicationContext.getBean(UserService.class);
-                List<User> userInfo = userService.getUserInfo(userId);
+                User userInfo = userService.getById(Integer.parseInt(userId));
 
-                if (CollectionUtils.isEmpty(userInfo)) {
+                if (userInfo == null) {
                     log.error("userInfo is null");
                     throw new AppException("authToken 校验失败, 用户不存在");
                 }
+                TokenUtil.setToken(userInfo.getId());
             } else {
                 log.info("cookie校验 跳过url {}", requestUrl);
             }

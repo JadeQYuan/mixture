@@ -15,14 +15,14 @@ export const returnOperationSteps = [
 // 退料操作字段配置
 export const returnOperationFields = [
   {
-    prop: 'bucketNo',
-    label: '罐号',
+    prop: 'tankNo',
+    label: '料罐编号',
     type: 'input',
     disabled: true,
     size: 'large'
   },
   {
-    prop: 'capacity',
+    prop: 'currentWeight',
     label: '当前重量',
     type: 'input',
     disabled: true,

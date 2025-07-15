@@ -1,8 +1,8 @@
 // 卡片显示字段配置
 export const displayFields = [
   {
-    prop: 'bucketNo',
-    label: '料罐',
+    prop: 'tankNo',
+    label: '料罐编号',
   }
 ]
 

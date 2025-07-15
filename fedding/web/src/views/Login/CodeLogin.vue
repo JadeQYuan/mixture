@@ -49,12 +49,11 @@ async function login() {
       // 前端AES加密
       const encrypted = encryptPassword(form.value.password)
       const res = await accountLogin(form.value.account, encrypted)
-      if (res.code === 200) {
-        localStorage.setItem('token', res.data)
+        localStorage.setItem('token', res)
         // 登录成功后获取用户信息
         try {
           const userInfo = await getCurrentUser()
-          store.dispatch('setUserInfo', userInfo.data)
+          store.dispatch('setUserInfo', userInfo)
         } catch (e) {
           // 可选：处理获取用户信息失败
         }
@@ -62,13 +61,9 @@ async function login() {
         setTimeout(() => {
           router.push('/app')
         }, 800)
-      } else {
-        ElMessage.error(res.message || '登录失败')
-        loading.value = false // 登录失败时重置loading状态
-      }
     } catch (e) {
-      // 错误已由http拦截器处理，不再重复提示
-      loading.value = false // 发生错误时重置loading状态
+      ElMessage.error(res.message || '登录失败')
+        loading.value = false // 登录失败时重置loading状态
     }
   })
 }
