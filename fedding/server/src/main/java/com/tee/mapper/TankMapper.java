@@ -29,6 +29,8 @@ public interface TankMapper {
             "<if test='tankNo != null and tankNo != \"\"'>",
             " t.tank_no LIKE '%' || #{tankNo} || '%'",
             "</if>",
+            "and t.del_flag = 1",
+            "and u.del_flag = 1",
             "</where>",
             "ORDER BY t.create_time DESC",
             "</script>"
@@ -42,7 +44,7 @@ public interface TankMapper {
      */
     @Select("SELECT id, tank_no as tankNo, remark, user_id as userId  " +
             "FROM tank_info " +
-            "WHERE id = #{id}")
+            "WHERE id = #{id} and del_flag = 1")
     Tank selectById(Integer id);
 
     /**
@@ -52,7 +54,7 @@ public interface TankMapper {
      */
     @Select("SELECT t.* " +
             "FROM tank_info t " +
-            "WHERE t.tank_no = #{tankNo}")
+            "WHERE t.tank_no = #{tankNo} and t.del_flag = 1")
     List<Tank> selectByTankNo(String tankNo);
 
     /**
@@ -63,7 +65,7 @@ public interface TankMapper {
     @Select("SELECT t.*, u.user_name as current_user, u.account as current_account " +
             "FROM tank_info t " +
             "LEFT JOIN user_info u ON t.user_id = u.id " +
-            "WHERE t.user_id = #{userId}")
+            "WHERE t.user_id = #{userId} and t.del_flag = 1 and u.del_flag = 1")
     List<Tank> selectByUserId(String userId);
 
     /**
@@ -73,7 +75,7 @@ public interface TankMapper {
     @Select("<script>" +
             "SELECT t.id, t.tank_no as tankNo, t.remark " +
             "FROM tank_info t " +
-            "WHERE user_id is null" +
+            "WHERE user_id is null and t.del_flag = 1" +
             "</script>")
     List<Tank> getTanksForApply();
 
@@ -82,8 +84,8 @@ public interface TankMapper {
      * @param tank 料罐信息对象
      * @return 影响行数
      */
-    @Insert("INSERT INTO tank_info (tank_no, remark, user_id, create_time, update_time) " +
-            "VALUES (#{tankNo}, #{remark}, #{userId}, datetime('now'), datetime('now'))")
+    @Insert("INSERT INTO tank_info (tank_no, remark, user_id, del_flag, create_time, update_time) " +
+            "VALUES (#{tankNo}, #{remark}, #{userId}, 1, datetime('now'), datetime('now'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Tank tank);
 
@@ -103,6 +105,6 @@ public interface TankMapper {
      * @param id 料罐ID
      * @return 影响行数
      */
-    @Delete("DELETE FROM tank_info WHERE id = #{id}")
+    @Update("UPDATE tank_info SET del_flag = 0 WHERE id = #{id}")
     int deleteById(Integer id);
 }

@@ -2,6 +2,7 @@ package com.tee.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.arcsoft.face.FaceFeature;
+import com.arcsoft.face.FaceInfo;
 import com.arcsoft.face.toolkit.ImageInfoEx;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -10,18 +11,24 @@ import com.tee.exception.AppException;
 import com.tee.mapper.UserMapper;
 import com.tee.pojo.PageVo;
 import com.tee.pojo.UserQo;
+import com.tee.util.ArcfaceUtils;
 import com.tee.util.Base64Util;
+import com.tee.util.DateUtil;
 import com.tee.util.TokenUtil;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -30,6 +37,15 @@ public class UserService {
 
     @Autowired
     private ArcFaceService arcFaceService;
+
+    @Value("${face.score}")
+    private float faceScore;
+
+    @Value("${face.path}")
+    private String facePath;
+
+    @Value("${face.path.back}")
+    private String facePathBack;
 
     public User getCurrentUserInfo() {
         Integer userId = TokenUtil.getToken();
@@ -96,6 +112,24 @@ public class UserService {
     }
 
     public void deleteUserInfo(Integer userId) {
+        User userInfo = userMapper.getUserInfo(userId);
+        if (userInfo == null) {
+            throw new AppException("用户不存在");
+        }
+        // 备份照片
+        String facePath1 = userInfo.getFacePath();
+        if (!StringUtils.isEmpty(facePath1)) {
+            File file = new File(facePath1);
+            if (file.exists()) {
+                String days = DateUtil.getDays();
+                File fileBack = new File(new File(facePathBack).getAbsolutePath() + "/back_del_" + days + "_" + userId + ".png");
+                if (!fileBack.getParentFile().exists()) {
+                    fileBack.getParentFile().mkdirs();
+                }
+                file.renameTo(fileBack);
+            }
+        }
+
         userMapper.deleteUserInfo(userId);
     }
 
@@ -104,23 +138,48 @@ public class UserService {
         if (user == null) {
             throw new AppException("用户不存在！");
         }
-        File file1 = new File("/face/");
-        File file = new File(file1.getAbsolutePath() + "/" + id + ".png");
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
+        File fileTemp = new File(new File(facePath).getAbsolutePath() + "/temp.png");
+        if (!fileTemp.getParentFile().exists()) {
+            fileTemp.getParentFile().mkdirs();
         }
-        multipartFile.transferTo(file);
-        List<com.arcsoft.face.FaceInfo> faceInfo = arcFaceService.detectFace(com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx());
+        multipartFile.transferTo(fileTemp);
+        List<FaceInfo> faceInfo = arcFaceService.detectFace(ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
         if (CollectionUtils.isEmpty(faceInfo)) {
-            file.delete();
+            fileTemp.delete();
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
         }
-        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx());
+        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
         if (faceFeature == null) {
-            file.delete();
+            fileTemp.delete();
             throw new AppException("人脸特征校验失败，请调整角度重新拍摄！");
         }
-        userMapper.updateFaceInfo(id, file.getPath(), JSONObject.toJSONString(faceFeature));
+        Integer userId = compareFaceFeature(faceFeature, id);
+        if (userId != null) {
+            fileTemp.delete();
+            throw new AppException("已经存在相似人脸，请调整角度重新拍摄！");
+        }
+        // 若是修改张片，则将旧张片进行备份
+        String facePath1 = user.getFacePath();
+        if (!StringUtils.isEmpty(facePath1)) {
+            File file = new File(facePath1);
+            if (file.exists()) {
+                String days = DateUtil.getDays();
+                File fileBack = new File(new File(facePathBack).getAbsolutePath() + "/back_" + days + "_" + id + ".png");
+                if (!fileBack.getParentFile().exists()) {
+                    fileBack.getParentFile().mkdirs();
+                }
+                file.renameTo(fileBack);
+            }
+        }
+
+        // 重命名文件，如果目标文件存在则替换
+        File fileNew = new File(new File(facePath).getAbsolutePath() + "/" + id + ".png");
+        if (fileNew.exists()) {
+            fileNew.delete();
+        }
+        fileTemp.renameTo(fileNew);
+
+        userMapper.updateFaceInfo(id, fileNew.getPath(), JSONObject.toJSONString(faceFeature));
     }
 
     public String loginByAccount(User user) {
@@ -144,38 +203,54 @@ public class UserService {
         }
         multipartFile.transferTo(file);
         ImageInfoEx imageInfoEx1 = com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx();
-        List<com.arcsoft.face.FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoEx1);
+        List<FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoEx1);
         if (CollectionUtils.isEmpty(faceInfo)) {
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
         }
         FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, imageInfoEx1);
-        int liveness = arcFaceService.getLiveness(imageInfoEx1); // 活体检测
-//        List<com.tee.entity.Face> faceInfoList = faceService.getFaceInfo(null);
-//        String userId = null;
-//        for (com.tee.entity.Face face : faceInfoList) {
-//            String facePath = face.getFacePath();
-//            if (StringUtils.isEmpty(facePath)) {
-//                continue;
-//            }
-//            File fileTemp = new File(facePath);
-//            ImageInfoEx imageInfoEx = com.tee.util.ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx();
-//            List<com.arcsoft.face.FaceInfo> faceInfoTemp = arcFaceService.detectFace(imageInfoEx);
-//            com.arcsoft.face.FaceFeature faceFeatureTemp = arcFaceService.extractFaceFeature(faceInfoTemp, imageInfoEx);
-//            com.arcsoft.face.FaceSimilar faceSimilar = arcFaceService.compareFaceFeature(faceFeature, faceFeatureTemp, com.arcsoft.face.enums.CompareModel.LIFE_PHOTO);
-//            float score = faceSimilar.getScore();
-//            if (score > 0.75) {
-//                userId = face.getUserId();
-//                break;
-//            }
-//        }
-//        if (StringUtils.isEmpty(userId)) {
-//            throw new AppException("用户不存在或者识别失败！");
-//        }
-//        List<User> userInfo = userMapper.getUserInfo(userId);
-//        if (CollectionUtils.isEmpty(userInfo)) {
-//            throw new AppException("用户不存在");
-//        }
-//        String jwtToken = JwtUtils.generateToken(userId);
-        return "jwtToken";
+        // int liveness = arcFaceService.getLiveness(imageInfoEx1); // 活体检测
+
+        Integer userId = compareFaceFeature(faceFeature, null);
+        if (StringUtils.isEmpty(userId)) {
+            throw new AppException("用户不存在或者识别失败！");
+        }
+        User userInfo = userMapper.getUserInfo(userId);
+        if (userInfo == null) {
+            throw new AppException("用户不存在");
+        }
+        return TokenUtil.generateToken(userId.toString());
+    }
+
+    private Integer compareFaceFeature(FaceFeature faceFeature, Integer id) {
+        Integer userId = null;
+        List<User> userInfoList = userMapper.getUserInfoByName(null, null);
+        for (User user : userInfoList) {
+            Integer idTemp = user.getId();
+            if (id != null && id == idTemp) {
+                continue;
+            }
+            try {
+                String faceFeatureUser = user.getFaceFeature();
+                if (StringUtils.isEmpty(faceFeatureUser)) {
+                    continue;
+                }
+                FaceFeature faceFeatureTemp = JSONObject.parseObject(faceFeatureUser, FaceFeature.class);
+                String facePath = user.getFacePath();
+                File fileTemp = new File(facePath);
+                if (!fileTemp.exists()) {
+                    continue;
+                }
+                com.arcsoft.face.FaceSimilar faceSimilar = arcFaceService.compareFaceFeature(faceFeature, faceFeatureTemp, com.arcsoft.face.enums.CompareModel.LIFE_PHOTO);
+                float score = faceSimilar.getScore();
+                if (score > faceScore) {
+                    userId = user.getId();
+                    break;
+                }
+            } catch (Exception e) {
+                log.error("加载人脸失败！, 用户id是：{},{}", user.getId(), e);
+            }
+
+        }
+        return userId;
     }
 }

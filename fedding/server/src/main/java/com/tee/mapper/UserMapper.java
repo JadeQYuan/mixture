@@ -9,13 +9,13 @@ import java.util.List;
 public interface UserMapper {
 
     @Select("SELECT id, user_name as userName, account, role_code as roleCode, face_path as facePath " +
-            "FROM user_info WHERE id = #{id}")
+            "FROM user_info WHERE id = #{id} and del_flag = 1")
     User getUserInfo(Integer id);
 
     @Select({
         "<script>",
         "SELECT id, user_name as userName, account, role_code as roleCode, ",
-        "face_path as facePath, remark, create_time as createTime, update_time as updateTime ",
+        "face_path as facePath, face_feature as faceFeature, remark, create_time as createTime, update_time as updateTime ",
         "FROM user_info ",
         "<where>",
         "<if test='userName != null and userName != \"\"'>",
@@ -24,6 +24,7 @@ public interface UserMapper {
         "<if test='account != null and account != \"\"'>",
         "AND account LIKE '%' || #{account} || '%'",
         "</if>",
+        "and del_flag = 1",
         "</where>",
         "ORDER BY create_time DESC",
         "</script>"
@@ -31,15 +32,15 @@ public interface UserMapper {
     List<User> getUserInfoByName(@Param("userName") String userName, @Param("account") String account);
 
     @Select("SELECT count(0) " +
-            "FROM user_info WHERE account = #{account}")
+            "FROM user_info WHERE account = #{account} and del_flag = 1")
     int checkUserByAccount(@Param("account") String account);
 
     @Select("SELECT id, user_name as userName, account, role_code as roleCode " +
-            "FROM user_info WHERE password = #{password} AND account = #{account}")
+            "FROM user_info WHERE password = #{password} AND account = #{account} and del_flag = 1")
     User getUserInfoByAccount(@Param("password") String password, @Param("account") String account);
 
-    @Insert("INSERT INTO user_info (user_name, account, role_code, remark, create_time, update_time) " +
-            "VALUES (#{userName}, #{account},  #{roleCode}, #{remark}, datetime('now'), datetime('now'))")
+    @Insert("INSERT INTO user_info (user_name, account, role_code, remark, del_flag, create_time, update_time) " +
+            "VALUES (#{userName}, #{account},  #{roleCode}, #{remark}, 1, datetime('now'), datetime('now'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertUserInfo(User user);
 
@@ -64,6 +65,6 @@ public interface UserMapper {
     @Update("UPDATE user_info SET face_path = #{facePath}, face_feature = #{faceFeature}, update_time = datetime('now') WHERE id = #{id}")
     void updateFaceInfo(Integer id, String facePath, String faceFeature);
 
-    @Delete("DELETE FROM user_info WHERE id = #{id}")
+    @Update("UPDATE user_info SET del_flag = 0 WHERE id = #{id}")
     void deleteUserInfo(@Param("id") Integer id);
 }

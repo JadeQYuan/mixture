@@ -10,6 +10,7 @@ CREATE TABLE user_info (
     face_path text,                           -- 人脸图片路径
     face_feature text,                        -- 人脸特征数据（用于人脸识别）
     remark text,                              -- 备注信息
+    del_flag INTEGER,                            -- 删除标识 0 删除，1 未删除
     create_time text,                         -- 创建时间
     update_time text                          -- 更新时间
 );
@@ -21,6 +22,7 @@ CREATE TABLE tank_info (
     tank_no text,                             -- 料罐编号（唯一标识）
     remark text,                              -- 备注信息
     user_id INTEGER,                          -- 所属用户ID（关联user_info表）
+    del_flag INTEGER,                         -- 删除标识 0 删除，1 未删除
     create_time text,                         -- 创建时间
     update_time text                          -- 更新时间
 );
