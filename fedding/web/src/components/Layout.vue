@@ -44,7 +44,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import activityMonitor from '../utils/activityMonitor'
 import { useStore } from 'vuex'
-import { getCurrentUser } from '../request/api'
+import { getCurrentUser } from '@/api/user'
 import defaultAvatar from '@/assets/avatar.svg'
 
 const router = useRouter()

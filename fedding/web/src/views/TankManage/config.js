@@ -22,7 +22,7 @@ export const columns = [
     prop: 'currentUser',
     label: '当前用户',
     width: '160',
-    render: (row) => row.currentUser ? `${row.currentUser}(${row.currentAccount})` : '-'
+    render: (row) => row.userAccount ? `${row.userName}(${row.userAccount})` : '-'
   },
   {
     prop: 'updateTime',
@@ -59,3 +59,69 @@ export const headerButtons = [
     size: 'large'
   }
 ] 
+
+// 料罐表单字段配置
+export const tankFormFields = [
+  {
+    prop: 'tankNo',
+    label: '料罐编号',
+    type: 'input',
+    placeholder: '请输入料罐编号',
+    size: 'large'
+  },
+  {
+    prop: 'remark',
+    label: '描述',
+    type: 'textarea',
+    placeholder: '请输入描述',
+    rows: 3,
+    size: 'large',
+    // 示例：根据编号是否填写来决定是否显示描述字段
+    visible: (currentStep, formData) => formData.tankNo && formData.tankNo.trim() !== ''
+  }
+]
+
+// 料罐表单验证规则
+export const tankFormRules = {
+  tankNo: [
+    { required: true, message: '请输入料罐编号', trigger: 'blur' }
+  ],
+  remark: [
+    { required: false, message: '请输入描述', trigger: 'blur' }
+  ]
+}
+
+// 料罐管理对话框表单配置
+export function getTankFormConfig() {
+  return {
+    title: '料罐信息',
+    width: '500px',
+    fields: [
+      {
+        prop: 'tankNo',
+        label: '料罐编号',
+        type: 'input',
+        required: true,
+        size: 'large',
+        style: { width: '100%' }
+      },
+      {
+        prop: 'remark',
+        label: '描述',
+        type: 'input',
+        required: false,
+        size: 'large',
+        style: { width: '100%' }
+      }
+    ],
+    rules: {
+      tankNo: [
+        { required: true, message: '请输入料罐编号', trigger: 'blur' }
+      ]
+    },
+    buttons: [
+      { action: 'submit', text: '保存', type: 'primary', size: 'large' },
+      { action: 'cancel', text: '取消', size: 'large' }
+    ]
+  }
+}

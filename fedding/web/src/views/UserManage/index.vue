@@ -161,8 +161,8 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/request/api'
-import { ROLE_MAP } from '@/utils/roleMap'
+import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/api/user'
+import { ROLE_MAP, getOptions } from '@/utils/constant'
 import { encryptPassword } from '@/utils/http'
 import { getCameraErrorMessage, startGlobalCamera } from '@/utils/camera'
 import { base64ToFile, canvasToBase64 } from '@/utils/fileUtils'
@@ -170,9 +170,9 @@ import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { searchFields, columns, actionButtons, headerButtons } from './config'
-import { getUserFormConfig, getPasswordFormConfig } from './formConfig'
+import { getUserFormConfig, getPasswordFormConfig } from './config'
 
-const roles = Object.keys(ROLE_MAP)
+const roles = getOptions(ROLE_MAP)
 
 // 数据
 const records = ref([])

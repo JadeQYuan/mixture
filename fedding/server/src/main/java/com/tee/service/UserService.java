@@ -8,11 +8,11 @@ import com.github.pagehelper.PageHelper;
 import com.tee.entity.User;
 import com.tee.exception.AppException;
 import com.tee.mapper.UserMapper;
-import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
+import com.tee.pojo.UserQo;
 import com.tee.util.Base64Util;
-import com.tee.util.JwtUtils;
 import com.tee.util.TokenUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -51,9 +51,9 @@ public class UserService {
         return userMapper.getUserInfo(userId);
     }
 
-    public PageVo<User> getUserList(String userName, String account, PageQo pageQo) {
-        PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userName, account);
+    public PageVo<User> getUserList(UserQo userQo) {
+        PageHelper.startPage(userQo.getPageNo(), userQo.getPageSize());
+        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userQo.getUserName(), userQo.getAccount());
         if (CollectionUtils.isEmpty(userList)) {
             return new PageVo<>();
         }
@@ -130,8 +130,7 @@ public class UserService {
         if (userInfo == null) {
             throw new AppException("账号或密码错误");
         }
-        String jwtToken = JwtUtils.generateToken(userInfo.getId().toString());
-        return jwtToken;
+        return TokenUtil.generateToken(userInfo.getId().toString());
     }
 
     public String loginByFace(MultipartFile multipartFile) throws Exception {

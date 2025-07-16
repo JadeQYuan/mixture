@@ -44,7 +44,6 @@ CREATE TABLE mixes_info (
     feeding_user_id INTEGER,                  -- 加料操作员ID（关联user_info表）
     return_weight real,                       -- 退料重量（kg）
     return_time text,                         -- 退料时间
-    return_user_id INTEGER,                   -- 退料操作员ID（关联user_info表）
     actual_weight real,                       -- 实际用料重量（kg）
     remark text,                              -- 备注信息
     status INTEGER,                            -- 状态（1-待处理，2-已处理，3-其他）

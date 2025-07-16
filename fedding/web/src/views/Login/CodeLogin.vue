@@ -22,7 +22,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { accountLogin, getCurrentUser } from '@/request/api'
+import { accountLogin } from '@/api/login'
+import { getCurrentUser } from '@/api/user'
 import { useStore } from 'vuex'
 import { encryptPassword } from '@/utils/http'
 
@@ -43,27 +44,28 @@ async function login() {
   formRef.value.validate(async valid => {
     if (!valid) return
     if (loading.value) return // 防止重复提交
-    
+
+    loading.value = true
     try {
-      loading.value = true
       // 前端AES加密
       const encrypted = encryptPassword(form.value.password)
       const res = await accountLogin(form.value.account, encrypted)
-        localStorage.setItem('token', res)
-        // 登录成功后获取用户信息
-        try {
-          const userInfo = await getCurrentUser()
-          store.dispatch('setUserInfo', userInfo)
-        } catch (e) {
-          // 可选：处理获取用户信息失败
-        }
-        ElMessage.success('登录成功')
-        setTimeout(() => {
-          router.push('/app')
-        }, 800)
+      localStorage.setItem('token', res)
+      // 登录成功后获取用户信息
+      try {
+        const userInfo = await getCurrentUser()
+        store.dispatch('setUserInfo', userInfo)
+      } catch (e) {
+        // 可选：处理获取用户信息失败
+      }
+      ElMessage.success('登录成功')
+      setTimeout(() => {
+        router.push('/app')
+      }, 800)
     } catch (e) {
       ElMessage.error(res.message || '登录失败')
-        loading.value = false // 登录失败时重置loading状态
+    } finally {
+      loading.value = false // 无论成功失败都重置loading
     }
   })
 }

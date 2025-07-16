@@ -1,3 +1,26 @@
+import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions } from '@/utils/constant'
+
+// 卡片显示字段配置
+export const displayFields = [
+  {
+    prop: 'tankNo',
+    label: '料罐',
+  }
+]
+
+// 操作按钮配置
+export const actionButtons = [
+  {
+    type: 'primary',
+    text: '申请',
+    action: 'apply',
+    size: 'large'
+  }
+]
+
+// 头部按钮配置
+export const headerButtons = []
+
 // 加料申请表单配置
 export function getFeedApplyFormConfig() {
   return {
@@ -7,9 +30,8 @@ export function getFeedApplyFormConfig() {
     fields: [
       {
         prop: 'tankNo',
-        label: '料罐编号',
+        label: '料罐',
         type: 'input',
-        placeholder: '料罐编号',
         disabled: true,
         size: 'large',
         style: { width: '100%' }
@@ -20,10 +42,7 @@ export function getFeedApplyFormConfig() {
         type: 'radio',
         placeholder: '请选择班次',
         required: true,
-        options: [
-          { label: '白班', value: 'day' },
-          { label: '夜班', value: 'night' }
-        ],
+        options: getOptions(SHIFT_TYPE_MAP),
         size: 'large',
         style: { width: '100%' }
       },
@@ -33,43 +52,39 @@ export function getFeedApplyFormConfig() {
         type: 'radio',
         placeholder: '请选择材料名称',
         required: true,
-        options: [
-          { label: '10KV', value: '10KV' },
-          { label: '35KV', value: '35KV' }
-        ],
+        options: getOptions(MATERIAL_MAP),
         size: 'large',
         style: { width: '100%' }
       },
       {
         prop: 'productSpec',
-        label: '产品规格型号',
+        label: '产品型号',
         type: 'input',
         placeholder: '请输入产品规格型号',
-        required: true,
+        required: false,
         size: 'large',
         style: { width: '100%' }
       },
       {
         prop: 'planWeight',
-        label: '计划加料重量',
+        label: '计划加料',
         type: 'number',
-        placeholder: '请输入重量',
+        placeholder: '请输入计划加料重量',
         required: true,
         size: 'large',
         style: { width: '100%' },
         suffix: 'kg',
         inputType: 'number',
         props: {
-          min: 0.01,
+          min: 0,
           step: 1
         }
       }
     ],
-    
     // 表单验证规则
     rules: {
       tankNo: [
-        { required: true, message: '料罐编号不能为空', trigger: 'blur' }
+        { required: true, message: '料罐不能为空', trigger: 'blur' }
       ],
       shiftType: [
         { required: true, message: '请选择班次', trigger: 'change' }
@@ -77,18 +92,13 @@ export function getFeedApplyFormConfig() {
       materialName: [
         { required: true, message: '请选择材料名称', trigger: 'change' }
       ],
-      productSpec: [
-        { required: true, message: '请输入产品规格型号', trigger: 'blur' }
-      ],
       planWeight: [
         { required: true, message: '请输入计划加料重量', trigger: 'blur' }
       ]
     },
-    
     // 表单样式配置
     labelWidth: '120px',
     labelPosition: 'left',
-    
     // 底部按钮配置
     footerButtons: [
       {

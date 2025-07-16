@@ -3,18 +3,16 @@ package com.tee.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.tee.entity.Mixes;
-import com.tee.entity.Tank;
 import com.tee.mapper.MixesMapper;
+import com.tee.pojo.MixesQo;
 import com.tee.pojo.MixesVo;
-import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
 import com.tee.util.TokenUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -29,17 +27,19 @@ public class MixesService {
     @Autowired
     private TankService tankService;
 
-    public PageVo<MixesVo> getMixesList(String userKey, String tankNo, String shiftType, String materialName, PageQo pageQo) {
-        PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(userKey, tankNo, shiftType, materialName, 0);
+    public PageVo<MixesVo> getMixesList(MixesQo mixesQo) {
+        mixesQo.setStatus(0);
+        PageHelper.startPage(mixesQo.getPageNo(), mixesQo.getPageSize());
+        Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(mixesQo);
         return new PageVo<>(mixesList);
     }
 
     @Transactional
     public void applyMixes(Mixes mixes) {
-        mixes.setApplyUserId(TokenUtil.getToken());
+        Integer userId = TokenUtil.getToken();
+        mixes.setApplyUserId(userId);
         mixesMapper.insert(mixes);
-        tankService.updateUser(mixes.getTankId(), TokenUtil.getToken());
+        tankService.updateUser(mixes.getTankId(), userId);
     }
 
     public void executeMixes(Mixes mixes) {
@@ -54,34 +54,22 @@ public class MixesService {
         tankService.updateUser(mixes.getTankId(), null);
     }
 
-    public PageVo<MixesVo> getMixesRecordList(String userKey, String tankNo, String shiftType, String materialName, String startTime, String endTime, PageQo pageQo) {
-        PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<MixesVo> mixesList = (Page<MixesVo>)mixesMapper.selectByCondition(userKey, tankNo, shiftType, materialName, 2);
+    public PageVo<MixesVo> getMixesRecordList(MixesQo mixesQo) {
+        mixesQo.setStatus(2);
+        PageHelper.startPage(mixesQo.getPageNo(), mixesQo.getPageSize());
+        Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(mixesQo);
         return new PageVo<>(mixesList);
     }
 
     public Double getWeightData() {
-        double weight = Math.random() * 100 + 50;
-        return weight;
+        return Math.random() * 100 + 50;
     }
 
     public List<Mixes> getTankForReturn() {
-        // 获取所有可用的料罐（没有被占用的）
         return mixesMapper.getTankForReturn(TokenUtil.getToken());
     }
 
-    public List<Mixes> getMixesList(String userKey, String tankNo, String shiftType, String materialName) {
-        // 这里应该根据条件查询，暂时返回所有数据
-        List<Mixes> mixesList = mixesMapper.selectAll();
-        return mixesList;
-    }
-
-    public List<Mixes> getPendingMixesByTankNo(String tankNo) {
-        // 查询待处理的加料申请（status为0或null）
-        List<Mixes> mixesList = mixesMapper.selectByTankNo(tankNo);
-//        return mixesList.stream()
-//                .filter(mixes -> mixes.getStatus() == null || "0".equals(mixes.getStatus()))
-//                .toList();
-        return mixesList;
+    public void remark(Mixes mixes) {
+        mixesMapper.updateRemark(mixes);
     }
 }

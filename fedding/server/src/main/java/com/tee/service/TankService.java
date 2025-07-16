@@ -2,22 +2,19 @@ package com.tee.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.tee.entity.Tank;
+import com.tee.exception.AppException;
 import com.tee.mapper.TankMapper;
 import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
-import com.tee.util.Result;
-import com.tee.exception.AppException;
-import com.tee.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.tee.pojo.TankQo;
+import com.tee.pojo.TankVo;
 
 /**
  * 料罐信息服务实现类
@@ -28,18 +25,15 @@ public class TankService {
     @Autowired
     private TankMapper tankMapper;
 
-    public PageVo<Tank> getTankList(String tankNo, PageQo pageQo) {
-        PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize());
-        Page<Tank> tankList = (Page<Tank>)tankMapper.selectByCondition(tankNo);
+    public PageVo<TankVo> getTankList(TankQo tankQo) {
+        PageHelper.startPage(tankQo.getPageNo(), tankQo.getPageSize());
+        Page<TankVo> tankList = (Page<TankVo>) tankMapper.selectByCondition(tankQo.getTankNo());
         return new PageVo<>(tankList);
     }
 
     public void addTank(Tank tank) {
-        if (StringUtils.isEmpty(tank.getTankNo())) {
-            throw new AppException("料罐编号不能为空");
-        }
-        List<Tank> tanks = tankMapper.selectByTankNo(tank.getTankNo());
-        if (!tanks.isEmpty()) {
+        validateTankNo(tank.getTankNo());
+        if (!tankMapper.selectByTankNo(tank.getTankNo()).isEmpty()) {
             throw new AppException("料罐编号已存在");
         }
         insertTank(tank);
@@ -49,36 +43,24 @@ public class TankService {
         if (tank.getId() == null) {
             throw new AppException("料罐ID不能为空");
         }
-        Tank existingTank = tankMapper.selectById(tank.getId());
-        if (existingTank == null) {
-            throw new AppException("料罐不存在");
-        }
+        Tank existingTank = getExistingTank(tank.getId());
         tankMapper.updateById(tank);
     }
 
     public void updateUser(Integer id, Integer userId) {
-        Tank existingTank = tankMapper.selectById(id);
-        if (existingTank == null) {
-            throw new AppException("料罐不存在");
-        }
+        getExistingTank(id);
         tankMapper.updateUser(id, userId);
     }
-
     public List<Tank> getTanksByUserId(String userId) {
         return tankMapper.selectByUserId(userId);
     }
-
     public List<Tank> getTanksForApply() {
-        // 获取所有可用的料罐（没有被占用的）
         return tankMapper.getTanksForApply();
     }
-
-    public void insertTank(Tank tank) {
-        // 设置创建时间和更新时间
+    private void insertTank(Tank tank) {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         tank.setCreateTime(now);
         tank.setUpdateTime(now);
-        
         tankMapper.insert(tank);
     }
 
@@ -86,13 +68,24 @@ public class TankService {
         if (id == null) {
             throw new AppException("料罐ID不能为空");
         }
-        Tank existingTank = tankMapper.selectById(id);
-        if (existingTank == null) {
-            throw new AppException("料罐不存在");
-        }
+        Tank existingTank = getExistingTank(id);
         if (existingTank.getUserId() != null) {
             throw new AppException("料罐正在使用中，无法删除");
         }
         tankMapper.deleteById(id);
+    }
+
+    private void validateTankNo(String tankNo) {
+        if (StringUtils.isEmpty(tankNo)) {
+            throw new AppException("料罐编号不能为空");
+        }
+    }
+
+    private Tank getExistingTank(Integer id) {
+        Tank tank = tankMapper.selectById(id);
+        if (tank == null) {
+            throw new AppException("料罐不存在");
+        }
+        return tank;
     }
 } 

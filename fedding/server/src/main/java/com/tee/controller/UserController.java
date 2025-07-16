@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+import com.tee.pojo.UserQo;
 
 /**
  * 用户信息管理
@@ -37,8 +38,8 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/list")
-    public PageVo<User> userList(String userName, String account, PageQo pageQo) {
-        return userService.getUserList(userName, account, pageQo);
+    public PageVo<User> userList(UserQo userQo) {
+        return userService.getUserList(userQo);
     }
 
     /**

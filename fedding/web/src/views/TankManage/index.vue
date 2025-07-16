@@ -55,12 +55,11 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getTankList, createTank, updateTank, deleteTank } from '@/request/api'
+import { getTankList, createTank, updateTank, deleteTank } from '@/api/tank'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, actionButtons, headerButtons } from './config'
-import { getTankFormConfig } from './formConfig'
+import { searchFields, columns, actionButtons, headerButtons, getTankFormConfig } from './config'
 
 // 数据
 const records = ref([])

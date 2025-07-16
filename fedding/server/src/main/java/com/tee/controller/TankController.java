@@ -3,6 +3,8 @@ package com.tee.controller;
 import com.tee.entity.Tank;
 import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
+import com.tee.pojo.TankQo;
+import com.tee.pojo.TankVo;
 import com.tee.service.TankService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +27,8 @@ public class TankController {
      * 获取料罐列表
      */
     @GetMapping("/list")
-    public PageVo<Tank> getTankList(String tankNo, PageQo pageQo) {
-        return tankService.getTankList(tankNo, pageQo);
+    public PageVo<TankVo> getTankList(TankQo tankQo) {
+        return tankService.getTankList(tankQo);
     }
 
     /**

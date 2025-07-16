@@ -41,12 +41,12 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getFeedManageList, submitFeedOperation, getTankWeightData } from '@/request/api'
+import { getFeedManageList, submitFeedOperation, getTankWeightData } from '@/api/mixes'
 import DataTable from '@/components/DataTable'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { searchFields, columns, actionButtons } from './config'
-import { getFeedOperationConfig } from './formConfig'
+import { getFeedOperationConfig } from './config'
 
 // 数据
 const records = ref([])
@@ -62,7 +62,7 @@ const feedDialog = reactive({
   step: 0,
   index: null,
   loading: false,
-  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: null, actualWeight: null }
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: 0, actualWeight: null }
 })
 
 // 定时器相关
@@ -178,7 +178,7 @@ function openFeedDialog(index) {
   }
   feedDialog.form.bottomWeight = null
   feedDialog.form.fullWeight = null
-  feedDialog.form.flameRetardantWeight = null
+  feedDialog.form.flameRetardantWeight = 0
 }
 
 function handleNextStep(step) {
@@ -203,7 +203,7 @@ stopWeightTimer()
       // 第三步不需要定时器，用户手动输入阻燃粉重量 
     }
   } else if (step === 3) {
-    if (!feedDialog.form.flameRetardantWeight) {
+    if (feedDialog.form.flameRetardantWeight === null || feedDialog.form.flameRetardantWeight === undefined || feedDialog.form.flameRetardantWeight < 0) {
       ElMessage.warning('请输入阻燃粉重量');
     } else {
       // 阻燃粉重量确定，进入第四步

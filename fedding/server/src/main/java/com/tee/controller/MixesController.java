@@ -1,16 +1,21 @@
 package com.tee.controller;
 
 import com.tee.entity.Mixes;
-import com.tee.entity.Tank;
+import com.tee.pojo.MixesQo;
 import com.tee.pojo.MixesVo;
-import com.tee.pojo.PageQo;
 import com.tee.pojo.PageVo;
 import com.tee.service.MixesService;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 加料信息管理
@@ -27,28 +32,9 @@ public class MixesController {
      * 获取加料管理列表
      */
     @GetMapping("/list")
-    public PageVo<MixesVo> getMixesList(@RequestParam(value = "userKey", required = false) String userKey,
-                                        @RequestParam(value = "tankNo", required = false) String tankNo,
-                                        @RequestParam(value = "shiftType", required = false) String shiftType,
-                                        @RequestParam(value = "materialName", required = false) String materialName, PageQo pageQo) {
-        return mixesService.getMixesList(userKey, tankNo, shiftType, materialName, pageQo);
+    public PageVo<MixesVo> getMixesList(MixesQo mixesQo) {
+        return mixesService.getMixesList(mixesQo);
     }
-
-    /**
-     * 获取我的料罐列表（用于加料申请）
-     */
-//    @GetMapping("/myTankList")
-//    public List<Tank> getMyTankList() {
-//        return mixesService.getMyTankList();
-//    }
-//
-//    /**
-//     * 获取可用料罐列表（用于加料管理）
-//     */
-//    @GetMapping("/availableTankList")
-//    public List<Tank> getAvailableTankList() {
-//        return mixesService.getAvailableTankList();
-//    }
 
     /**
      * 加料申请
@@ -79,14 +65,8 @@ public class MixesController {
      * 获取加料记录列表
      */
     @GetMapping("/recordList")
-    public PageVo<MixesVo> getMixesRecordList(@RequestParam(value = "userKey", required = false) String userKey,
-                                       @RequestParam(value = "tankNo", required = false) String tankNo,
-                                       @RequestParam(value = "shiftType", required = false) String shiftType,
-                                       @RequestParam(value = "materialName", required = false) String materialName,
-                                       @RequestParam(value = "startTime", required = false) String startTime,
-                                       @RequestParam(value = "endTime", required = false) String endTime,
-                                       PageQo pageQo) {
-        return mixesService.getMixesRecordList(userKey, tankNo, shiftType, materialName, startTime, endTime, pageQo);
+    public PageVo<MixesVo> getMixesRecordList(MixesQo mixesQo) {
+        return mixesService.getMixesRecordList(mixesQo);
     }
 
     /**
@@ -100,5 +80,10 @@ public class MixesController {
     @GetMapping("/return")
     public List<Mixes> getTankForReturn() {
         return mixesService.getTankForReturn();
+    }
+
+    @PostMapping("/remark")
+    public void remark(@RequestBody Mixes mixes) {
+        mixesService.remark(mixes);
     }
 } 

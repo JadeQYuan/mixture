@@ -38,12 +38,12 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedApply, getApplyTankList } from '@/request/api'
+import { feedApply } from '@/api/mixes'
+import { getApplyTankList } from '@/api/tank'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, actionButtons, headerButtons } from './config'
-import { getFeedApplyFormConfig } from './formConfig'
+import { displayFields, actionButtons, headerButtons, getFeedApplyFormConfig } from './config'
 
 // 数据
 const records = ref([])

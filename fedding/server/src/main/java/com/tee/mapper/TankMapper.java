@@ -1,7 +1,15 @@
 package com.tee.mapper;
 
 import com.tee.entity.Tank;
-import org.apache.ibatis.annotations.*;
+import com.tee.pojo.TankVo;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -25,7 +33,7 @@ public interface TankMapper {
             "ORDER BY t.create_time DESC",
             "</script>"
     })
-    List<Tank> selectByCondition(@Param("tankNo") String tankNo);
+    List<TankVo> selectByCondition(String tankNo);
 
     /**
      * 根据ID查询料罐信息

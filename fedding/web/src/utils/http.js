@@ -28,14 +28,15 @@ http.interceptors.response.use(
   }
 )
 
-// AES加密密码工具方法
-const AES_KEY = import.meta.env.VITE_AES_KEY || '3a9F7bE2cD5gH1jK'
+// 密码加密工具方法（反序+两次base64）
 export function encryptPassword(password) {
-  const key = CryptoJS.enc.Utf8.parse(AES_KEY)
-  return CryptoJS.AES.encrypt(password, key, {
-    mode: CryptoJS.mode.ECB,
-    padding: CryptoJS.pad.Pkcs7
-  }).toString()
+  // 第一步：反序
+  let reversed = password.split('').reverse().join('');
+  // 第二步：base64加密，去掉末尾=
+  let firstBase64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(reversed)).replace(/=+$/, '');
+  // 第三步：再base64加密，去掉末尾=
+  let secondBase64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(firstBase64)).replace(/=+$/, '');
+  return secondBase64;
 }
 
 // 移除接口实现，只保留http实例和拦截器

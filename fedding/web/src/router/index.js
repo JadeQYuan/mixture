@@ -1,17 +1,16 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import activityMonitor from '@/utils/activityMonitor'
-import { ElMessage } from 'element-plus'
 
 // 引入页面组件
 import Home from '@/views/Home.vue'
 import Layout from '@/components/Layout.vue'
 import UserManage from '@/views/UserManage'
 import TankManage from '@/views/TankManage'
-import FeedApply from '@/views/FeedApply'
-import ReturnApply from '@/views/ReturnApply'
-import FeedManage from '@/views/FeedManage'
-import FeedRecord from '@/views/FeedRecord'
+import Apply from '@/views/Apply'
+import Return from '@/views/Return'
+import Feed from '@/views/Feed'
+import Record from '@/views/Record'
 import FaceLogin from '@/views/Login/FaceLogin'
 import CodeLogin from '@/views/Login/CodeLogin'
 
@@ -43,26 +42,26 @@ const routes = [
       },
       {
         path: 'feed-apply',
-        name: 'FeedApply',
-        component: FeedApply,
+        name: 'Apply',
+        component: Apply,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '加料申请' }
       },
       {
         path: 'return-apply',
-        name: 'ReturnApply',
-        component: ReturnApply,
+        name: 'Return',
+        component: Return,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '退料' }
       },
       {
         path: 'feed-manage',
-        name: 'FeedManage',
-        component: FeedManage,
+        name: 'Feed',
+        component: Feed,
         meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '加料管理' }
       },
       {
         path: 'feed-record',
-        name: 'FeedRecord',
-        component: FeedRecord,
+        name: 'Record',
+        component: Record,
         meta: { roles: ['MaterialClerk', 'Accountant'], title: '加料记录' }
       },
       {

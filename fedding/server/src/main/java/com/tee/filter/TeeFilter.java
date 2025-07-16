@@ -1,19 +1,23 @@
 package com.tee.filter;
 
 import com.tee.constant.Contants;
-import com.tee.entity.User;
 import com.tee.exception.AppException;
-import com.tee.service.UserService;
-import com.tee.util.JwtUtils;
-import com.tee.util.SpringApplicationContext;
 import com.tee.util.TokenUtil;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.util.StringUtils;
 
-import javax.servlet.*;
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TeeFilter implements Filter {
@@ -47,22 +51,13 @@ public class TeeFilter implements Filter {
         try {
             if (!flag) {
                 String authorization = request.getHeader(Contants.AUTHORIZATION);
-                String userId = null;
                 try {
-                    userId = JwtUtils.getSubject(authorization);
+                    String userId = TokenUtil.getSubject(authorization);
+                    TokenUtil.setToken(Integer.parseInt(userId));
                 } catch (Exception e) {
                     log.error("getSubject failed", e);
                     throw new AppException("authToken 校验失败！");
                 }
-                // 查库 校验userId是否存在即可
-                UserService userService = SpringApplicationContext.getBean(UserService.class);
-                User userInfo = userService.getById(Integer.parseInt(userId));
-
-                if (userInfo == null) {
-                    log.error("userInfo is null");
-                    throw new AppException("authToken 校验失败, 用户不存在");
-                }
-                TokenUtil.setToken(userInfo.getId());
             } else {
                 log.info("cookie校验 跳过url {}", requestUrl);
             }

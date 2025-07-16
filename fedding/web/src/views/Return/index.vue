@@ -40,12 +40,11 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/request/api'
+import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/api/mixes'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, actionButtons, headerButtons } from './config'
-import { getReturnOperationConfig } from './formConfig'
+import { displayFields, actionButtons, headerButtons, getReturnOperationConfig } from './config'
 
 // 数据
 const records = ref([])

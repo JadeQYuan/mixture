@@ -9,15 +9,17 @@ function getDefaultTimeRange() {
   return [startTime, endTime]
 }
 
+import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions, getLabel } from '@/utils/constant'
+
 export const searchFields = [
   {
-    key: 'userKey',
-    label: '人员',
+    key: 'applyUserKey',
+    label: '申请人员',
     placeholder: '请输入姓名/工号'
   },
   {
     key: 'tankNo',
-    label: '料罐编号',
+    label: '料罐',
     placeholder: '请输入料罐编号'
   },
   {
@@ -25,20 +27,14 @@ export const searchFields = [
     label: '班次',
     type: 'select',
     placeholder: '请选择班次',
-    options: [
-      { label: '白班', value: 'day' },
-      { label: '夜班', value: 'night' }
-    ]
+    options: getOptions(SHIFT_TYPE_MAP)
   },
   {
     key: 'materialName',
     label: '材料名称',
     type: 'select',
     placeholder: '请选择材料名称',
-    options: [
-      { label: '10KV', value: '10KV' },
-      { label: '35KV', value: '35KV' }
-    ]
+    options: getOptions(MATERIAL_MAP)
   },
   // {
   //   key: 'time',
@@ -52,41 +48,53 @@ export const searchFields = [
 export const columns = [
   {
     prop: 'tankNo',
-    label: '料罐编号',
+    label: '料罐',
     width: '120'
   },
   {
     prop: 'shiftType',
     label: '班次',
     width: '80',
-    render: (row) => row.shiftType === 'day' ? '白班' : row.shiftType === 'night' ? '夜班' : '-'
+    render: (row) => getLabel(SHIFT_TYPE_MAP, row.shiftType)
   },
   {
     prop: 'materialName',
     label: '材料名称',
-    width: '100'
+    width: '100',
+    render: (row) => getLabel(MATERIAL_MAP, row.materialName)
   },
   {
     prop: 'productSpec',
-    label: '产品规格型号',
+    label: '产品型号',
     width: '120'
   },
   {
     prop: 'planWeight',
-    label: '计划加料重量',
+    label: '计划加料',
     width: '120',
     render: (row) => `${row.planWeight} kg`
   },
   {
+    prop: 'applyUserAccount',
+    label: '申请人员',
+    width: '160',
+    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
+  },
+  {
+    prop: 'applyTime',
+    label: '申请时间',
+    width: '160'
+  },
+  {
     prop: 'bottomWeight',
     label: '罐底重量',
-    width: '100',
+    width: '120',
     render: (row) => `${row.bottomWeight} kg`
   },
   {
     prop: 'fullWeight',
     label: '满罐重量',
-    width: '100',
+    width: '120',
     render: (row) => `${row.fullWeight} kg`
   },
   {
@@ -96,25 +104,37 @@ export const columns = [
     render: (row) => `${row.flameRetardantWeight} kg`
   },
   {
+    prop: 'feedingTime',
+    label: '加料时间',
+    width: '200'
+  },
+  {
+    prop: 'feedingUserAccount',
+    label: '加料人员',
+    width: '160',
+    render: (row) => `${row.feedingUserName}(${row.feedingUserAccount})`
+  },
+  {
+    prop: 'returnTime',
+    label: '退料时间',
+    width: '200'
+  },
+  {
+    prop: 'returnWeight',
+    label: '退料重量',
+    width: '120',
+    render: (row) => `${row.returnWeight} kg`
+  },
+  {
     prop: 'actualWeight',
     label: '实际用料',
     width: '100',
     render: (row) => `${row.actualWeight} kg`
   },
   {
-    prop: 'applyTime',
-    label: '申请时间',
-    width: '160'
-  },
-  {
-    prop: 'feedingTime',
-    label: '加料时间',
-    width: '160'
-  },
-  {
-    prop: 'returnTime',
-    label: '退料时间',
-    width: '160'
+    prop: 'remark',
+    label: '备注',
+    width: '200'
   },
   {
     type: 'actions',
@@ -125,8 +145,8 @@ export const columns = [
 
 export const actionButtons = [
   {
-    action: 'view',
-    text: '详情',
+    action: 'remark',
+    text: '备注',
     type: 'primary',
     size: 'large'
   }
@@ -141,3 +161,19 @@ export const headerButtons = [
     roles: ['Accountant'] // 只有会计角色有导出权限
   }
 ] 
+
+export const remarkDialogConfig = {
+  title: '备注',
+  width: '500px',
+  fields: [
+    {
+      prop: 'remark',
+      label: '备注',
+      type: 'textarea',
+      placeholder: '请输入备注',
+      rows: 4,
+      required: false,
+      style: { width: '100%' }
+    }
+  ]
+} 
