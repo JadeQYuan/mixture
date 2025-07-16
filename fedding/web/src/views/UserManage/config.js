@@ -149,7 +149,8 @@ export const passwordFormFields = [
     type: 'input',
     inputType: 'password',
     placeholder: '请输入新密码',
-    size: 'large'
+    size: 'large',
+    showPassword: true
   },
   {
     prop: 'confirmPassword',
@@ -157,7 +158,8 @@ export const passwordFormFields = [
     type: 'input',
     inputType: 'password',
     placeholder: '请再次输入新密码',
-    size: 'large'
+    size: 'large',
+    showPassword: true
   }
 ]
 // 密码修改验证规则

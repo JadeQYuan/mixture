@@ -51,8 +51,8 @@ public class TankController {
      * 删除料罐
      */
     @DeleteMapping("/delete")
-    public void deleteTank(@RequestParam Integer id) {
-        tankService.deleteTank(id);
+    public void deleteTank(@RequestBody Tank tank) {
+        tankService.deleteTank(tank.getId());
     }
 
     /**

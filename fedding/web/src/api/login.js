@@ -9,7 +9,7 @@ export function accountLogin(account, password) {
 export function faceLogin(imageFile) {
   const formData = new FormData()
   formData.append('imageFile', imageFile)
-  return http.post('/service/face/faceLogin', formData, {
+  return http.post('/service/login/face', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 } 

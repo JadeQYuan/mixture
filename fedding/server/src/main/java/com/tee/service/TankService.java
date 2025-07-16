@@ -44,6 +44,9 @@ public class TankService {
             throw new AppException("料罐ID不能为空");
         }
         Tank existingTank = getExistingTank(tank.getId());
+        if (existingTank.getUserId() != null) {
+            throw new AppException("料罐正在使用中，不能编辑");
+        }
         tankMapper.updateById(tank);
     }
 

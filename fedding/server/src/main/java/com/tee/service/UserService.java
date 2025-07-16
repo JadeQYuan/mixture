@@ -67,11 +67,10 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        String userName = user.getUserName();
         String account = user.getAccount();
-        List<User> userInfo = userMapper.getUserInfoByNameAndNo(userName, account);
-        if (!CollectionUtils.isEmpty(userInfo)) {
-            throw new AppException("用户已存在");
+        int count = userMapper.checkUserByAccount(account);
+        if (count > 0) {
+            throw new AppException("工号已存在");
         }
         userMapper.insertUserInfo(user);
         return user;
@@ -88,6 +87,10 @@ public class UserService {
         User userInfo = userMapper.getUserInfo(user.getId());
         if (userInfo == null) {
             throw new AppException("用户不存在");
+        }
+        int count = userMapper.checkUserByAccount(user.getAccount());
+        if (count > 0) {
+            throw new AppException("工号已存在");
         }
         userMapper.updateUserInfo(user);
     }

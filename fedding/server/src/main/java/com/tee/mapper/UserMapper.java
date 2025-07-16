@@ -30,9 +30,9 @@ public interface UserMapper {
     })
     List<User> getUserInfoByName(@Param("userName") String userName, @Param("account") String account);
 
-    @Select("SELECT id, user_name as userName, account, role_code as roleCode, face_path as facePath " +
-            "FROM user_info WHERE user_name = #{userName} AND account = #{account}")
-    List<User> getUserInfoByNameAndNo(@Param("userName") String userName, @Param("account") String account);
+    @Select("SELECT count(0) " +
+            "FROM user_info WHERE account = #{account}")
+    int checkUserByAccount(@Param("account") String account);
 
     @Select("SELECT id, user_name as userName, account, role_code as roleCode " +
             "FROM user_info WHERE password = #{password} AND account = #{account}")

@@ -62,7 +62,8 @@ public class MixesService {
     }
 
     public Double getWeightData() {
-        return Math.random() * 100 + 50;
+        double weight = Math.random() * 100 + 50;
+        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
     }
 
     public List<Mixes> getTankForReturn() {

@@ -3,7 +3,7 @@ import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions, getLabel } from '@/utils/cons
 
 export const searchFields = [
   {
-    key: 'userKey',
+    key: 'applyUserKey',
     label: '申请人员',
     placeholder: '请输入姓名/工号'
   },

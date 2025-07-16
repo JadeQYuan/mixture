@@ -40,7 +40,7 @@ public interface TankMapper {
      * @param id 料罐ID
      * @return 料罐信息对象
      */
-    @Select("SELECT id, tank_no as tankNo, remark  " +
+    @Select("SELECT id, tank_no as tankNo, remark, user_id as userId  " +
             "FROM tank_info " +
             "WHERE id = #{id}")
     Tank selectById(Integer id);

@@ -7,7 +7,7 @@
           <el-input v-model="form.account" placeholder="请输入工号" size="large" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" />
+          <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" size="large" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" class="login-btn" @click="login" :loading="loading">登录</el-button>

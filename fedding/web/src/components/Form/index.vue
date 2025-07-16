@@ -42,6 +42,7 @@
             :type="field.inputType || 'text'"
             :size="field.size || 'large'"
             :style="field.style"
+            :show-password="field.showPassword"
             v-bind="field.props || {}"
           >
             <template v-if="field.suffix" #suffix>

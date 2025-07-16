@@ -41,6 +41,11 @@
           class="grid-card"
           shadow="hover"
         >
+          <template #header>
+            <div class="card-header">
+              <span>{{ item.tankNo }}</span>
+            </div>
+          </template>
           <!-- 卡片内容 -->
           <div class="card-content">
             <!-- 信息展示区域 -->

@@ -16,10 +16,10 @@ export function updateUser(id, data) {
 }
 
 // 上传用户照片
-export function updateUserPhoto(userId, imageFile) {
+export function updateUserPhoto(id, imageFile) {
   const formData = new FormData()
   formData.append('imageFile', imageFile)
-  formData.append('userId', userId)
+  formData.append('id', id)
   return http.post(`/service/user/uploadPhoto`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
