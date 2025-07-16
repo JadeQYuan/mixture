@@ -62,7 +62,7 @@ const feedDialog = reactive({
   step: 0,
   index: null,
   loading: false,
-  form: { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: null, actualWeight: null }
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: null, actualWeight: null }
 })
 
 // 定时器相关
@@ -77,11 +77,11 @@ async function fetchWeightDataWithDelay(step) {
   if (currentTankId.value) {
     try {
       const response = await getTankWeightData()
-      if (response.data) {
+      if (response) {
         if (step === 0) {
-          feedDialog.form.bottomWeight = response.data
+          feedDialog.form.bottomWeight = response
         } else if (step === 1) {
-          feedDialog.form.fullWeight = response.data
+          feedDialog.form.fullWeight = response
         }
       }
     } catch (error) {
@@ -158,10 +158,13 @@ function openFeedDialog(index) {
   feedDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
+    feedDialog.form.id = record.id
+    feedDialog.form.tankId = record.tankId
     feedDialog.form.tankNo = record.tankNo
     feedDialog.form.shiftType = record.shiftType
     feedDialog.form.materialName = record.materialName
     feedDialog.form.productSpec = record.productSpec
+    feedDialog.form.planWeight = record.planWeight
     currentTankId.value = record.tankNo // 设置当前罐号
     // 启动第一步定时器，获取底罐重量
     startWeightTimer(0)
@@ -170,9 +173,9 @@ function openFeedDialog(index) {
     feedDialog.form.shiftType = ''
     feedDialog.form.materialName = ''
     feedDialog.form.productSpec = ''
+    feedDialog.form.planWeight = null
     currentTankId.value = null
   }
-  feedDialog.form.planWeight = null
   feedDialog.form.bottomWeight = null
   feedDialog.form.fullWeight = null
   feedDialog.form.flameRetardantWeight = null

@@ -38,7 +38,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedApply, getAvailableTankList } from '@/request/api'
+import { feedApply, getApplyTankList } from '@/request/api'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -57,14 +57,14 @@ const applyDialogConfig = getFeedApplyFormConfig()
 const applyDialog = reactive({
   visible: false,
   loading: false,
-  form: { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
+  form: { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 })
 
 // 事件处理函数
 async function handleRefresh() {
   loading.value = true
   try {
-    const response = await getAvailableTankList()
+    const response = await getApplyTankList()
     records.value = response || []
   } catch (error) {
     ElMessage.error('获取料罐列表失败')
@@ -97,6 +97,7 @@ function handleHeaderAction({ action }) {
 function openApplyDialog(row) {
   applyDialog.visible = true
       applyDialog.form = {
+        tankId: row.id,
       tankNo: row.tankNo,
       shiftType: '',
       materialName: '',
@@ -107,7 +108,7 @@ function openApplyDialog(row) {
 
 function closeApplyDialog() {
   applyDialog.visible = false
-  applyDialog.form = { tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
+  applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 }
 
 async function handleApplySubmit(formData) {
@@ -118,8 +119,9 @@ async function handleApplySubmit(formData) {
     await feedApply(formData)
     ElMessage.success('加料申请已提交！')
     closeApplyDialog()
-    await handleSearch({}) // 重新获取列表
+    await handleRefresh() // 重新获取列表
   } catch (error) {
+    console.log(error)
     ElMessage.error('加料申请失败')
   } finally {
     applyDialog.loading = false

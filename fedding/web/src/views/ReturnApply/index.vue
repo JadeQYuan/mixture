@@ -40,7 +40,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { submitReturnOperation, getTankWeightData, getMyTankList } from '@/request/api'
+import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/request/api'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -61,7 +61,7 @@ const returnDialog = reactive({
   step: 0,
   index: null,
   loading: false,
-  form: { tankNo: '', currentWeight: null, returnWeight: null }
+  form: { id: null, tankId: null, tankNo: '', returnWeight: null }
 })
 
 // 定时器相关
@@ -75,8 +75,8 @@ async function fetchWeightDataWithDelay() {
   if (currentTankId.value) {
     try {
       const response = await getTankWeightData()
-      if (response.data) {
-        returnDialog.form.currentWeight = response.data
+      if (response) {
+        returnDialog.form.returnWeight = response
       }
     } catch (error) {
       ElMessage.error('获取重量数据失败')
@@ -105,7 +105,7 @@ function stopWeightTimer() {
 async function handleRefresh() {
   loading.value = true
   try {
-    const response = await getMyTankList()
+    const response = await getReturnTankList()
     records.value = response || []
   } catch (error) {
     ElMessage.error('获取退料列表失败')
@@ -141,6 +141,8 @@ function openReturnDialog(index) {
   returnDialog.index = index
   if (index >= 0) {
     const record = records.value[index]
+    returnDialog.form.id = record.id
+    returnDialog.form.tankId = record.tankId
     returnDialog.form.tankNo = record.tankNo
     currentTankId.value = record.tankNo // 设置当前罐号
     // 启动定时器，获取当前重量
@@ -149,13 +151,12 @@ function openReturnDialog(index) {
     returnDialog.form.tankNo = ''
     currentTankId.value = null
   }
-      returnDialog.form.currentWeight = null
 }
 
 function handleNextStep(step) {
   if (step === 1) {
     // 第0步：检查当前重量是否已获取
-    if (!returnDialog.form.currentWeight) {
+    if (!returnDialog.form.returnWeight) {
       ElMessage.warning('正在获取当前重量数据，请稍候')
     } else {
       // 当前重量确定，进入第二步
@@ -177,7 +178,7 @@ function closeReturnDialog() {
   returnDialog.visible = false
   stopWeightTimer()
   returnDialog.step = 0
-  returnDialog.form = { tankNo: '', currentWeight: null, returnWeight: null }
+  returnDialog.form = { id: null, tankId: null, tankNo: '', returnWeight: null }
 }
 
 async function handleReturnSubmit(formData) {

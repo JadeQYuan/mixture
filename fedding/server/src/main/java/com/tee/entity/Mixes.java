@@ -19,6 +19,7 @@ public class Mixes {
     private Double bottomWeight;               // 罐底重量（kg）
     private Double fullWeight;                 // 满罐重量（kg）
     private Double flameRetardantWeight;       // 阻燃粉重量（kg）
+    private Double returnWeight;               // 退料重量（kg）
     private Double actualWeight;               // 实际用料重量（kg）
     private String applyTime;                  // 申请加料时间
     private String feedingTime;                // 实际加料时间

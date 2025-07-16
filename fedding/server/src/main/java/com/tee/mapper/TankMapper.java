@@ -67,15 +67,7 @@ public interface TankMapper {
             "FROM tank_info t " +
             "WHERE user_id is null" +
             "</script>")
-    List<Tank> selectAvailableTanks();
-
-    @Select("<script>" +
-            "SELECT t.id, t.tank_no as tankNo, t.remark " +
-            "FROM tank_info t " +
-            "WHERE t.user_id = #{userId} " +
-            "AND user_id is null " +
-            "</script>")
-    List<Tank> selectMyTanks(Integer userId);
+    List<Tank> getTanksForApply();
 
     /**
      * 插入料罐信息
@@ -83,7 +75,7 @@ public interface TankMapper {
      * @return 影响行数
      */
     @Insert("INSERT INTO tank_info (tank_no, remark, user_id, create_time, update_time) " +
-            "VALUES (#{tankNo}, #{remark}, #{userId}, #{createTime}, #{updateTime})")
+            "VALUES (#{tankNo}, #{remark}, #{userId}, datetime('now'), datetime('now'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Tank tank);
 
@@ -92,11 +84,11 @@ public interface TankMapper {
      * @param tank 料罐信息对象
      * @return 影响行数
      */
-    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, update_time = #{updateTime} WHERE id = #{id}")
+    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, update_time = datetime('now') WHERE id = #{id}")
     int updateById(Tank tank);
 
-    @Update("UPDATE tank_info SET user_id = #{userId}, update_time = #{updateTime} WHERE id = #{id}")
-    int updateUser(int id, int userId);
+    @Update("UPDATE tank_info SET user_id = #{userId} WHERE id = #{id}")
+    int updateUser(int id, Integer userId);
 
     /**
      * 根据ID删除料罐信息

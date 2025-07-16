@@ -2,7 +2,9 @@ package com.tee.controller;
 
 import com.tee.entity.Mixes;
 import com.tee.entity.Tank;
+import com.tee.pojo.MixesVo;
 import com.tee.pojo.PageQo;
+import com.tee.pojo.PageVo;
 import com.tee.service.MixesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +27,10 @@ public class MixesController {
      * 获取加料管理列表
      */
     @GetMapping("/list")
-    public List<Mixes> getMixesList(@RequestParam(value = "userKey", required = false) String userKey,
-                                    @RequestParam(value = "tankNo", required = false) String tankNo,
-                                    @RequestParam(value = "shiftType", required = false) String shiftType,
-                                    @RequestParam(value = "materialName", required = false) String materialName, PageQo pageQo) {
+    public PageVo<MixesVo> getMixesList(@RequestParam(value = "userKey", required = false) String userKey,
+                                        @RequestParam(value = "tankNo", required = false) String tankNo,
+                                        @RequestParam(value = "shiftType", required = false) String shiftType,
+                                        @RequestParam(value = "materialName", required = false) String materialName, PageQo pageQo) {
         return mixesService.getMixesList(userKey, tankNo, shiftType, materialName, pageQo);
     }
 
@@ -77,15 +79,14 @@ public class MixesController {
      * 获取加料记录列表
      */
     @GetMapping("/recordList")
-    public List<Mixes> getMixesRecordList(@RequestParam(value = "userKey", required = false) String userKey,
+    public PageVo<MixesVo> getMixesRecordList(@RequestParam(value = "userKey", required = false) String userKey,
                                        @RequestParam(value = "tankNo", required = false) String tankNo,
                                        @RequestParam(value = "shiftType", required = false) String shiftType,
                                        @RequestParam(value = "materialName", required = false) String materialName,
                                        @RequestParam(value = "startTime", required = false) String startTime,
                                        @RequestParam(value = "endTime", required = false) String endTime,
-                                       @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
-                                       @RequestParam(value = "size", defaultValue = "10") int size) {
-        return mixesService.getMixesRecordList(userKey, tankNo, shiftType, materialName, startTime, endTime, pageNo, size);
+                                       PageQo pageQo) {
+        return mixesService.getMixesRecordList(userKey, tankNo, shiftType, materialName, startTime, endTime, pageQo);
     }
 
     /**
@@ -94,5 +95,10 @@ public class MixesController {
     @GetMapping("/weight")
     public Double getWeightData() {
         return mixesService.getWeightData();
+    }
+
+    @GetMapping("/return")
+    public List<Mixes> getTankForReturn() {
+        return mixesService.getTankForReturn();
     }
 } 

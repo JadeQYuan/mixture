@@ -22,7 +22,7 @@ export const returnOperationFields = [
     size: 'large'
   },
   {
-    prop: 'currentWeight',
+    prop: 'returnWeight',
     label: '当前重量',
     type: 'input',
     disabled: true,

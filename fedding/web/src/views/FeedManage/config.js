@@ -37,7 +37,7 @@ export const columns = [
     prop: 'userName',
     label: '人员',
     width: '160',
-    render: (row) => `${row.userName}(${row.account})`
+    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
   },
   {
     prop: 'tankNo',

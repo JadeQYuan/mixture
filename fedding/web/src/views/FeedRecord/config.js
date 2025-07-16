@@ -40,13 +40,13 @@ export const searchFields = [
       { label: '35KV', value: '35KV' }
     ]
   },
-  {
-    key: 'time',
-    label: '时间范围',
-    type: 'datetimerange',
-    placeholder: '请选择时间范围',
-    defaultValue: getDefaultTimeRange()
-  }
+  // {
+  //   key: 'time',
+  //   label: '时间范围',
+  //   type: 'datetimerange',
+  //   placeholder: '请选择时间范围',
+  //   defaultValue: getDefaultTimeRange()
+  // }
 ]
 
 export const columns = [

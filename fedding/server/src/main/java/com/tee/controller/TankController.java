@@ -56,13 +56,8 @@ public class TankController {
     /**
      * 获取料罐列表
      */
-    @GetMapping("/available")
-    public List<Tank> getAvailableTanks() {
-        return tankService.getAvailableTanks();
-    }
-
-    @GetMapping("/my")
-    public List<Tank> getMyTanks() {
-        return tankService.getMyTanks();
+    @GetMapping("/apply")
+    public List<Tank> getTanksForApply() {
+        return tankService.getTanksForApply();
     }
 }

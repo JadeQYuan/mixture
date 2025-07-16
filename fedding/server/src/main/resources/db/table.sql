@@ -30,20 +30,22 @@ CREATE TABLE tank_info (
 CREATE TABLE mixes_info (
     id INTEGER PRIMARY KEY,                    -- 加料记录ID，主键，自增
     tank_id INTEGER,                          -- 料罐ID（关联tank_info表）
-    apply_user_id INTEGER,                     -- 申请用户ID（关联user_info表）
+    tank_no text,                             -- 料罐编号
     shift_type text,                          -- 班次类型（day-白班，night-夜班）
     material_name text,                       -- 材料名称（10KV、35KV等）
     product_spec text,                        -- 产品规格型号
     plan_weight real,                         -- 计划加料重量（kg）
+    apply_user_id INTEGER,                     -- 申请用户ID（关联user_info表）
+    apply_time text,                          -- 申请加料时间
     bottom_weight real,                       -- 罐底重量（kg）
     full_weight real,                         -- 满罐重量（kg）
     flame_retardant_weight real,              -- 阻燃粉重量（kg）
-    actual_weight real,                       -- 实际用料重量（kg）
-    apply_time text,                          -- 申请加料时间
     feeding_time text,                        -- 实际加料时间
     feeding_user_id INTEGER,                  -- 加料操作员ID（关联user_info表）
+    return_weight real,                       -- 退料重量（kg）
     return_time text,                         -- 退料时间
     return_user_id INTEGER,                   -- 退料操作员ID（关联user_info表）
+    actual_weight real,                       -- 实际用料重量（kg）
     remark text,                              -- 备注信息
     status INTEGER,                            -- 状态（1-待处理，2-已处理，3-其他）
     create_time text,                         -- 创建时间

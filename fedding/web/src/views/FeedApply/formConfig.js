@@ -17,7 +17,7 @@ export function getFeedApplyFormConfig() {
       {
         prop: 'shiftType',
         label: '班次',
-        type: 'select',
+        type: 'radio',
         placeholder: '请选择班次',
         required: true,
         options: [
@@ -30,7 +30,7 @@ export function getFeedApplyFormConfig() {
       {
         prop: 'materialName',
         label: '材料名称',
-        type: 'select',
+        type: 'radio',
         placeholder: '请选择材料名称',
         required: true,
         options: [

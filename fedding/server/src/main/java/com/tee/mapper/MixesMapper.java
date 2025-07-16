@@ -1,6 +1,8 @@
 package com.tee.mapper;
 
 import com.tee.entity.Mixes;
+import com.tee.entity.Tank;
+import com.tee.pojo.MixesVo;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -17,12 +19,10 @@ public interface MixesMapper {
      * @param mixes 加料信息对象
      * @return 影响行数
      */
-    @Insert("INSERT INTO mixes_info (tank_id, apply_user_id, shift_type, material_name, product_spec, plan_weight, " +
-            "bottom_weight, full_weight, flame_retardant_weight, actual_weight, apply_time, feeding_time, " +
-            "feeding_user_id, return_time, return_user_id, status, remark, create_time, update_time) " +
-            "VALUES (#{tankId}, #{applyUserId}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
-            "#{bottomWeight}, #{fullWeight}, #{flameRetardantWeight}, #{actualWeight}, #{applyTime}, #{feedingTime}, " +
-            "#{feedingUserId}, #{returnTime}, #{returnUserId}, #{status}, #{remark}, datetime('now'), datetime('now'))")
+    @Insert("INSERT INTO mixes_info (tank_id, tank_no, apply_user_id, shift_type, material_name, product_spec, plan_weight, " +
+            "apply_time, status, create_time, update_time) " +
+            "VALUES (#{tankId}, #{tankNo}, #{applyUserId}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
+            "datetime('now'), 0, datetime('now'), datetime('now'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Mixes mixes);
 
@@ -116,4 +116,61 @@ public interface MixesMapper {
             "WHERE f.apply_user_id = #{applyUserId} " +
             "ORDER BY f.create_time DESC")
     List<Mixes> selectByApplyUserId(Integer applyUserId);
-} 
+
+    @Select({
+        "<script>",
+        "SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType," +
+        "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
+        "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
+        "f.return_weight as returnWeight, " +
+        "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
+        "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
+        "u2.user_name as feedingUserName, u2.account as feedingUserAccount, ",
+        "u3.user_name as returnUserName, u3.account as returnUserAccount ",
+        "FROM mixes_info f ",
+        "LEFT JOIN tank_info t ON f.tank_id = t.id ",
+        "LEFT JOIN user_info u1 ON f.apply_user_id = u1.id ",
+        "LEFT JOIN user_info u2 ON f.feeding_user_id = u2.id ",
+        "LEFT JOIN user_info u3 ON f.return_user_id = u3.id ",
+        "<where>",
+        "<if test='userKey != null and userKey != \"\"'>",
+        "AND u1.userKey LIKE '%' || #{materialName} || '%'",
+        "</if>",
+        "<if test='tankNo != null and tankNo != \"\"'>",
+        "AND t.tank_no LIKE '%' || #{tankNo} || '%'",
+        "</if>",
+        "<if test='shiftType != null and shiftType != \"\"'>",
+        "AND f.shift_type = #{shiftType}",
+        "</if>",
+        "<if test='materialName != null and materialName != \"\"'>",
+        "AND f.material_name LIKE '%' || #{materialName} || '%'",
+        "</if>",
+        "<if test='status != null '>",
+        "AND f.status = #{status} ",
+        "</if>",
+        "</where>",
+        "ORDER BY f.create_time DESC",
+        "</script>"
+    })
+    List<MixesVo> selectByCondition(String userKey, String tankNo, String shiftType, String materialName, Integer status);
+
+    @Update("UPDATE mixes_info SET bottom_weight = #{bottomWeight}, full_weight = #{fullWeight}, " +
+            "flame_retardant_weight = #{flameRetardantWeight}, " +
+            "feeding_time = datetime('now'), feeding_user_id = #{feedingUserId}, " +
+            "status = 1 WHERE id = #{id}")
+    void executeMixes(Mixes mixes);
+
+    @Update("UPDATE mixes_info SET return_weight = #{returnWeight}, " +
+            "return_time = datetime('now'), return_user_id = #{returnUserId}, status = 2 " +
+            "WHERE id = #{id}")
+    void executeReturn(Mixes mixes);
+
+    @Select("<script>" +
+            "SELECT m.id, m.tank_id as tankId, t.tank_no as tankNo, t.remark " +
+            "FROM mixes_info m " +
+            "LEFT JOIN tank_info t ON m.tank_id = t.id " +
+            "WHERE m.status = 1 " +
+            "AND t.user_id = #{userId} " +
+            "</script>")
+    List<Mixes> getTankForReturn(Integer userId);
+}

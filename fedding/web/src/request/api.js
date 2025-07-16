@@ -48,50 +48,41 @@ export function deleteTank(id) {
   return http.delete(`/service/tank/delete`, { data: { id } })
 }
 
-export function getAvailableTankList( ) {
-  return http.get('/service/tank/available')
+export function getApplyTankList( ) {
+  return http.get('/service/tank/apply')
 }
 
-export function getMyTankList() {
-  return http.get('/service/tank/my')
+export function getReturnTankList() {
+  return http.get('/service/mixes/return')
 }
 
 // 加料管理接口
 export function getFeedManageList(params) {
-  return http.get('/service/feeding/list', { params })
+  return http.get('/service/mixes/list', { params })
 }
 
 export function submitFeedOperation(data) {
-  return http.post('/service/feeding/feed', data)
+  return http.post('/service/mixes/feed', data)
 }
 
-// 退料管理接口
-export function getReturnManageList(params) {
-  return http.get('/service/feeding/list', { params })
-}
-
+// 退料接口
 export function submitReturnOperation(data) {
-  return http.post('/service/feeding/return', data)
+  return http.post('/service/mixes/return', data)
 }
 
 // 获取底罐重量和加料重量接口
 export function getTankWeightData() {
-  return http.get(`/service/feeding/weight`)
+  return http.get(`/service/mixes/weight`)
 }
 
 // 领料记录接口
 export function getFeedRecordList(params) {
-  return http.get('/service/feeding/recordList', { params })
+  return http.get('/service/mixes/recordList', { params })
 }
 
 // 加料申请接口
 export function feedApply(data) {
-  return http.post('/service/feeding/apply', data)
-}
-
-// 退料申请接口
-export function returnApply(data) {
-  return http.post('/service/feeding/returnApply', data)
+  return http.post('/service/mixes/apply', data)
 }
 
 // 获取当前用户信息接口

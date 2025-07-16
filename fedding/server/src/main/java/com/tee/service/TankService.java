@@ -56,18 +56,21 @@ public class TankService {
         tankMapper.updateById(tank);
     }
 
+    public void updateUser(Integer id, Integer userId) {
+        Tank existingTank = tankMapper.selectById(id);
+        if (existingTank == null) {
+            throw new AppException("料罐不存在");
+        }
+        tankMapper.updateUser(id, userId);
+    }
+
     public List<Tank> getTanksByUserId(String userId) {
         return tankMapper.selectByUserId(userId);
     }
 
-    public List<Tank> getAvailableTanks() {
+    public List<Tank> getTanksForApply() {
         // 获取所有可用的料罐（没有被占用的）
-        return tankMapper.selectAvailableTanks();
-    }
-
-    public List<Tank> getMyTanks() {
-        // 获取所有可用的料罐（没有被占用的）
-        return tankMapper.selectMyTanks(TokenUtil.getToken());
+        return tankMapper.getTanksForApply();
     }
 
     public void insertTank(Tank tank) {
