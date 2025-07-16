@@ -65,6 +65,6 @@ public interface UserMapper {
     @Update("UPDATE user_info SET face_path = #{facePath}, face_feature = #{faceFeature}, update_time = datetime('now') WHERE id = #{id}")
     void updateFaceInfo(Integer id, String facePath, String faceFeature);
 
-    @Update("UPDATE user_info SET del_flag = 0 WHERE id = #{id}")
+    @Update("UPDATE user_info SET del_flag = 0, update_time = datetime('now') WHERE id = #{id}")
     void deleteUserInfo(@Param("id") Integer id);
 }

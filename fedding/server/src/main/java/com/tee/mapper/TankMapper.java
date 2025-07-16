@@ -105,6 +105,6 @@ public interface TankMapper {
      * @param id 料罐ID
      * @return 影响行数
      */
-    @Update("UPDATE tank_info SET del_flag = 0 WHERE id = #{id}")
+    @Update("UPDATE tank_info SET del_flag = 0, update_time = datetime('now') WHERE id = #{id}")
     int deleteById(Integer id);
 }
