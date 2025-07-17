@@ -7,11 +7,10 @@
       :display-fields="displayFields"
       :action-buttons="actionButtons"
       :header-buttons="headerButtons"
-      :auto-refresh="true"
-      :refresh-interval="5000"
+      :auto-refresh="autoRefresh"
+      :header-render="item => ('料罐：' + item.tankNo)"
       @refresh="handleRefresh"
       @action="handleAction"
-      @header-action="handleHeaderAction"
     />
 
     <!-- 加料申请对话框 -->
@@ -19,7 +18,7 @@
       :visible="applyDialog.visible"
       :title="applyDialogConfig.title"
       :width="applyDialogConfig.width"
-      @update:visible="val => applyDialog.visible = val"
+      @update:visible="handleDialogVisibleUpdate"
     >
       <Form
         :fields="applyDialogConfig.fields"
@@ -30,6 +29,7 @@
         :label-position="applyDialogConfig.labelPosition"
         :footer-buttons="applyDialogConfig.footerButtons"
         @submit="handleApplySubmit"
+        @cancel="closeApplyDialog"
       />
     </Dialog>
   </div>
@@ -50,6 +50,9 @@ const records = ref([])
 const loading = ref(false)
 const pageLoading = ref(false)
 
+// 自动刷新配置
+const autoRefresh = ref(true)
+
 // 加料申请对话框配置
 const applyDialogConfig = getFeedApplyFormConfig()
 
@@ -66,8 +69,6 @@ async function handleRefresh() {
   try {
     const response = await getApplyTankList()
     records.value = response || []
-  } catch (error) {
-    ElMessage.error('获取料罐列表失败')
   } finally {
     loading.value = false
   }
@@ -89,24 +90,23 @@ function handleAction({ action, row, index }) {
   }
 }
 
-function handleHeaderAction({ action }) {
-  // 移除导出功能处理
-}
-
 // 加料申请对话框相关函数
 function openApplyDialog(row) {
+  autoRefresh.value = false // 打开弹窗时关闭自动刷新
   applyDialog.visible = true
-      applyDialog.form = {
-        tankId: row.id,
-      tankNo: row.tankNo,
-      shiftType: '',
-      materialName: '',
-      productSpec: '',
-      planWeight: null
-    }
+  applyDialog.form = {
+    tankId: row.id,
+    tankNo: row.tankNo,
+    shiftType: '',
+    materialName: '',
+    productSpec: '',
+    planWeight: null
+  }
 }
 
 function closeApplyDialog() {
+  autoRefresh.value = true // 关闭弹窗时恢复自动刷新
+  handleRefresh()
   applyDialog.visible = false
   applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 }
@@ -120,11 +120,17 @@ async function handleApplySubmit(formData) {
     ElMessage.success('加料申请已提交！')
     closeApplyDialog()
     await handleRefresh() // 重新获取列表
-  } catch (error) {
-    console.log(error)
-    ElMessage.error('加料申请失败')
   } finally {
     applyDialog.loading = false
+  }
+}
+
+// 新增：Dialog关闭时处理
+function handleDialogVisibleUpdate(val) {
+  if (!val) {
+    closeApplyDialog()
+  } else {
+    applyDialog.visible = true
   }
 }
 
@@ -136,6 +142,5 @@ onMounted(() => {
 
 <style scoped>
 .feed-apply-container {
-  height: 100vh;
 }
 </style> 

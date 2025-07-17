@@ -7,11 +7,10 @@
       :display-fields="displayFields"
       :action-buttons="actionButtons"
       :header-buttons="headerButtons"
-      :auto-refresh="true"
-      :refresh-interval="5000"
+      :auto-refresh="autoRefresh"
+      :header-render="item => ('料罐：' + item.tankNo)"
       @refresh="handleRefresh"
       @action="handleAction"
-      @header-action="handleHeaderAction"
     />
 
     <!-- 退料操作对话框 -->
@@ -19,7 +18,7 @@
       :visible="returnDialog.visible"
       :title="returnDialogConfig.title"
       :width="returnDialogConfig.width"
-      @update:visible="val => returnDialog.visible = val"
+      @update:visible="handleDialogVisibleUpdate"
     >
       <Form
         :fields="returnDialogConfig.fields"
@@ -28,6 +27,7 @@
         :current-step="returnDialog.step"
         :form-data="returnDialog.form"
         :loading="returnDialog.loading"
+        :footer-buttons="returnDialogConfig.footerButtons"
         @submit="handleReturnSubmit"
         @next-step="handleNextStep"
         @prev-step="handlePrevStep"
@@ -51,6 +51,9 @@ const records = ref([])
 const loading = ref(false)
 const pageLoading = ref(false)
 
+// 自动刷新配置
+const autoRefresh = ref(true)
+
 // 退料对话框配置
 const returnDialogConfig = getReturnOperationConfig()
 
@@ -72,13 +75,9 @@ const weightTimerActive = ref(false)
 async function fetchWeightDataWithDelay() {
   if (!weightTimerActive.value) return;
   if (currentTankId.value) {
-    try {
-      const response = await getTankWeightData()
-      if (response) {
-        returnDialog.form.returnWeight = response
-      }
-    } catch (error) {
-      ElMessage.error('获取重量数据失败')
+    const response = await getTankWeightData()
+    if (response) {
+      returnDialog.form.returnWeight = response
     }
   }
   if (weightTimerActive.value) {
@@ -106,8 +105,6 @@ async function handleRefresh() {
   try {
     const response = await getReturnTankList()
     records.value = response || []
-  } catch (error) {
-    ElMessage.error('获取退料列表失败')
   } finally {
     loading.value = false
   }
@@ -129,12 +126,9 @@ function handleAction({ action, row, index }) {
   }
 }
 
-function handleHeaderAction({ action }) {
-  // 移除导出功能处理
-}
-
 // 退料对话框相关函数
 function openReturnDialog(index) {
+  autoRefresh.value = false // 打开弹窗时关闭自动刷新
   returnDialog.visible = true
   returnDialog.step = 0
   returnDialog.index = index
@@ -174,6 +168,8 @@ function handlePrevStep(step) {
 }
 
 function closeReturnDialog() {
+  handleRefresh()
+  autoRefresh.value = true // 关闭弹窗时恢复自动刷新
   returnDialog.visible = false
   stopWeightTimer()
   returnDialog.step = 0
@@ -191,10 +187,17 @@ async function handleReturnSubmit(formData) {
     ElMessage.success('退料操作成功')
     closeReturnDialog()
     await handleRefresh() // 重新获取列表
-  } catch (error) {
-    ElMessage.error('退料操作失败')
   } finally {
     returnDialog.loading = false
+  }
+}
+
+// 新增：Dialog关闭时处理
+function handleDialogVisibleUpdate(val) {
+  if (!val) {
+    closeReturnDialog()
+  } else {
+    returnDialog.visible = true
   }
 }
 
@@ -211,6 +214,5 @@ onUnmounted(() => {
 
 <style scoped>
 .return-container {
-  height: 100vh;
 }
 </style> 

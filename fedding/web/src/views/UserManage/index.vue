@@ -163,7 +163,7 @@ import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/api/user'
 import { ROLE_MAP, getOptions } from '@/utils/constant'
-import { encryptPassword } from '@/utils/http'
+import { encryptPassword } from '@/utils/crypto'
 import { getCameraErrorMessage, startGlobalCamera } from '@/utils/camera'
 import { base64ToFile, canvasToBase64 } from '@/utils/fileUtils'
 import DataTable from '@/components/DataTable'
@@ -229,8 +229,6 @@ async function handleSearch(params) {
     const response = await getUserList(params)
     records.value = response.data || []
     total.value = response.total || 0
-  } catch (error) {
-    ElMessage.error('获取用户列表失败')
   } finally {
     loading.value = false
   }
@@ -305,11 +303,22 @@ function openDialog(mode, index = null) {
 async function handleDialogSubmit(formData) {
   if (dialog.loading) return // 防止重复提交
   
-  dialog.loading = true
   try {
+    dialog.loading = true
     if (dialog.mode === 'add') {
-      await createUser(formData)
+      const res = await createUser(formData)
       ElMessage.success('新增用户成功')
+      dialog.visible = false
+      // 新增：刷新后自动弹出人脸录入弹窗（用id查找）
+      await handleSearch({ page: 1, pageSize: 10 })
+      const newId = res && res.id
+      if (newId) {
+        const idx = records.value.findIndex(u => u.id === newId)
+        if (idx !== -1) {
+          openPhotoDialog(idx)
+        }
+      }
+      return
     } else {
       const user = records.value[dialog.index]
       const userId = user.userId || user.id
@@ -318,8 +327,6 @@ async function handleDialogSubmit(formData) {
     }
     dialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
-  } catch (error) {
-    ElMessage.error(dialog.mode === 'add' ? '新增用户失败' : '编辑用户失败')
   } finally {
     dialog.loading = false
   }
@@ -341,10 +348,9 @@ async function handleDeleteUser() {
     const userId = user.userId || user.id
     await deleteUser(userId)
     ElMessage.success('删除用户成功')
+  } finally {
     deleteDialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
-  } catch (error) {
-    ElMessage.error('删除用户失败')
   }
 }
 
@@ -373,8 +379,8 @@ function openPhotoDialog(index) {
 async function getCamera() {
   if (photoDialog.cameraLoading) return
   
-  photoDialog.cameraLoading = true
   try {
+    photoDialog.cameraLoading = true
     // 直接获取全局摄像头
     cameraStream = await startGlobalCamera()
     
@@ -522,6 +528,5 @@ onMounted(() => {
 
 <style scoped>
 .user-manage-container {
-  height: 100vh;
 }
 </style> 

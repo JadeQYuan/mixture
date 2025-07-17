@@ -14,15 +14,7 @@ class ActivityMonitor {
     events.forEach(event => {
       document.addEventListener(event, () => this.resetTimer(), true)
     })
-
-    // 监听页面可见性变化
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.pauseTimer()
-      } else {
-        this.resumeTimer()
-      }
-    })
+    // 移除visibilitychange监听，不再切后台暂停计时
   }
 
   start(onLogout) {

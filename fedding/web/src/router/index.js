@@ -11,6 +11,7 @@ import Apply from '@/views/Apply'
 import Return from '@/views/Return'
 import Feed from '@/views/Feed'
 import Record from '@/views/Record'
+import Stats from '@/views/Stats'
 import FaceLogin from '@/views/Login/FaceLogin'
 import CodeLogin from '@/views/Login/CodeLogin'
 
@@ -24,12 +25,12 @@ const routes = [
     meta: { title: '首页' }
   },
   {
-    path: '/login',
+    path: '/code',
     name: 'CodeLogin',
     component: CodeLogin,
     meta: { title: '密码登录' }
   },
-  { path: '/face-login', name: 'FaceLogin', component: FaceLogin, meta: { title: '人脸识别' } },
+  { path: '/face', name: 'FaceLogin', component: FaceLogin, meta: { title: '人脸识别' } },
   {
     path: '/app',
     name: 'Layout',
@@ -41,28 +42,34 @@ const routes = [
         name: '',
       },
       {
-        path: 'feed-apply',
+        path: 'apply',
         name: 'Apply',
         component: Apply,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '加料申请' }
       },
       {
-        path: 'return-apply',
+        path: 'return',
         name: 'Return',
         component: Return,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '退料' }
       },
       {
-        path: 'feed-manage',
+        path: 'feed',
         name: 'Feed',
         component: Feed,
         meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '加料管理' }
       },
       {
-        path: 'feed-record',
+        path: 'record',
         name: 'Record',
         component: Record,
-        meta: { roles: ['MaterialClerk', 'Accountant'], title: '加料记录' }
+        meta: { roles: ['MaterialClerk'], title: '加料记录' }
+      },
+      {
+        path: 'stats',
+        name: 'Stats',
+        component: Stats,
+        meta: { roles: ['Accountant'], title: '领料统计' }
       },
       {
         path: 'tank-manage',
@@ -76,8 +83,6 @@ const routes = [
         component: UserManage,
         meta: { roles: ['MaterialClerk'], title: '用户管理' }
       },
-
-
     ]
   }
 ]

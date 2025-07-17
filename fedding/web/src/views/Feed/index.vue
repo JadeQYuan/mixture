@@ -75,17 +75,13 @@ const weightTimerActive = ref(false)
 async function fetchWeightDataWithDelay(step) {
   if (!weightTimerActive.value) return;
   if (currentTankId.value) {
-    try {
-      const response = await getTankWeightData()
-      if (response) {
-        if (step === 0) {
-          feedDialog.form.bottomWeight = response
-        } else if (step === 1) {
-          feedDialog.form.fullWeight = response
-        }
+    const response = await getTankWeightData()
+    if (response) {
+      if (step === 0) {
+        feedDialog.form.bottomWeight = response
+      } else if (step === 1) {
+        feedDialog.form.fullWeight = response
       }
-    } catch (error) {
-      ElMessage.error('获取重量数据失败')
     }
   }
   if (weightTimerActive.value) {
@@ -115,8 +111,6 @@ async function handleSearch(params) {
     const response = await getFeedManageList(params)
     records.value = response.data || []
     total.value = response.total || 0
-  } catch (error) {
-    ElMessage.error('获取加料管理列表失败')
   } finally {
     loading.value = false
   }
@@ -242,8 +236,6 @@ async function handleFeedSubmit(formData) {
     ElMessage.success('加料数据已提交！')
     feedDialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 }) // 重新获取列表
-  } catch (error) {
-    ElMessage.error('提交失败')
   } finally {
     feedDialog.loading = false
   }
@@ -261,6 +253,5 @@ onUnmounted(() => {
 
 <style scoped>
 .feed-manage-container {
-  height: 100vh;
 }
 </style> 

@@ -13,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,7 +32,7 @@ public class MixesService {
     private TankService tankService;
 
     public PageVo<MixesVo> getMixesList(MixesQo mixesQo) {
-        mixesQo.setStatus(0);
+        mixesQo.setStatus(Collections.singletonList(0));
         PageHelper.startPage(mixesQo.getPageNo(), mixesQo.getPageSize());
         Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(mixesQo);
         return new PageVo<>(mixesList);
@@ -57,7 +61,18 @@ public class MixesService {
     }
 
     public PageVo<MixesVo> getMixesRecordList(MixesQo mixesQo) {
-        mixesQo.setStatus(2);
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = LocalDateTime.now().minusDays(3);
+        mixesQo.setStatus(Arrays.asList(1, 2));
+        mixesQo.setApplyStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        mixesQo.setApplyEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        PageHelper.startPage(mixesQo.getPageNo(), mixesQo.getPageSize());
+        Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(mixesQo);
+        return new PageVo<>(mixesList);
+    }
+
+    public PageVo<MixesVo> getMixesStatsList(MixesQo mixesQo) {
+        mixesQo.setStatus(Collections.singletonList(2));
         PageHelper.startPage(mixesQo.getPageNo(), mixesQo.getPageSize());
         Page<MixesVo> mixesList = (Page<MixesVo>) mixesMapper.selectByCondition(mixesQo);
         return new PageVo<>(mixesList);

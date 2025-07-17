@@ -25,7 +25,7 @@ import { ElMessage } from 'element-plus'
 import { accountLogin } from '@/api/login'
 import { getCurrentUser } from '@/api/user'
 import { useStore } from 'vuex'
-import { encryptPassword } from '@/utils/http'
+import { encryptPassword } from '@/utils/crypto'
 
 const router = useRouter()
 const store = useStore()

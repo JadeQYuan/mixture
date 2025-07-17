@@ -104,6 +104,7 @@
           :prop="column.prop" 
           :label="column.label" 
           :width="column.width"
+          :fixed="column.fixed"
           show-overflow-tooltip
           :resizable="true"
         >
@@ -190,7 +191,6 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
-import { pageSizeCalculators } from '../../utils/pagination'
 
 // Props 定义
 const props = defineProps({
@@ -234,16 +234,6 @@ const props = defineProps({
     type: String,
     default: 'id'
   },
-  // 分页大小选项
-  pageSizes: {
-    type: Array,
-    default: () => [10, 15, 20, 25, 30, 50, 100]
-  },
-  // 页面大小计算器名称
-  pageSizeCalculator: {
-    type: String,
-    default: 'default'
-  },
   // 操作按钮配置
   actionButtons: {
     type: Array,
@@ -274,7 +264,7 @@ const emit = defineEmits([
 
 // 响应式数据
 const searchForm = reactive({})
-const pageSize = ref(5)
+const pageSize = ref(10)
 const currentPage = ref(1)
 
 // 初始化搜索表单
@@ -285,34 +275,22 @@ const initSearchForm = () => {
   })
 }
 
-// 计算合适的每页显示条数
-function calculatePageSize() {
-  if (props.pageSizeCalculator && pageSizeCalculators[props.pageSizeCalculator]) {
-    pageSize.value = pageSizeCalculators[props.pageSizeCalculator]()
-  }
-}
-
 // 搜索处理
 function handleSearch() {
   currentPage.value = 1
-  
   // 处理搜索参数，特别是时间范围
   const searchParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
-  
   // 处理时间范围参数
   props.searchFields.forEach(field => {
     if (field.type === 'datetimerange' || field.type === 'daterange') {
       const timeValue = searchForm[field.key]
       if (Array.isArray(timeValue) && timeValue.length === 2) {
-        // 将时间范围数组转换为开始和结束时间
         searchParams[`startTime`] = timeValue[0]
         searchParams[`endTime`] = timeValue[1]
-        // 保留原始时间范围参数
         searchParams[field.key] = timeValue
       }
     }
   })
-  
   emit('search', searchParams)
 }
 
@@ -320,48 +298,34 @@ function handleSearch() {
 function resetSearch() {
   initSearchForm()
   currentPage.value = 1
-  
-  // 处理重置参数，特别是时间范围
   const resetParams = { page: currentPage.value, pageSize: pageSize.value }
-  
-  // 处理时间范围参数
   props.searchFields.forEach(field => {
     if (field.type === 'datetimerange' || field.type === 'daterange') {
       const timeValue = searchForm[field.key]
       if (Array.isArray(timeValue) && timeValue.length === 2) {
-        // 将时间范围数组转换为开始和结束时间
         resetParams[`startTime`] = timeValue[0]
         resetParams[`endTime`] = timeValue[1]
-        // 保留原始时间范围参数
         resetParams[field.key] = timeValue
       }
     }
   })
-  
   emit('reset', resetParams)
 }
 
 // 页码变化
 function handlePageChange(page) {
   currentPage.value = page
-  
-  // 处理分页参数，特别是时间范围
-  const pageParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
-  
-  // 处理时间范围参数
+  const pageParams = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value }
   props.searchFields.forEach(field => {
     if (field.type === 'datetimerange' || field.type === 'daterange') {
       const timeValue = searchForm[field.key]
       if (Array.isArray(timeValue) && timeValue.length === 2) {
-        // 将时间范围数组转换为开始和结束时间
         pageParams[`startTime`] = timeValue[0]
         pageParams[`endTime`] = timeValue[1]
-        // 保留原始时间范围参数
         pageParams[field.key] = timeValue
       }
     }
   })
-  
   emit('page-change', pageParams)
 }
 
@@ -369,24 +333,17 @@ function handlePageChange(page) {
 function handleSizeChange(size) {
   pageSize.value = size
   currentPage.value = 1
-  
-  // 处理分页参数，特别是时间范围
   const sizeParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
-  
-  // 处理时间范围参数
   props.searchFields.forEach(field => {
     if (field.type === 'datetimerange' || field.type === 'daterange') {
       const timeValue = searchForm[field.key]
       if (Array.isArray(timeValue) && timeValue.length === 2) {
-        // 将时间范围数组转换为开始和结束时间
         sizeParams[`startTime`] = timeValue[0]
         sizeParams[`endTime`] = timeValue[1]
-        // 保留原始时间范围参数
         sizeParams[field.key] = timeValue
       }
     }
   })
-  
   emit('size-change', sizeParams)
 }
 
@@ -445,14 +402,11 @@ watch(() => props.total, () => {
 // 生命周期
 onMounted(() => {
   initSearchForm()
-  calculatePageSize()
-  
-  // 监听窗口大小变化
-  window.addEventListener('resize', calculatePageSize)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', calculatePageSize)
+  // 监听窗口大小变化
+  // window.removeEventListener('resize', calculatePageSize)
 })
 </script>
 
@@ -497,7 +451,7 @@ onUnmounted(() => {
   font-size: 18px !important;
   flex: 1;
   min-height: 0;
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 350px);
   overflow: auto;
 }
 

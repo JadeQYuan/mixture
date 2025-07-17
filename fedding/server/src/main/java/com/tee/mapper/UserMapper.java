@@ -40,7 +40,7 @@ public interface UserMapper {
     User getUserInfoByAccount(@Param("password") String password, @Param("account") String account);
 
     @Insert("INSERT INTO user_info (user_name, account, role_code, remark, del_flag, create_time, update_time) " +
-            "VALUES (#{userName}, #{account},  #{roleCode}, #{remark}, 1, datetime('now'), datetime('now'))")
+            "VALUES (#{userName}, #{account},  #{roleCode}, #{remark}, 1, datetime('now', 'localtime'), datetime('now', 'localtime'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertUserInfo(User user);
 
@@ -52,19 +52,19 @@ public interface UserMapper {
         "<if test='account != null'>account = #{account},</if>",
         "<if test='roleCode != null'>role_code = #{roleCode},</if>",
         "<if test='remark != null'>remark = #{remark},</if>",
-        "update_time = datetime('now')",
+        "update_time = datetime('now', 'localtime')",
         "</set>",
         "WHERE id = #{id}",
         "</script>"
     })
     void updateUserInfo(User user);
 
-    @Update("UPDATE user_info SET password = #{password}, update_time = datetime('now') WHERE id = #{id}")
+    @Update("UPDATE user_info SET password = #{password}, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     void updatePassword(User user);
 
-    @Update("UPDATE user_info SET face_path = #{facePath}, face_feature = #{faceFeature}, update_time = datetime('now') WHERE id = #{id}")
+    @Update("UPDATE user_info SET face_path = #{facePath}, face_feature = #{faceFeature}, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     void updateFaceInfo(Integer id, String facePath, String faceFeature);
 
-    @Update("UPDATE user_info SET del_flag = 0, update_time = datetime('now') WHERE id = #{id}")
+    @Update("UPDATE user_info SET del_flag = 0, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     void deleteUserInfo(@Param("id") Integer id);
 }

@@ -1,5 +1,7 @@
 package com.tee.pojo;
 
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -16,5 +18,13 @@ public class MixesQo extends PageQo {
     /** 材料名称 */
     private String materialName;
 
-    private Integer status;
+    private List<Integer> status;
+
+    // 时间范围查询字段
+    private String applyStartTime;
+    private String applyEndTime;
+    private String feedingStartTime;
+    private String feedingEndTime;
+    private String returnStartTime;
+    private String returnEndTime;
 } 

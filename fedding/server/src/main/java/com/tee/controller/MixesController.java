@@ -70,6 +70,14 @@ public class MixesController {
     }
 
     /**
+     * 获取加料统计列表
+     */
+    @GetMapping("/stats")
+    public PageVo<MixesVo> getMixesStatsList(MixesQo mixesQo) {
+        return mixesService.getMixesStatsList(mixesQo);
+    }
+
+    /**
      * 获取重量数据
      */
     @GetMapping("/weight")

@@ -1,9 +1,9 @@
 // 卡片显示字段配置
 export const displayFields = [
-  {
-    prop: 'tankNo',
-    label: '料罐',
-  }
+  // {
+  //   prop: 'tankNo',
+  //   label: '料罐',
+  // }
 ]
 
 // 操作按钮配置

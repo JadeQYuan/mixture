@@ -88,8 +88,6 @@ async function handleSearch(params) {
     const response = await getTankList(params)
     records.value = response.data || []
     total.value = response.total || 0
-  } catch (error) {
-    ElMessage.error('获取料罐列表失败')
   } finally {
     loading.value = false
   }
@@ -161,8 +159,8 @@ function handleFooterAction({ action, formData }) {
 }
 
 async function handleDialogOk(formData) {
-  dialog.loading = true
   try {
+    dialog.loading = true
     if (dialog.mode === 'add') {
       await createTank(formData)
       ElMessage.success('新增料罐成功')
@@ -177,8 +175,6 @@ async function handleDialogOk(formData) {
     }
     dialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
-  } catch (error) {
-    ElMessage.error(dialog.mode === 'add' ? '新增料罐失败' : '编辑料罐失败')
   } finally {
     dialog.loading = false
   }
@@ -198,10 +194,9 @@ async function handleDeleteTank() {
   try {
     await deleteTank(records.value[index].id)
     ElMessage.success('删除料罐成功')
+  } finally {
     deleteDialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
-  } catch (error) {
-    ElMessage.error('删除料罐失败')
   }
 }
 
@@ -213,6 +208,5 @@ onMounted(() => {
 
 <style scoped>
 .tank-manage-container {
-  height: 100vh;
 }
 </style> 

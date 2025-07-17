@@ -25,6 +25,11 @@ export function getFeedRecordList(params) {
   return http.get('/service/mixes/recordList', { params })
 }
 
+// 获取领料记录列表
+export function getFeedStatsList(params) {
+  return http.get('/service/mixes/stats', { params })
+}
+
 // 加料申请
 export function feedApply(data) {
   return http.post('/service/mixes/apply', data)

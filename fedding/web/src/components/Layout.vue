@@ -21,13 +21,15 @@
         </el-menu-item>
 
       </el-menu>
-      <div class="user-info-box">
-        <img class="user-avatar" :src="userAvatar" alt="头像" />
-        <div class="user-account">{{ userAccount }}</div>
-        <div class="user-name">{{ userName }}</div>
-      </div>
-      <div class="logout-btn-box">
-        <el-button color="rgba(140, 166, 191, 1)" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
+      <div class="user-section">
+        <div class="user-info-box">
+          <img class="user-avatar" :src="userAvatar" alt="头像" />
+          <div class="user-account">{{ userAccount }}</div>
+          <div class="user-name">{{ userName }}</div>
+        </div>
+        <div class="logout-btn-box">
+          <el-button color="rgba(140, 166, 191, 1)" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
+        </div>
       </div>
     </div>
     <div class="main-content">
@@ -157,6 +159,13 @@ function logout() {
   background: #e3f0fd !important;
   color: #1976d2 !important;
 }
+.user-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: 0;
+}
 .user-info-box {
   display: flex;
   flex-direction: column;
@@ -188,6 +197,7 @@ function logout() {
   display: flex;
   justify-content: center;
   background: #f5f5f5;
+  width: 100%;
 }
 .logout-btn-box .el-button {
   font-size: 0.8em !important;

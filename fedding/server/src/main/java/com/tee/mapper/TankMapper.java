@@ -24,13 +24,12 @@ public interface TankMapper {
             "<script>",
             "SELECT t.id, t.tank_no as tankNo, t.remark, t.update_time as updateTime, u.user_name as userName, u.account as userAccount " +
             "FROM tank_info t ",
-            "LEFT JOIN user_info u ON t.user_id = u.id " +
+            "LEFT JOIN user_info u ON t.user_id = u.id and u.del_flag = 1 " +
             "<where>",
             "<if test='tankNo != null and tankNo != \"\"'>",
             " t.tank_no LIKE '%' || #{tankNo} || '%'",
             "</if>",
             "and t.del_flag = 1",
-            "and u.del_flag = 1",
             "</where>",
             "ORDER BY t.create_time DESC",
             "</script>"
@@ -85,7 +84,7 @@ public interface TankMapper {
      * @return 影响行数
      */
     @Insert("INSERT INTO tank_info (tank_no, remark, user_id, del_flag, create_time, update_time) " +
-            "VALUES (#{tankNo}, #{remark}, #{userId}, 1, datetime('now'), datetime('now'))")
+            "VALUES (#{tankNo}, #{remark}, #{userId}, 1, datetime('now', 'localtime'), datetime('now', 'localtime'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Tank tank);
 
@@ -94,10 +93,10 @@ public interface TankMapper {
      * @param tank 料罐信息对象
      * @return 影响行数
      */
-    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, update_time = datetime('now') WHERE id = #{id}")
+    @Update("UPDATE tank_info SET tank_no = #{tankNo}, remark = #{remark}, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     int updateById(Tank tank);
 
-    @Update("UPDATE tank_info SET user_id = #{userId} WHERE id = #{id}")
+    @Update("UPDATE tank_info SET user_id = #{userId}, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     int updateUser(int id, Integer userId);
 
     /**
@@ -105,6 +104,6 @@ public interface TankMapper {
      * @param id 料罐ID
      * @return 影响行数
      */
-    @Update("UPDATE tank_info SET del_flag = 0, update_time = datetime('now') WHERE id = #{id}")
+    @Update("UPDATE tank_info SET del_flag = 0, update_time = datetime('now', 'localtime') WHERE id = #{id}")
     int deleteById(Integer id);
 }

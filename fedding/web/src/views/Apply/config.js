@@ -2,10 +2,10 @@ import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions } from '@/utils/constant'
 
 // 卡片显示字段配置
 export const displayFields = [
-  {
-    prop: 'tankNo',
-    label: '料罐',
-  }
+  // {
+  //   prop: 'tankNo',
+  //   label: '料罐',
+  // }
 ]
 
 // 操作按钮配置
@@ -95,18 +95,6 @@ export function getFeedApplyFormConfig() {
       planWeight: [
         { required: true, message: '请输入计划加料重量', trigger: 'blur' }
       ]
-    },
-    // 表单样式配置
-    labelWidth: '120px',
-    labelPosition: 'left',
-    // 底部按钮配置
-    footerButtons: [
-      {
-        action: 'submit',
-        text: '提交申请',
-        type: 'primary',
-        size: 'large'
-      }
-    ]
+    }
   }
 } 

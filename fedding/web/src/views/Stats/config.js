@@ -1,4 +1,13 @@
-// FeedRecord页面配置
+// Stats页面配置
+
+// 生成默认时间范围：过去4小时到今晚结束
+function getDefaultTimeRange() {
+  const now = new Date()
+  const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59) // 今晚结束
+  const startTime = new Date(now.getTime() - 4 * 60 * 60 * 1000) // 过去4小时
+  
+  return [startTime, endTime]
+}
 
 import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions, getLabel } from '@/utils/constant'
 
@@ -26,6 +35,25 @@ export const searchFields = [
     type: 'select',
     placeholder: '请选择材料名称',
     options: getOptions(MATERIAL_MAP)
+  },
+  {
+    key: 'timeType',
+    label: '查询时间',
+    type: 'select',
+    placeholder: '请选择时间类型',
+    options: [
+      { label: '申请时间', value: 'applyTime' },
+      { label: '加料时间', value: 'feedingTime' },
+      { label: '退料时间', value: 'returnTime' }
+    ],
+    defaultValue: 'applyTime'
+  },
+  {
+    key: 'timeRange',
+    label: '时间范围',
+    type: 'datetimerange',
+    placeholder: '请选择时间范围',
+    defaultValue: getDefaultTimeRange()
   },
 ]
 
@@ -114,41 +142,14 @@ export const columns = [
     label: '实际用料',
     width: '100',
     render: (row) => `${row.actualWeight} kg`
-  },
-  {
-    prop: 'remark',
-    label: '备注',
-    width: '200'
-  },
-  {
-    type: 'actions',
-    label: '操作',
-    width: '100',
-    fixed: 'right'
   }
 ]
 
-export const actionButtons = [
+export const headerButtons = [
   {
-    action: 'remark',
-    text: '备注',
-    type: 'primary',
-    size: 'large'
+    action: 'export',
+    text: '导出',
+    type: 'success',
+    size: 'large',
   }
-]
-
-export const remarkDialogConfig = {
-  title: '备注',
-  width: '500px',
-  fields: [
-    {
-      prop: 'remark',
-      label: '备注',
-      type: 'textarea',
-      placeholder: '请输入备注',
-      rows: 4,
-      required: false,
-      style: { width: '100%' }
-    }
-  ]
-} 
+] 

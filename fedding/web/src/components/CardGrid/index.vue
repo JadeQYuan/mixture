@@ -40,12 +40,8 @@
           :key="item.id || index"
           class="grid-card"
           shadow="hover"
+          :header="getHeader(item)"
         >
-          <template #header>
-            <div class="card-header">
-              <span>{{ item.tankNo }}</span>
-            </div>
-          </template>
           <!-- 卡片内容 -->
           <div class="card-content">
             <!-- 信息展示区域 -->
@@ -87,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 
 // Props 定义
@@ -136,6 +132,16 @@ const props = defineProps({
   refreshInterval: {
     type: Number,
     default: 5000
+  },
+  // 卡片header字段名
+  headerField: {
+    type: String,
+    default: ''
+  },
+  // 卡片header渲染函数
+  headerRender: {
+    type: Function,
+    default: null
   }
 })
 
@@ -192,6 +198,17 @@ function handleHeaderButtonClick(action) {
   emit('header-action', { action })
 }
 
+// 获取卡片header
+function getHeader(item) {
+  if (props.headerRender) {
+    return props.headerRender(item)
+  }
+  if (props.headerField) {
+    return item[props.headerField] || ''
+  }
+  return ''
+}
+
 // 生命周期
 onMounted(() => {
   startAutoRefresh()
@@ -200,6 +217,17 @@ onMounted(() => {
 onUnmounted(() => {
   stopAutoRefresh()
 })
+
+// 新增：监听autoRefresh和refreshInterval变化，动态启停定时器
+watch(
+  () => [props.autoRefresh, props.refreshInterval],
+  ([newAuto, newInterval], [oldAuto, oldInterval]) => {
+    stopAutoRefresh()
+    if (newAuto) {
+      startAutoRefresh()
+    }
+  }
+)
 </script>
 
 <style scoped>
@@ -238,6 +266,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   padding: 0;
+  max-height: 650px;
 }
 
 .grid-card {
@@ -339,6 +368,13 @@ onUnmounted(() => {
   margin-right: 8px;
 }
 
+/* 卡片header字体大小设置 */
+:deep(.grid-card .el-card__header) {
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .card-grid {
@@ -351,6 +387,11 @@ onUnmounted(() => {
   
   .card-grid-card {
     padding: 24px 20px 16px 20px;
+  }
+  
+  /* 移动端卡片header字体大小 */
+  :deep(.grid-card .el-card__header) {
+    font-size: 16px !important;
   }
 }
 </style> 

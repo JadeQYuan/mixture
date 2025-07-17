@@ -7,6 +7,7 @@ import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { createStore } from 'vuex'
 import { setupMessage } from './utils/message'
+import { ElMessage } from 'element-plus'
 
 const store = createStore({
   state() {
@@ -42,6 +43,22 @@ async function startApp() {
   
   // 设置消息管理
   setupMessage()
+  
+  // 全局异常处理
+  app.config.errorHandler = (err, vm, info) => {
+    // 控制台输出
+    console.error('全局异常:', err, info)
+    // 判断是否为 HTTP 异常（如 axios/fetch）
+    if (
+      (err && err.isAxiosError) ||
+      (err && err.response && err.config)
+    ) {
+      // HTTP异常，交由拦截器处理，这里不弹窗
+      return
+    }
+    // 其他异常弹窗
+    ElMessage.error(err?.message || '发生未知错误')
+  }
   
   app.mount('#app')
 }

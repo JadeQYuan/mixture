@@ -1,7 +1,6 @@
 package com.tee.mapper;
 
 import com.tee.entity.Mixes;
-import com.tee.entity.Tank;
 import com.tee.pojo.MixesQo;
 import com.tee.pojo.MixesVo;
 import org.apache.ibatis.annotations.*;
@@ -23,7 +22,7 @@ public interface MixesMapper {
     @Insert("INSERT INTO mixes_info (tank_id, tank_no, apply_user_id, shift_type, material_name, product_spec, plan_weight, " +
             "apply_time, status, create_time, update_time) " +
             "VALUES (#{tankId}, #{tankNo}, #{applyUserId}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
-            "datetime('now'), 0, datetime('now'), datetime('now'))")
+            "datetime('now', 'localtime'), 0, datetime('now', 'localtime'), datetime('now', 'localtime'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Mixes mixes);
 
@@ -68,8 +67,20 @@ public interface MixesMapper {
         "<if test='materialName != null and materialName != \"\"'>",
         "AND f.material_name = #{materialName} ",
         "</if>",
-        "<if test='status != null '>",
-        "AND f.status = #{status} ",
+        "<if test='status != null and status.size > 0'>",
+        "AND f.status IN ",
+        "<foreach collection='status' item='item' open='(' separator=',' close=')'>",
+        "#{item}",
+        "</foreach>",
+        "</if>",
+        "<if test='applyStartTime != null and applyEndTime != null'>",
+        "AND f.apply_time &gt;= #{applyStartTime} AND f.apply_time &lt;= #{applyEndTime}",
+        "</if>",
+        "<if test='feedingStartTime != null and feedingEndTime != null'>",
+        "AND f.feeding_time &gt;= #{feedingStartTime} AND f.feeding_time &lt;= #{feedingEndTime}",
+        "</if>",
+        "<if test='returnStartTime != null and returnEndTime != null'>",
+        "AND f.return_time &gt;= #{returnStartTime} AND f.return_time &lt;= #{returnEndTime}",
         "</if>",
         "</where>",
         "ORDER BY f.create_time DESC",
@@ -79,17 +90,17 @@ public interface MixesMapper {
 
     @Update("UPDATE mixes_info SET bottom_weight = #{bottomWeight}, full_weight = #{fullWeight}, " +
             "flame_retardant_weight = #{flameRetardantWeight}, " +
-            "feeding_time = datetime('now'), feeding_user_id = #{feedingUserId}, " +
+            "feeding_time = datetime('now', 'localtime'), feeding_user_id = #{feedingUserId}, " +
             "status = 1 WHERE id = #{id}")
     void executeMixes(Mixes mixes);
 
     @Update("UPDATE mixes_info SET return_weight = #{returnWeight}, actual_weight = #{actualWeight}, " +
-            "return_time = datetime('now'), status = 2 " +
+            "return_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 2 " +
             "WHERE id = #{id}")
     void executeReturn(Mixes mixes);
 
     @Update("UPDATE mixes_info SET remark = #{remark}, " +
-            "update_time = datetime('now'), status = 2 " +
+            "update_time = datetime('now', 'localtime'), status = 2 " +
             "WHERE id = #{id}")
     void updateRemark(Mixes mixes);
 
