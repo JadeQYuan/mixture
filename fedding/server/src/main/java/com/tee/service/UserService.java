@@ -3,6 +3,8 @@ package com.tee.service;
 import com.alibaba.fastjson.JSONObject;
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.FaceInfo;
+import com.arcsoft.face.IrLivenessInfo;
+import com.arcsoft.face.toolkit.ImageInfo;
 import com.arcsoft.face.toolkit.ImageInfoEx;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -15,7 +17,6 @@ import com.tee.util.ArcfaceUtils;
 import com.tee.util.Base64Util;
 import com.tee.util.DateUtil;
 import com.tee.util.TokenUtil;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.arcsoft.face.toolkit.ImageFactory.getGrayData;
 
 @Slf4j
 @Service
@@ -143,10 +144,17 @@ public class UserService {
             fileTemp.getParentFile().mkdirs();
         }
         multipartFile.transferTo(fileTemp);
+        // 活体检测
+        //checkIRLivenessFace(fileTemp);
+
         List<FaceInfo> faceInfo = arcFaceService.detectFace(ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
         if (CollectionUtils.isEmpty(faceInfo)) {
             fileTemp.delete();
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
+        }
+        if (faceInfo.size() > 1) {
+            fileTemp.delete();
+            throw new AppException("检测到多张人脸，请保持镜头只有一人！");
         }
         FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
         if (faceFeature == null) {
@@ -202,10 +210,16 @@ public class UserService {
             file.getParentFile().mkdirs();
         }
         multipartFile.transferTo(file);
+        // 活体检测
+        // checkIRLivenessFace(fileTemp);
+
         ImageInfoEx imageInfoEx1 = com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx();
         List<FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoEx1);
         if (CollectionUtils.isEmpty(faceInfo)) {
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
+        }
+        if (faceInfo.size() > 1) {
+            throw new AppException("检测到多张人脸，请保持镜头只有一人！");
         }
         FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, imageInfoEx1);
         // int liveness = arcFaceService.getLiveness(imageInfoEx1); // 活体检测
@@ -252,5 +266,28 @@ public class UserService {
 
         }
         return userId;
+    }
+
+    /**
+     * IR活体检测
+     *
+     * @param fileTemp
+     */
+    private void checkIRLivenessFace(File fileTemp) {
+        ImageInfo imageInfoGray = getGrayData(fileTemp);
+        List<IrLivenessInfo> irLiveness = arcFaceService.getIRLiveness(imageInfoGray);
+        if (CollectionUtils.isEmpty(irLiveness)) {
+            fileTemp.delete();
+            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
+        }
+        if (irLiveness.size() > 1) {
+            fileTemp.delete();
+            throw new AppException("检测到多张人脸，请保持镜头只有一人！");
+        }
+        int irCode = irLiveness.get(0).getLiveness();
+        if (irCode != 1) {
+            fileTemp.delete();
+            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
+        }
     }
 }
