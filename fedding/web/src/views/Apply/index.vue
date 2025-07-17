@@ -106,7 +106,6 @@ function openApplyDialog(row) {
 
 function closeApplyDialog() {
   autoRefresh.value = true // 关闭弹窗时恢复自动刷新
-  handleRefresh()
   applyDialog.visible = false
   applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 }

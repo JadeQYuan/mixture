@@ -89,7 +89,7 @@ async function handleHeaderAction({ action }) {
     return
   }
   // 2. 拉取所有数据
-  const allRes = await getFeedRecordList(params)
+  const allRes = await getFeedStatsList(params)
   const list = allRes.data || []
     try {
       // 3. 组装导出数据和表头，顺序与columns一致，内容优先用render

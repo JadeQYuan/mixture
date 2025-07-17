@@ -10,7 +10,7 @@ import lombok.Data;
 public class MixesVo {
     private Integer id;
     private Integer tankId;
-    private Integer tankNo;
+    private String tankNo;
     private String shiftType;
     private String materialName;
     private String productSpec;

@@ -20,7 +20,7 @@
       :visible="feedDialog.visible"
       :title="feedDialogConfig.title"
       :width="feedDialogConfig.width"
-      @update:visible="val => feedDialog.visible = val"
+      @update:visible="closeFeedDialog"
     >
       <Form
         :fields="feedDialogConfig.fields"
@@ -140,10 +140,6 @@ function handleHeaderAction({ action }) {
   }
 }
 
-
-
-
-
 // 加料对话框相关函数
 function openFeedDialog(index) {
   feedDialog.visible = true
@@ -181,8 +177,8 @@ function handleNextStep(step) {
     if (!feedDialog.form.bottomWeight) {
       ElMessage.warning('正在获取底罐重量数据，请稍候');
     } else {
-// 底罐重量确定，进入第二步
-stopWeightTimer()
+      // 底罐重量确定，进入第二步
+      stopWeightTimer()
       feedDialog.step = step
       // 启动第二步定时器，立即获取加料重量
       startWeightTimer(1)

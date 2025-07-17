@@ -10,7 +10,7 @@ import lombok.Data;
 public class Mixes {
     private Integer id;                        // 加料记录ID，主键
     private Integer tankId;                    // 料罐ID（关联tank_info表）
-    private Integer tankNo;                    // 料罐编号
+    private String tankNo;                    // 料罐编号
     private Integer applyUserId;               // 申请用户ID（关联user_info表）
     private String shiftType;                  // 班次类型（day-白班，night-夜班）
     private String materialName;               // 材料名称（10KV、35KV等）

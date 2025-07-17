@@ -50,7 +50,7 @@
     <Dialog
       :visible="photoDialog.visible"
       title="人脸录入"
-      width="900px"
+      width="800px"
       @update:visible="val => {
         photoDialog.visible = val
         if (!val) closePhotoDialog()
@@ -138,7 +138,7 @@
     <Dialog
       :visible="photoPreviewDialog.visible"
       title="照片预览"
-      width="700px"
+      width="800px"
       @update:visible="val => photoPreviewDialog.visible = val"
     >
       <div style="text-align: center; margin-top: 20px;">
@@ -267,12 +267,6 @@ function handleHeaderAction({ action }) {
   switch (action) {
     case 'add':
       openDialog('add')
-      break
-    case 'batch-import':
-      ElMessage.success('批量导入功能待实现')
-      break
-    case 'export':
-      ElMessage.success('导出功能待实现')
       break
   }
 }
@@ -442,12 +436,10 @@ async function submitPhoto() {
     if (photoDialog.index === null || photoDialog.index === undefined) {
       throw new Error('用户索引为空')
     }
-    
     const user = records.value[photoDialog.index]
     if (!user) {
       throw new Error('用户数据不存在')
     }
-    
     const id = user.id
     if (!id) {
       throw new Error('用户ID为空')
@@ -461,9 +453,6 @@ async function submitPhoto() {
     ElMessage.success('照片提交成功')
     photoDialog.visible = false
     await handleSearch({ page: 1, pageSize: 10 })
-  } catch (error) {
-    console.error('照片提交失败:', error)
-    ElMessage.error(`照片提交失败: ${error.message}`)
   } finally {
     photoDialog.submitLoading = false
   }

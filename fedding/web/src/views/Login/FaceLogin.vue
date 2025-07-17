@@ -57,7 +57,8 @@ async function startCameraStream() {
     if (videoRef.value) {
       videoRef.value.srcObject = await startGlobalCamera()
       isCameraActive.value = true
-      ElMessage.success('摄像头已启动，正在准备识别...')
+      // ElMessage.success('摄像头已启动，正在准备识别...')
+      ElMessage.info('正在识别中...')
     }
   } catch (error) {
     console.error('摄像头启动失败:', error)
@@ -98,7 +99,7 @@ async function captureAndRecognize() {
   
   // 检查重试次数
   if (retryCount >= maxRetryCount) {
-    ElMessage.error('识别失败次数过多，请检查摄像头或网络连接，或联系管理员')
+    ElMessage.error('识别失败次数过多，请检查摄像头或网络连接')
     isProcessing.value = false
     return
   }
@@ -118,47 +119,36 @@ async function captureAndRecognize() {
       return
     }
     
-    ElMessage.info('正在识别中...')
-    
     // 调用人脸识别接口
     const response = await faceLogin(imageFile)
     
-    if (response.code === 200) {
+    if (response) {
       // 识别成功，与密码登录逻辑保持一致
-      const token = response.data
-      if (token) {
-        localStorage.setItem('token', token)
-        
-        // 登录成功后获取用户信息
-        try {
-          const userInfo = await getCurrentUser()
-          store.dispatch('setUserInfo', userInfo.data)
-        } catch (error) {
-          console.error('获取用户信息失败:', error)
-        }
-        
-        ElMessage.success('识别成功，正在跳转...')
-        
-        // 减少延迟跳转时间
-        setTimeout(() => {
-          router.push('/app')
-        }, 500)
-      } else {
-        ElMessage.error('识别成功但token无效，1秒后重试...')
-        retryCount++
-        isProcessing.value = false
-        setTimeout(() => {
-          captureAndRecognize()
-        }, 1000)
+      const token = response
+      localStorage.setItem('token', token)
+      
+      // 登录成功后获取用户信息
+      try {
+        const userInfo = await getCurrentUser()
+        store.dispatch('setUserInfo', userInfo.data)
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
       }
+      
+      ElMessage.success('识别成功，正在跳转...')
+      
+      // 减少延迟跳转时间
+      setTimeout(() => {
+        router.push('/app')
+      }, 500)
     } else {
       // 识别失败，减少等待时间后重新识别
-      ElMessage.error(response.message || '人脸识别失败，1秒后重试')
+      ElMessage.error(response.message || '人脸识别失败')
       retryCount++
       isProcessing.value = false
       setTimeout(() => {
         captureAndRecognize()
-      }, 1000)
+      }, 2000)
     }
   } catch (error) {
     // 错误已由http拦截器处理，不再重复提示
@@ -166,7 +156,7 @@ async function captureAndRecognize() {
     isProcessing.value = false
     setTimeout(() => {
       captureAndRecognize()
-    }, 1000)
+    }, 2000)
   }
 }
 
