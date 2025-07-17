@@ -163,6 +163,7 @@ async function startCamera(customOptions = {}) {
         video: config
       })
       console.log(`摄像头启动成功 (${configType})`)
+      console.log(getCurrentCameraConfig(stream))
       return stream
     } catch (error) {
       console.log(`摄像头启动失败 (${configType}):`, error)
@@ -177,6 +178,51 @@ async function startCamera(customOptions = {}) {
       console.log(`尝试下一个配置...`)
     }
   }
+}
+
+/**
+ * 分步升级摄像头质量：先用最低配置启动，逐步提升到目标配置
+ * @param {string} type 目标配置类型（如 'HD'、'BLURAY'，默认 'MEDIUM'）
+ * @param {object} customOptions 额外自定义配置
+ * @returns {Promise<MediaStream>} 最终达到目标配置的摄像头流
+ */
+export async function startCameraWithUpgrade(type = 'MEDIUM', customOptions = {}) {
+  // 配置升级顺序
+  const configOrder = ['PRELOAD', 'LOW', 'MEDIUM', 'HD', 'BLURAY']
+  // 目标配置在顺序中的索引
+  const targetIndex = configOrder.indexOf(type)
+  const finalIndex = targetIndex >= 0 ? targetIndex : configOrder.indexOf('MEDIUM')
+
+  let stream = null
+  let lastError = null
+
+  // 1. 先用最低配置启动
+  try {
+    const preloadConfig = getCameraConfig('PRELOAD')
+    stream = await navigator.mediaDevices.getUserMedia({ video: preloadConfig })
+  } catch (e) {
+    lastError = e
+    // PRELOAD 都失败直接抛出
+    throw e
+  }
+
+  // 2. 逐步升级到目标配置
+  for (let i = 1; i <= finalIndex; i++) {
+    const configType = configOrder[i]
+    try {
+      // 关闭上一个流
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+      }
+      // 合并自定义配置
+      const config = getCameraConfig(configType, customOptions)
+      stream = await navigator.mediaDevices.getUserMedia({ video: config })
+    } catch (e) {
+      // 升级失败就停在当前配置，返回当前流
+      break
+    }
+  }
+  return stream
 }
 
 /**
@@ -273,6 +319,24 @@ export function getCameraErrorMessage(error) {
   }
   
   return errorMessages[error.name] || error.message || '摄像头启动失败'
+}
+
+/**
+ * 获取摄像头流的实际配置信息（分辨率、帧率等）
+ * @param {MediaStream} stream 摄像头流
+ * @returns {object|null} 配置信息，如 { width, height, frameRate, facingMode }
+ */
+export function getCurrentCameraConfig(stream) {
+  if (!stream) return null
+  const videoTrack = stream.getVideoTracks && stream.getVideoTracks()[0]
+  if (!videoTrack) return null
+  const settings = videoTrack.getSettings ? videoTrack.getSettings() : {}
+  return {
+    width: settings.width,
+    height: settings.height,
+    frameRate: settings.frameRate,
+    facingMode: settings.facingMode
+  }
 }
 
 /**

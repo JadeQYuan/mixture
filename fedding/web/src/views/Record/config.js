@@ -67,7 +67,7 @@ export const columns = [
   {
     prop: 'applyTime',
     label: '申请时间',
-    width: '160'
+    width: '200'
   },
   {
     prop: 'bottomWeight',

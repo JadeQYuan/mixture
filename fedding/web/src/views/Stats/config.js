@@ -1,14 +1,5 @@
 // Stats页面配置
 
-// 生成默认时间范围：过去4小时到今晚结束
-function getDefaultTimeRange() {
-  const now = new Date()
-  const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59) // 今晚结束
-  const startTime = new Date(now.getTime() - 4 * 60 * 60 * 1000) // 过去4小时
-  
-  return [startTime, endTime]
-}
-
 import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions, getLabel } from '@/utils/constant'
 
 export const searchFields = [
@@ -53,7 +44,6 @@ export const searchFields = [
     label: '时间范围',
     type: 'datetimerange',
     placeholder: '请选择时间范围',
-    defaultValue: getDefaultTimeRange()
   },
 ]
 
@@ -95,7 +85,7 @@ export const columns = [
   {
     prop: 'applyTime',
     label: '申请时间',
-    width: '160'
+    width: '200'
   },
   {
     prop: 'bottomWeight',
