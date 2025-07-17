@@ -27,44 +27,27 @@ public interface MixesMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Mixes mixes);
 
-    /**
-     * 根据料罐编号查询加料记录
-     * @param tankNo 料罐编号
-     * @return 加料记录列表
-     */
-    @Select("SELECT f.*, t.tank_no, " +
-            "u1.user_name as apply_user_name, u1.account as apply_user_account, " +
-            "u2.user_name as feeding_user_name, u2.account as feeding_user_account " +
-            "FROM mixes_info f " +
-            "LEFT JOIN tank_info t ON f.tank_id = t.id " +
-            "LEFT JOIN user_info u1 ON f.apply_user_id = u1.id " +
-            "LEFT JOIN user_info u2 ON f.feeding_user_id = u2.id " +
-            "WHERE t.tank_no = #{tankNo} " +
-            "ORDER BY f.create_time DESC")
-    List<Mixes> selectByTankNo(String tankNo);
 
     /**
-     * 根据申请用户ID查询加料记录
-     * @param applyUserId 申请用户ID
-     * @return 加料记录列表
+     * 根据ID查询加料记录
+     * @param id 加料记录ID
+     * @return 加料信息对象
      */
-    @Select("SELECT f.*, t.tank_no, " +
-            "u1.user_name as apply_user_name, u1.account as apply_user_account, " +
-            "u2.user_name as feeding_user_name, u2.account as feeding_user_account " +
+    @Select("SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType," +
+            "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
+            "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
+            "f.return_weight as returnWeight, " +
+            "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark " +
             "FROM mixes_info f " +
-            "LEFT JOIN tank_info t ON f.tank_id = t.id " +
-            "LEFT JOIN user_info u1 ON f.apply_user_id = u1.id " +
-            "LEFT JOIN user_info u2 ON f.feeding_user_id = u2.id " +
-            "WHERE f.apply_user_id = #{applyUserId} " +
-            "ORDER BY f.create_time DESC")
-    List<Mixes> selectByApplyUserId(Integer applyUserId);
+            "WHERE f.id = #{id}")
+    Mixes selectById(Integer id);
 
     @Select({
         "<script>",
         "SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType," +
         "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
         "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
-        "f.return_weight as returnWeight, " +
+        "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
         "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
         "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
         "u2.user_name as feedingUserName, u2.account as feedingUserAccount ",
@@ -100,7 +83,7 @@ public interface MixesMapper {
             "status = 1 WHERE id = #{id}")
     void executeMixes(Mixes mixes);
 
-    @Update("UPDATE mixes_info SET return_weight = #{returnWeight}, " +
+    @Update("UPDATE mixes_info SET return_weight = #{returnWeight}, actual_weight = #{actualWeight}, " +
             "return_time = datetime('now'), status = 2 " +
             "WHERE id = #{id}")
     void executeReturn(Mixes mixes);

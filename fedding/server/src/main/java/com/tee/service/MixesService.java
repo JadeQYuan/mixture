@@ -50,6 +50,8 @@ public class MixesService {
     @Transactional
     public void executeReturn(Mixes mixes) {
         mixes.setReturnUserId(TokenUtil.getToken());
+        Mixes info = mixesMapper.selectById(mixes.getId());
+        mixes.setActualWeight(info.getFullWeight() + info.getFlameRetardantWeight() - mixes.getReturnWeight());
         mixesMapper.executeReturn(mixes);
         tankService.updateUser(mixes.getTankId(), null);
     }
