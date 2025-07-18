@@ -4,13 +4,14 @@
 <configuration monitorInterval="5">
     <!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
 
+
     <!--变量配置-->
     <Properties>
         <!-- 格式化输出：%date表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
         <!-- %logger{36} 表示 Logger 名字最长36个字符 -->
         <property name="LOG_PATTERN" value="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %l - %msg%n" charset="UTF-8" />
         <!-- 定义日志存储的路径 -->
-        <property name="FILE_PATH" value="/opt/treePei/log" />
+        <property name="FILE_PATH" value="${bundle:application:log.path}" />
         <property name="FILE_NAME" value="RookieLeague" />
     </Properties>
 

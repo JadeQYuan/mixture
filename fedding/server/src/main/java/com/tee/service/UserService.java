@@ -27,8 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.List;
 
-import static com.arcsoft.face.toolkit.ImageFactory.getGrayData;
-
 @Slf4j
 @Service
 public class UserService {
@@ -139,31 +137,22 @@ public class UserService {
         if (user == null) {
             throw new AppException("用户不存在！");
         }
-        File fileTemp = new File(new File(facePath).getAbsolutePath() + "/temp.png");
-        if (!fileTemp.getParentFile().exists()) {
-            fileTemp.getParentFile().mkdirs();
-        }
-        multipartFile.transferTo(fileTemp);
+        ArcfaceUtils.ImageInfoMeta imageInfoMeta = ArcfaceUtils.packImageInfoMeta(multipartFile.getInputStream());
         // 活体检测
-        //checkIRLivenessFace(fileTemp);
-
-        List<FaceInfo> faceInfo = arcFaceService.detectFace(ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
+//        checkIRLivenessFace(imageInfoMeta.getImageInfo());
+        List<FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoMeta.getImageInfoEx());
         if (CollectionUtils.isEmpty(faceInfo)) {
-            fileTemp.delete();
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
         }
         if (faceInfo.size() > 1) {
-            fileTemp.delete();
             throw new AppException("检测到多张人脸，请保持镜头只有一人！");
         }
-        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, ArcfaceUtils.packImageInfoEx(fileTemp).getImageInfoEx());
+        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, imageInfoMeta.getImageInfoEx());
         if (faceFeature == null) {
-            fileTemp.delete();
             throw new AppException("人脸特征校验失败，请调整角度重新拍摄！");
         }
         Integer userId = compareFaceFeature(faceFeature, id);
         if (userId != null) {
-            fileTemp.delete();
             throw new AppException("已经存在相似人脸，请调整角度重新拍摄！");
         }
         // 若是修改张片，则将旧张片进行备份
@@ -185,8 +174,10 @@ public class UserService {
         if (fileNew.exists()) {
             fileNew.delete();
         }
-        fileTemp.renameTo(fileNew);
-
+        if (!fileNew.getParentFile().exists()) {
+            fileNew.getParentFile().mkdirs();
+        }
+        multipartFile.transferTo(fileNew);
         userMapper.updateFaceInfo(id, fileNew.getPath(), JSONObject.toJSONString(faceFeature));
     }
 
@@ -204,25 +195,19 @@ public class UserService {
     }
 
     public String loginByFace(MultipartFile multipartFile) throws Exception {
-        File file1 = new File("/face/");
-        File file = new File(file1.getAbsolutePath() + "/face_temp.png");
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        multipartFile.transferTo(file);
+        ArcfaceUtils.ImageInfoMeta imageInfoMeta = ArcfaceUtils.packImageInfoMeta(multipartFile.getInputStream());
+        ImageInfoEx imageInfoEx = imageInfoMeta.getImageInfoEx();
         // 活体检测
-        // checkIRLivenessFace(fileTemp);
-
-        ImageInfoEx imageInfoEx1 = com.tee.util.ArcfaceUtils.packImageInfoEx(file).getImageInfoEx();
-        List<FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoEx1);
+//        checkIRLivenessFace(imageInfoMeta.getImageInfo());
+        List<FaceInfo> faceInfo = arcFaceService.detectFace(imageInfoEx);
         if (CollectionUtils.isEmpty(faceInfo)) {
             throw new AppException("人脸校验失败，请调整角度重新拍摄！");
         }
         if (faceInfo.size() > 1) {
             throw new AppException("检测到多张人脸，请保持镜头只有一人！");
         }
-        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, imageInfoEx1);
-        // int liveness = arcFaceService.getLiveness(imageInfoEx1); // 活体检测
+        FaceFeature faceFeature = arcFaceService.extractFaceFeature(faceInfo, imageInfoEx);
+        // int liveness = arcFaceService.getLiveness(imageInfoEx); // 活体检测
 
         Integer userId = compareFaceFeature(faceFeature, null);
         if (StringUtils.isEmpty(userId)) {
@@ -271,22 +256,18 @@ public class UserService {
     /**
      * IR活体检测
      *
-     * @param fileTemp
+     * @param imageInfoGray
      */
-    private void checkIRLivenessFace(File fileTemp) {
-        ImageInfo imageInfoGray = getGrayData(fileTemp);
+    private void checkIRLivenessFace(ImageInfo imageInfoGray) {
         List<IrLivenessInfo> irLiveness = arcFaceService.getIRLiveness(imageInfoGray);
         if (CollectionUtils.isEmpty(irLiveness)) {
-            fileTemp.delete();
             throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
         }
         if (irLiveness.size() > 1) {
-            fileTemp.delete();
             throw new AppException("检测到多张人脸，请保持镜头只有一人！");
         }
         int irCode = irLiveness.get(0).getLiveness();
         if (irCode != 1) {
-            fileTemp.delete();
             throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
         }
     }
