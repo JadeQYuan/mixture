@@ -44,7 +44,7 @@ export const columns = [
       if (row.facePath) {
         return `<a href="javascript:void(0)" style="color: #409eff; text-decoration: none; cursor: pointer;" data-row-id="${row.id}">查看</a>`
       } else {
-        return `<span style="color: #999;">-</span>`
+        return ``
       }
     }
   },
@@ -52,7 +52,6 @@ export const columns = [
     prop: 'remark',
     label: '描述',
     width: '240',
-    render: (row) => row.remark || '-'
   },
   {
     type: 'actions',

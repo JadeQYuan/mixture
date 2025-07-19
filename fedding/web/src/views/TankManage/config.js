@@ -22,7 +22,7 @@ export const columns = [
     prop: 'currentUser',
     label: '当前用户',
     width: '160',
-    render: (row) => row.userAccount ? `${row.userName}(${row.userAccount})` : '-'
+    render: (row) => row.userAccount ? `${row.userName}(${row.userAccount})` : ''  // 当前用户(工号)
   },
   {
     prop: 'updateTime',

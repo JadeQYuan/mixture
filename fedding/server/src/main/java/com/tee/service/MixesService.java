@@ -7,6 +7,7 @@ import com.tee.mapper.MixesMapper;
 import com.tee.pojo.MixesQo;
 import com.tee.pojo.MixesVo;
 import com.tee.pojo.PageVo;
+import com.tee.serial.SerialService;
 import com.tee.util.TokenUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class MixesService {
 
     @Autowired
     private TankService tankService;
+
+    @Autowired
+    private SerialService serialService;
 
     public PageVo<MixesVo> getMixesList(MixesQo mixesQo) {
         mixesQo.setStatus(Collections.singletonList(0));
@@ -79,8 +83,9 @@ public class MixesService {
     }
 
     public Double getWeightData() {
-        double weight = Math.random() * 100 + 50;
-        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
+//        double weight = Math.random() * 100 + 50;
+//        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
+        return serialService.readWeight();
     }
 
     public List<Mixes> getTankForReturn() {

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "modbus")
-public class ModbusConfig {
+@ConfigurationProperties(prefix = "serial")
+public class SerialConfig {
 
     /**
      * 串口设备名称，如COM1、COM2等
@@ -48,5 +48,7 @@ public class ModbusConfig {
      * 读取寄存器数量，要读取的连续寄存器个数
      */
     private int quantity = 2;
+
+    private boolean send = false;
 
 }

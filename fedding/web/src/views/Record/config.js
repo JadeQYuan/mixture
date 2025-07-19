@@ -73,19 +73,19 @@ export const columns = [
     prop: 'bottomWeight',
     label: '罐底重量',
     width: '120',
-    render: (row) => `${row.bottomWeight} kg`
+    render: (row) => row.bottomWeight ? `${row.bottomWeight} kg` : ''
   },
   {
     prop: 'fullWeight',
     label: '满罐重量',
     width: '120',
-    render: (row) => `${row.fullWeight} kg`
+    render: (row) => row.fullWeight ? `${row.fullWeight} kg` : ''
   },
   {
     prop: 'flameRetardantWeight',
     label: '阻燃粉重量',
     width: '120',
-    render: (row) => `${row.flameRetardantWeight} kg`
+    render: (row) => row.flameRetardantWeight ? `${row.flameRetardantWeight} kg` : ''
   },
   {
     prop: 'feedingTime',
@@ -107,13 +107,13 @@ export const columns = [
     prop: 'returnWeight',
     label: '退料重量',
     width: '120',
-    render: (row) => `${row.returnWeight} kg`
+    render: (row) => row.returnWeight ? `${row.returnWeight} kg` : ''
   },
   {
     prop: 'actualWeight',
     label: '实际用料',
     width: '100',
-    render: (row) => `${row.actualWeight} kg`
+    render: (row) => row.actualWeight ? `${row.actualWeight} kg` : ''
   },
   {
     prop: 'remark',

@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
+
 @Slf4j
 @Data
 @Configuration
@@ -53,7 +55,7 @@ public class ArcSoftConfig {
         } else {
             sdkkey = linuxsdkkey;
         }*/
-        libpath = path + "\\WIN64";
+        libpath = new File(path).getAbsolutePath() + "\\WIN64";
         FaceEngine faceEngine = new FaceEngine(libpath);
         int errorCode = faceEngine.activeOnline(appid, winsdkkey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
