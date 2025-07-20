@@ -13,5 +13,6 @@ public class TankVo {
     private Integer userId;        // 用户ID
     private String userName;       // 用户姓名
     private String userAccount;        // 用户账号
+    private String createTime;     // 更新时间
     private String updateTime;     // 更新时间
 } 

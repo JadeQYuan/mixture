@@ -29,18 +29,18 @@ public interface UserMapper {
         "</if>",
         "and del_flag = 1",
         "</where>",
-        "ORDER BY create_time DESC",
+        "ORDER BY update_time DESC",
         "</script>"
     })
-    List<User> getUserInfoByName(@Param("userName") String userName, @Param("account") String account);
+    List<User> getUserInfoByName(String userName, String account);
 
-    @Select("SELECT count(0) " +
+    @Select("SELECT id " +
             "FROM user_info WHERE account = #{account} and del_flag = 1")
-    int checkUserByAccount(@Param("account") String account);
+    List<User> checkUserByAccount(String account);
 
     @Select("SELECT id, user_name as userName, account, role_code as roleCode " +
             "FROM user_info WHERE password = #{password} AND account = #{account} and del_flag = 1")
-    User getUserInfoByAccount(@Param("password") String password, @Param("account") String account);
+    User getUserInfoByAccount(String password, String account);
 
     @Insert("INSERT INTO user_info (user_name, account, role_code, remark, del_flag, create_time, update_time) " +
             "VALUES (#{userName}, #{account},  #{roleCode}, #{remark}, 1, datetime('now', 'localtime'), datetime('now', 'localtime'))")
@@ -69,5 +69,5 @@ public interface UserMapper {
     void updateFaceInfo(Integer id, String facePath, String faceFeature);
 
     @Update("UPDATE user_info SET del_flag = 0, update_time = datetime('now', 'localtime') WHERE id = #{id}")
-    void deleteUserInfo(@Param("id") Integer id);
+    void deleteUserInfo(Integer id);
 }

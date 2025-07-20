@@ -29,10 +29,6 @@ const store = createStore({
 
 // 启动应用
 async function startApp() {
-  // 引入 MockJS（仅在开发环境）
-  if (import.meta.env.DEV) {
-    await import('./mock/index.js')
-  }
 
   const app = createApp(App)
   app.use(router)

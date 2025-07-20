@@ -102,15 +102,15 @@ export function getFeedOperationConfig() {
       { prop: 'shiftType', label: '班次', type: 'select', disabled: true, options: getOptions(SHIFT_TYPE_MAP), size: 'large', style: { width: '100%' } },
       { prop: 'materialName', label: '材料名称', type: 'select', disabled: true, options: getOptions(MATERIAL_MAP), size: 'large', style: { width: '100%' } },
       { prop: 'productSpec', label: '产品型号', type: 'input', disabled: true, size: 'large', style: { width: '100%' } },
-      { prop: 'planWeight', label: '计划加料', type: 'number', disabled: true, size: 'large', style: { width: '100%' }, 
-              suffix: 'kg', inputType: 'number', props: { min: 0, step: 1 } },
-      { prop: 'bottomWeight', label: '底罐', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
-              suffix: 'kg', inputType: 'number', disabled: true },
-      { prop: 'fullWeight', label: '满罐', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
-              suffix: 'kg', inputType: 'number', disabled: true, visible: (currentStep) => currentStep >= 1 },
+      { prop: 'planWeight', label: '计划加料', type: 'input', disabled: true, size: 'large', style: { width: '100%' }, 
+              suffix: 'kg' },
+      { prop: 'bottomWeight', label: '底罐', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
+              suffix: 'kg', disabled: true },
+      { prop: 'fullWeight', label: '满罐', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
+              suffix: 'kg', disabled: true, visible: (currentStep) => currentStep >= 1 },
       { prop: 'flameRetardantWeight', label: '阻燃粉', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
               suffix: 'kg', inputType: 'number', disabled: (currentStep) => currentStep !== 2 , visible: (currentStep) => currentStep >= 2, 
-              props: { min: 0, step: 1 } }
+              props: { min: 0, step: 0.1 } }
     ],
     rules: {
       bottomWeight: [ { required: true, message: '请获取底罐重量', trigger: 'blur' } ],

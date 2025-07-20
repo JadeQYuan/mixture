@@ -110,8 +110,8 @@ async function handleHeaderAction({ action }) {
       const ws = XLSX.utils.json_to_sheet(exportData, { header: headers })
       ws['!cols'] = exportColumns.map(col => ({ wch: Math.round(Number(col.width || 120) / 7.5) }))
       const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, ws, '加料记录')
-      XLSX.writeFile(wb, '加料记录.xlsx')
+      XLSX.utils.book_append_sheet(wb, ws, '领料统计')
+      XLSX.writeFile(wb, '领料统计.xlsx')
       ElMessage.success('导出成功')
     } catch (e) {
       ElMessage.error('导出失败')

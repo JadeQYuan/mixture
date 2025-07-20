@@ -91,6 +91,4 @@ public class UserController {
     public void uploadPhoto(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestParam Integer id) throws Exception {
         userService.uploadPhoto(multipartFile, id);
     }
-
-
 }

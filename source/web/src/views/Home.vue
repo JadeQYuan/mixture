@@ -1,6 +1,6 @@
 <template>
   <div class="home-container" @click="goToFace">
-    <h2 class="welcome-title">欢迎使用智能加料管理系统</h2>
+    <h2 class="welcome-title">欢迎使用智能混合料系统</h2>
     <div class="click-hint" :style="hintStyle">
       请点击进入系统
     </div>

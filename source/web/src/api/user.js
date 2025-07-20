@@ -27,7 +27,7 @@ export function updateUserPhoto(id, imageFile) {
 
 // 删除用户
 export function deleteUser(id) {
-  return http.delete(`/api/user/delete`, { data: { userId: id } })
+  return http.delete(`/api/user/delete`, { data: { id: id } })
 }
 
 // 修改密码

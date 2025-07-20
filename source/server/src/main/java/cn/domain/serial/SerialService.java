@@ -31,6 +31,7 @@ public class SerialService {
 
     private byte[] readBuffer;
     private byte[] writeBuffer = new byte[1];
+    private double weight;
 
     /**
      * 连接到串口设备
@@ -45,7 +46,16 @@ public class SerialService {
             serialPort.openPort(1000);
             isConnected = true;
             readBuffer = new byte[12];
+            writeBuffer[0] = 'R';
             log.info("串口连接成功: {}", serialConfig.getSerialPort());
+            if (!serialConfig.isSend()) {
+                new Thread(() -> {
+                    while (true) {
+                        serialPort.readBytes(readBuffer, 11);
+                        weight = parse(new String(readBuffer).trim());
+                    }
+                }).start();
+            }
         } catch (Exception e) {
             log.error("串口连接失败: {} ", serialConfig.getSerialPort(),  e);
             isConnected = false;
@@ -98,10 +108,12 @@ public class SerialService {
 
         try {
             if (serialConfig.isSend()) {
-                serialPort.writeBytes(readBuffer, 1);
+                serialPort.writeBytes(writeBuffer, 1);
+                serialPort.readBytes(readBuffer, 11);
+                return parse(new String(readBuffer).trim());
+            } else {
+                return weight;
             }
-            serialPort.readBytes(readBuffer, 11);
-            return parse(new String(readBuffer).trim());
         } catch (Exception e) {
             isConnected = false;
             log.error("读取重量数据时发生未知错误: ", e);
@@ -110,11 +122,9 @@ public class SerialService {
     }
 
     public double parse(String value) {
-        if (value.startsWith("ww") || value.startsWith("wn") || value.startsWith("wt")) {
+        if (value.startsWith("wn")) {
             if (value.endsWith("kg")) {
                 return Double.parseDouble(value.substring(2, 9));
-            } else if (value.endsWith("lb")) {
-                return Double.parseDouble(value.substring(2, 9)) * 0.453592;
             }
         }
         return 0.0;

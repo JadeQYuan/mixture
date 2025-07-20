@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -36,6 +37,9 @@ public class UserService {
 
     @Autowired
     private ArcFaceService arcFaceService;
+
+    @Autowired
+    private TankService tankService;
 
     @Value("${face.score}")
     private float faceScore;
@@ -83,8 +87,8 @@ public class UserService {
 
     public User addUser(User user) {
         String account = user.getAccount();
-        int count = userMapper.checkUserByAccount(account);
-        if (count > 0) {
+        List<User> userList = userMapper.checkUserByAccount(account);
+        if (!userList.isEmpty()) {
             throw new AppException("工号已存在");
         }
         userMapper.insertUserInfo(user);
@@ -103,8 +107,8 @@ public class UserService {
         if (userInfo == null) {
             throw new AppException("用户不存在");
         }
-        int count = userMapper.checkUserByAccount(user.getAccount());
-        if (count > 0) {
+        List<User> userList = userMapper.checkUserByAccount(user.getAccount());
+        if (!userList.isEmpty() && !Objects.equals(userList.get(0).getId(), user.getId())) {
             throw new AppException("工号已存在");
         }
         userMapper.updateUserInfo(user);
@@ -114,6 +118,9 @@ public class UserService {
         User userInfo = userMapper.getUserInfo(userId);
         if (userInfo == null) {
             throw new AppException("用户不存在");
+        }
+        if (!tankService.getTanksByUserId(userId).isEmpty()) {
+            throw new AppException("用户数据正在使用中");
         }
         // 备份照片
         String facePath1 = userInfo.getFacePath();

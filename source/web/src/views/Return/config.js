@@ -36,16 +36,12 @@ export function getReturnOperationConfig() {
       {
         prop: 'returnWeight',
         label: '退料',
-        type: 'number',
+        type: 'input',
         required: true,
         size: 'large',
         style: { width: '100%' },
         suffix: 'kg',
-        inputType: 'number',
-        props: {
-          min: 0.01,
-          step: 1
-        }
+        disabled: true,
       }
     ],
     rules: {

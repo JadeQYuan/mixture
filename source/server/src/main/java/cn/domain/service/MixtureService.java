@@ -37,7 +37,7 @@ public class MixtureService {
 
     public PageVo<MixtureVo> getMixesList(MixtureQo mixtureQo) {
         mixtureQo.setStatus(Collections.singletonList(0));
-        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize());
+        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
     }
@@ -70,14 +70,14 @@ public class MixtureService {
         mixtureQo.setStatus(Arrays.asList(1, 2));
         mixtureQo.setApplyStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         mixtureQo.setApplyEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize());
+        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
     }
 
     public PageVo<MixtureVo> getMixesStatsList(MixtureQo mixtureQo) {
         mixtureQo.setStatus(Collections.singletonList(2));
-        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize());
+        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");;
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
     }

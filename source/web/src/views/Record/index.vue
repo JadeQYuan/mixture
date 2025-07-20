@@ -65,6 +65,7 @@ async function saveRemark() {
   await saveFeedRemark({ id: remarkRow.value.id, remark: remarkForm.value.remark })
   ElMessage.success('保存成功')
   remarkDialog.value = false
+  handleSearch({ page: 1, pageSize: 10 })
 }
 
 // 查询参数

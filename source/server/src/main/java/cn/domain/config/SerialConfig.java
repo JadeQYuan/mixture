@@ -17,7 +17,7 @@ public class SerialConfig {
     /**
      * 波特率，常用的有9600、19200、38400、57600、115200等
      */
-    private int baudRate = 115200;
+    private int baudRate = 9600;
 
     /**
      * 串口通信校验方式

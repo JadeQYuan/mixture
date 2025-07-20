@@ -82,7 +82,6 @@ public interface MixtureMapper {
         "AND f.return_time &gt;= #{returnStartTime} AND f.return_time &lt;= #{returnEndTime}",
         "</if>",
         "</where>",
-        "ORDER BY f.create_time DESC",
         "</script>"
     })
     List<MixtureVo> selectByCondition(MixtureQo mixtureQo);

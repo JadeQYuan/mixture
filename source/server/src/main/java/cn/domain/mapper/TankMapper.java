@@ -19,7 +19,8 @@ public interface TankMapper {
 
     @Select({
             "<script>",
-            "SELECT t.id, t.tank_no as tankNo, t.remark, t.update_time as updateTime, u.user_name as userName, u.account as userAccount " +
+            "SELECT t.id, t.tank_no as tankNo, t.remark, t.create_time as createTime, t.update_time as updateTime," +
+            " u.user_name as userName, u.account as userAccount " +
             "FROM tank_info t ",
             "LEFT JOIN user_info u ON t.user_id = u.id and u.del_flag = 1 " +
             "<where>",
@@ -28,7 +29,7 @@ public interface TankMapper {
             "</if>",
             "and t.del_flag = 1",
             "</where>",
-            "ORDER BY t.create_time DESC",
+            "ORDER BY t.create_time ASC",
             "</script>"
     })
     List<TankVo> selectByCondition(String tankNo);
@@ -62,7 +63,7 @@ public interface TankMapper {
             "FROM tank_info t " +
             "LEFT JOIN user_info u ON t.user_id = u.id " +
             "WHERE t.user_id = #{userId} and t.del_flag = 1 and u.del_flag = 1")
-    List<Tank> selectByUserId(String userId);
+    List<Tank> selectByUserId(Integer userId);
 
     /**
      * 查询可用料罐（未被占用的料罐）

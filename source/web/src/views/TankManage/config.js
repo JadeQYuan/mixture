@@ -25,8 +25,8 @@ export const columns = [
     render: (row) => row.userAccount ? `${row.userName}(${row.userAccount})` : ''  // 当前用户(工号)
   },
   {
-    prop: 'updateTime',
-    label: '更新时间'
+    prop: 'createTime',
+    label: '创建时间'
   },
   {
     type: 'actions',

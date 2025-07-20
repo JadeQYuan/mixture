@@ -53,12 +53,15 @@ public class TankService {
         getExistingTank(id);
         tankMapper.updateUser(id, userId);
     }
-    public List<Tank> getTanksByUserId(String userId) {
+
+    public List<Tank> getTanksByUserId(Integer userId) {
         return tankMapper.selectByUserId(userId);
     }
+
     public List<Tank> getTanksForApply() {
         return tankMapper.getTanksForApply();
     }
+
     private void insertTank(Tank tank) {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         tank.setCreateTime(now);
