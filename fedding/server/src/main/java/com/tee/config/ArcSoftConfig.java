@@ -44,8 +44,6 @@ public class ArcSoftConfig {
      */
     @Bean
     public FaceEngine faceEngine() {
-        String path = this.getClass().getClassLoader().getResource("").getPath();
-
         /*String sdkkey = "";
         String os = System.getProperty("os.name");
         if (os.toLowerCase().startsWith("win")) {
@@ -55,7 +53,7 @@ public class ArcSoftConfig {
         } else {
             sdkkey = linuxsdkkey;
         }*/
-        libpath = new File(path).getAbsolutePath() + "\\WIN64";
+        libpath = new File("").getAbsolutePath() + libpath;
         FaceEngine faceEngine = new FaceEngine(libpath);
         int errorCode = faceEngine.activeOnline(appid, winsdkkey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {

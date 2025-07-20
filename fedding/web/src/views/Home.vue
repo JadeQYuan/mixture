@@ -25,11 +25,11 @@ const speed = 0.5
 const maxDistance = 20
 
 function goToFace() {
-  router.push('/face')
+  router.push('/login/face')
 }
 
 function goToLogin() {
-  router.push('/code')
+  router.push('/login/code')
 }
 
 function animateHint() {

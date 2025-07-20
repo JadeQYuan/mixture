@@ -6,3 +6,6 @@ gen
 
 **/target
 **/*.iml
+
+src/main/resources/static/
+src/main/resources/templates/

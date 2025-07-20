@@ -25,12 +25,12 @@ const routes = [
     meta: { title: '首页' }
   },
   {
-    path: '/code',
+    path: '/login/code',
     name: 'CodeLogin',
     component: CodeLogin,
     meta: { title: '密码登录' }
   },
-  { path: '/face', name: 'FaceLogin', component: FaceLogin, meta: { title: '人脸识别' } },
+  { path: '/login/face', name: 'FaceLogin', component: FaceLogin, meta: { title: '人脸识别' } },
   {
     path: '/app',
     name: 'Layout',
@@ -84,6 +84,10 @@ const routes = [
         meta: { roles: ['MaterialClerk'], title: '用户管理' }
       },
     ]
+  },
+  {
+    path: "/:catchAll(.*)",
+    redirect: "/",
   }
 ]
 

@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 const http = axios.create({
-  baseURL: import.meta.env.DEV ? 'http://localhost:8090' : '/api', // 开发环境直接请求，生产环境使用 /api
+  baseURL: import.meta.env.DEV ? 'http://localhost:8090' : '', // 开发环境直接请求，生产环境使用 /api
   timeout: 10000
 })
 
