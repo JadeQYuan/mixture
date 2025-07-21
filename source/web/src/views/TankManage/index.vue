@@ -1,19 +1,12 @@
 <template>
   <div class="tank-manage-container">
     <DataTable
-      :data="records"
-      :total="total"
-      :loading="loading"
+      ref="table"
       :columns="columns"
       :search-fields="searchFields"
       :action-buttons="actionButtons"
       :header-buttons="headerButtons"
-      @search="handleSearch"
-      @reset="handleReset"
-      @page-change="handlePageChange"
-      @size-change="handleSizeChange"
-      @action="handleAction"
-      @header-action="handleHeaderAction"
+      :request="getTankList"
     />
 
     <!-- 料罐管理对话框 -->
@@ -59,91 +52,57 @@ import { getTankList, createTank, updateTank, deleteTank } from '@/api/tank'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, actionButtons, headerButtons, getTankFormConfig } from './config'
+import { searchFields, columns, getTankFormConfig } from './config'
 
-// 数据
-const records = ref([])
-const loading = ref(false)
-const total = ref(0)
+const table = ref()
+
+const headerButtons = [
+  {
+    key: 'add',
+    text: '新增',
+    type: 'primary',
+    size: 'large',
+    action: () => openDialog('add')
+  }
+] 
+
+const actionButtons = [
+  {
+    key: 'edit',
+    text: '编辑',
+    type: 'primary',
+    size: 'large',
+    action: (row) => openDialog('edit', row)
+  },
+  {
+    key: 'delete',
+    text: '删除',
+    type: 'danger',
+    size: 'large',
+    disabled: (row) => row.status === 'active', // 正常状态禁用删除
+    action: (row) => confirmDelete(row)
+  }
+]
 
 // 对话框
 const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
-  index: null,
   loading: false,
   form: { tankNo: '', remark: '' },
   config: getTankFormConfig()
 })
 
-const deleteDialog = reactive({
-  visible: false,
-  index: null
-})
-
-// 事件处理函数
-async function handleSearch(params) {
-  loading.value = true
-  try {
-    const response = await getTankList(params)
-    records.value = response.data || []
-    total.value = response.total || 0
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleReset(params) {
-  await handleSearch(params)
-}
-
-async function handlePageChange(params) {
-  await handleSearch(params)
-}
-
-async function handleSizeChange(params) {
-  await handleSearch(params)
-}
-
-function handleAction({ action, row, index }) {
-  switch (action) {
-    case 'edit':
-      openDialog('edit', index)
-      break
-    case 'delete':
-      confirmDelete(index)
-      break
-    case 'view':
-      ElMessage.info(`查看料罐: ${row.tankNo}`)
-      break
-  }
-}
-
-function handleHeaderAction({ action }) {
-  switch (action) {
-    case 'add':
-      openDialog('add')
-      break
-    case 'import':
-      ElMessage.success('导入功能待实现')
-      break
-    case 'export':
-      ElMessage.success('导出功能待实现')
-      break
-  }
-}
-
 // 对话框相关函数
-function openDialog(mode, index = null) {
+function openDialog(mode, row) {
   dialog.mode = mode
   dialog.visible = true
-  dialog.index = index
   
   // 更新对话框标题
   dialog.config.title = mode === 'add' ? '新增料罐' : '编辑料罐'
   
-  if (mode === 'edit' && index !== null) {
-    Object.assign(dialog.form, records.value[index])
+  if (mode === 'edit' && row !== null) {
+    Object.assign(dialog.form, row)
   } else {
     dialog.form = { tankNo: '', remark: '' }
   }
@@ -174,14 +133,19 @@ async function handleDialogOk(formData) {
       ElMessage.success('编辑料罐成功')
     }
     dialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 })
+    await table.value.search()
   } finally {
     dialog.loading = false
   }
 }
 
-function confirmDelete(index) {
-  deleteDialog.index = index
+const deleteDialog = reactive({
+  visible: false,
+  id: null
+})
+
+function confirmDelete(row) {
+  deleteDialog.id = row.id
   deleteDialog.visible = true
 }
 
@@ -190,20 +154,16 @@ function closeDeleteDialog() {
 }
 
 async function handleDeleteTank() {
-  const index = deleteDialog.index
   try {
-    await deleteTank(records.value[index].id)
+    await deleteTank(deleteDialog.id)
     ElMessage.success('删除料罐成功')
   } finally {
+    deleteDialog.id = null
     deleteDialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 })
+    await table.value.search()
   }
 }
 
-// 页面加载时获取数据
-onMounted(() => {
-  handleSearch({ page: 1, pageSize: 10 })
-})
 </script>
 
 <style scoped>

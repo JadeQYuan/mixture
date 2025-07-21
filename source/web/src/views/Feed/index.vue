@@ -1,18 +1,11 @@
 <template>
   <div class="feed-manage-container">
     <DataTable
-      :data="records"
-      :total="total"
-      :loading="loading"
+      ref="table"
       :columns="columns"
       :search-fields="searchFields"
       :action-buttons="actionButtons"
-      :header-buttons="headerButtons"
-      @search="handleSearch"
-      @reset="handleReset"
-      @page-change="handlePageChange"
-      @size-change="handleSizeChange"
-      @action="handleAction"
+      :request="getFeedManageList"
     />
 
     <!-- 加料操作对话框 -->
@@ -45,25 +38,20 @@ import { getFeedManageList, submitFeedOperation, getTankWeightData } from '@/api
 import DataTable from '@/components/DataTable'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, actionButtons } from './config'
+import { searchFields, columns } from './config'
 import { getFeedOperationConfig } from './config'
 
-// 数据
-const records = ref([])
-const loading = ref(false)
-const total = ref(0)
+const table = ref()
 
-// 加料对话框配置
-const feedDialogConfig = getFeedOperationConfig()
-
-// 加料对话框
-const feedDialog = reactive({
-  visible: false,
-  step: 0,
-  index: null,
-  loading: false,
-  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: 0, actualWeight: null }
-})
+const actionButtons = [
+  {
+    key: 'feed',
+    text: '加料',
+    type: 'primary',
+    size: 'large',
+    action: ( row ) => openFeedDialog(row)
+  }
+]
 
 // 定时器相关
 const weightTimer = ref(null)
@@ -104,68 +92,32 @@ function stopWeightTimer() {
   }
 }
 
-// 事件处理函数
-async function handleSearch(params) {
-  loading.value = true
-  try {
-    const response = await getFeedManageList(params)
-    records.value = response.data || []
-    total.value = response.total || 0
-  } finally {
-    loading.value = false
-  }
-}
+// 加料对话框配置
+const feedDialogConfig = getFeedOperationConfig()
 
-async function handleReset(params) {
-  await handleSearch(params)
-}
-
-async function handlePageChange(params) {
-  await handleSearch(params)
-}
-
-async function handleSizeChange(params) {
-  await handleSearch(params)
-}
-
-function handleAction({ action, row, index }) {
-  if (action === 'feed') {
-    openFeedDialog(index)
-  }
-}
-
-function handleHeaderAction({ action }) {
-  if (action === 'add') {
-    ElMessage.success('新增功能待实现')
-  }
-}
+// 加料对话框
+const feedDialog = reactive({
+  visible: false,
+  step: 0,
+  loading: false,
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: 0, actualWeight: null }
+})
 
 // 加料对话框相关函数
-function openFeedDialog(index) {
+function openFeedDialog(row) {
   feedDialog.visible = true
   feedDialog.step = 0
   currentStep.value = 0
-  feedDialog.index = index
-  if (index >= 0) {
-    const record = records.value[index]
-    feedDialog.form.id = record.id
-    feedDialog.form.tankId = record.tankId
-    feedDialog.form.tankNo = record.tankNo
-    feedDialog.form.shiftType = record.shiftType
-    feedDialog.form.materialName = record.materialName
-    feedDialog.form.productSpec = record.productSpec
-    feedDialog.form.planWeight = record.planWeight
-    currentTankId.value = record.tankNo // 设置当前罐号
-    // 启动第一步定时器，获取底罐重量
-    startWeightTimer(0)
-  } else {
-    feedDialog.form.tankNo = ''
-    feedDialog.form.shiftType = ''
-    feedDialog.form.materialName = ''
-    feedDialog.form.productSpec = ''
-    feedDialog.form.planWeight = null
-    currentTankId.value = null
-  }
+  feedDialog.form.id = row.id
+  feedDialog.form.tankId = row.tankId
+  feedDialog.form.tankNo = row.tankNo
+  feedDialog.form.shiftType = row.shiftType
+  feedDialog.form.materialName = row.materialName
+  feedDialog.form.productSpec = row.productSpec
+  feedDialog.form.planWeight = row.planWeight
+  currentTankId.value = row.tankNo // 设置当前罐号
+  // 启动第一步定时器，获取底罐重量
+  startWeightTimer(0)
   feedDialog.form.bottomWeight = null
   feedDialog.form.fullWeight = null
   feedDialog.form.flameRetardantWeight = 0
@@ -231,16 +183,11 @@ async function handleFeedSubmit(formData) {
     await submitFeedOperation(formData)
     ElMessage.success('加料数据已提交！')
     feedDialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 }) // 重新获取列表
+    await table.value.search() // 重新获取列表
   } finally {
     feedDialog.loading = false
   }
 }
-
-// 初始化
-onMounted(() => {
-  handleSearch({ page: 1, pageSize: 10 })
-})
 
 onUnmounted(() => {
   stopWeightTimer()

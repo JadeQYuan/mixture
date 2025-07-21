@@ -1,8 +1,6 @@
 // UserManage页面配置
 import { ROLE_MAP, getOptions, getLabel } from '@/utils/constant'
 
-
-
 export const searchFields = [
   {
     key: 'userName',
@@ -57,42 +55,6 @@ export const columns = [
     type: 'actions',
     label: '操作',
     width: '420'
-  }
-]
-
-export const actionButtons = [
-  {
-    action: 'edit',
-    text: '编辑',
-    type: 'primary',
-    size: 'large'
-  },
-  {
-    action: 'photo',
-    text: '人脸录入',
-    type: 'warning',
-    size: 'large'
-  },
-  {
-    action: 'password',
-    text: '修改密码',
-    type: 'info',
-    size: 'large'
-  },
-  {
-    action: 'delete',
-    text: '删除',
-    type: 'danger',
-    size: 'large'
-  }
-]
-
-export const headerButtons = [
-  {
-    action: 'add',
-    text: '新增用户',
-    type: 'primary',
-    size: 'large'
   }
 ]
 

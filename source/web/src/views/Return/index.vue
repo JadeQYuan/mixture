@@ -1,16 +1,12 @@
 <template>
   <div class="return-container">
     <CardGrid
-      :data="records"
-      :loading="loading"
-      :page-loading="pageLoading"
+      ref="card"
       :display-fields="displayFields"
-      :action-buttons="actionButtons"
       :header-buttons="headerButtons"
-      :auto-refresh="autoRefresh"
+      :action-buttons="actionButtons"
       :header-render="item => ('料罐：' + item.tankNo)"
-      @refresh="handleRefresh"
-      @action="handleAction"
+      :request="getReturnTankList"
     />
 
     <!-- 退料操作对话框 -->
@@ -44,27 +40,30 @@ import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/a
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, actionButtons, headerButtons, getReturnOperationConfig } from './config'
+import { displayFields, getReturnOperationConfig } from './config'
 
-// 数据
-const records = ref([])
-const loading = ref(false)
-const pageLoading = ref(false)
+const card = ref()
 
-// 自动刷新配置
-const autoRefresh = ref(true)
+const headerButtons = [
+  {
+    key: 'refresh',
+    text: '刷新',
+    type: 'primary',
+    size: 'large',
+    action: () => card.value.search()
+  }
+] 
 
-// 退料对话框配置
-const returnDialogConfig = getReturnOperationConfig()
-
-// 退料对话框
-const returnDialog = reactive({
-  visible: false,
-  step: 0,
-  index: null,
-  loading: false,
-  form: { id: null, tankId: null, tankNo: '', returnWeight: null }
-})
+// 操作按钮配置
+const actionButtons = [
+  {
+    key: 'return',
+    text: '退料',
+    type: 'warning',
+    size: 'large',
+    action: ( row ) => openReturnDialog(row)
+  }
+]
 
 // 定时器相关
 const weightTimer = ref(null)
@@ -99,51 +98,27 @@ function stopWeightTimer() {
   }
 }
 
-// 事件处理函数
-async function handleRefresh() {
-  loading.value = true
-  try {
-    const response = await getReturnTankList()
-    records.value = response || []
-  } finally {
-    loading.value = false
-  }
-}
+// 退料对话框配置
+const returnDialogConfig = getReturnOperationConfig()
 
-// 页面初始化加载
-async function initPage() {
-  pageLoading.value = true
-  try {
-    await handleRefresh()
-  } finally {
-    pageLoading.value = false
-  }
-}
-
-function handleAction({ action, row, index }) {
-  if (action === 'return') {
-    openReturnDialog(index)
-  }
-}
+// 退料对话框
+const returnDialog = reactive({
+  visible: false,
+  step: 0,
+  loading: false,
+  form: { id: null, tankId: null, tankNo: '', returnWeight: null }
+})
 
 // 退料对话框相关函数
-function openReturnDialog(index) {
-  autoRefresh.value = false // 打开弹窗时关闭自动刷新
+function openReturnDialog(row) {
   returnDialog.visible = true
   returnDialog.step = 0
-  returnDialog.index = index
-  if (index >= 0) {
-    const record = records.value[index]
-    returnDialog.form.id = record.id
-    returnDialog.form.tankId = record.tankId
-    returnDialog.form.tankNo = record.tankNo
-    currentTankId.value = record.tankNo // 设置当前罐号
-    // 启动定时器，获取当前重量
-    startWeightTimer()
-  } else {
-    returnDialog.form.tankNo = ''
-    currentTankId.value = null
-  }
+  returnDialog.form.id = row.id
+  returnDialog.form.tankId = row.tankId
+  returnDialog.form.tankNo = row.tankNo
+  currentTankId.value = row.tankNo // 设置当前罐号
+  // 启动定时器，获取当前重量
+  startWeightTimer()
 }
 
 function handleNextStep(step) {
@@ -168,8 +143,7 @@ function handlePrevStep(step) {
 }
 
 function closeReturnDialog() {
-  handleRefresh()
-  autoRefresh.value = true // 关闭弹窗时恢复自动刷新
+  card.value.search()
   returnDialog.visible = false
   stopWeightTimer()
   returnDialog.step = 0
@@ -186,7 +160,7 @@ async function handleReturnSubmit(formData) {
     await submitReturnOperation(formData)
     ElMessage.success('退料操作成功')
     closeReturnDialog()
-    await handleRefresh() // 重新获取列表
+    await card.value.search() // 重新获取列表
   } finally {
     returnDialog.loading = false
   }
@@ -200,11 +174,6 @@ function handleDialogVisibleUpdate(val) {
     returnDialog.visible = true
   }
 }
-
-// 页面加载时获取数据
-onMounted(() => {
-  initPage()
-})
 
 // 组件卸载时清理定时器
 onUnmounted(() => {

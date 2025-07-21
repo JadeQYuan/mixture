@@ -1,16 +1,12 @@
 <template>
   <div class="feed-apply-container">
     <CardGrid
-      :data="records"
-      :loading="loading"
-      :page-loading="pageLoading"
+      ref="card"
       :display-fields="displayFields"
+      :headerButtons="headerButtons"
       :action-buttons="actionButtons"
-      :header-buttons="headerButtons"
-      :auto-refresh="autoRefresh"
+      :request="getApplyTankList"
       :header-render="item => ('料罐：' + item.tankNo)"
-      @refresh="handleRefresh"
-      @action="handleAction"
     />
 
     <!-- 加料申请对话框 -->
@@ -43,15 +39,30 @@ import { getApplyTankList } from '@/api/tank'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, actionButtons, headerButtons, getFeedApplyFormConfig } from './config'
+import { displayFields, getFeedApplyFormConfig } from './config'
 
-// 数据
-const records = ref([])
-const loading = ref(false)
-const pageLoading = ref(false)
+const card = ref()
 
-// 自动刷新配置
-const autoRefresh = ref(true)
+const headerButtons = [
+  {
+    key: 'refresh',
+    text: '刷新',
+    type: 'primary',
+    size: 'large',
+    action: () => card.value.search()
+  }
+] 
+
+// 操作按钮配置
+const actionButtons = [
+  {
+    key: 'primary',
+    text: '申请',
+    action: 'apply',
+    size: 'large',
+    action: ( row ) => openApplyDialog(row)
+  }
+]
 
 // 加料申请对话框配置
 const applyDialogConfig = getFeedApplyFormConfig()
@@ -63,36 +74,9 @@ const applyDialog = reactive({
   form: { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 })
 
-// 事件处理函数
-async function handleRefresh() {
-  loading.value = true
-  try {
-    const response = await getApplyTankList()
-    records.value = response || []
-  } finally {
-    loading.value = false
-  }
-}
-
-// 页面初始化加载
-async function initPage() {
-  pageLoading.value = true
-  try {
-    await handleRefresh()
-  } finally {
-    pageLoading.value = false
-  }
-}
-
-function handleAction({ action, row, index }) {
-  if (action === 'apply') {
-    openApplyDialog(row)
-  }
-}
-
 // 加料申请对话框相关函数
 function openApplyDialog(row) {
-  autoRefresh.value = false // 打开弹窗时关闭自动刷新
+  // autoRefresh.value = false // 打开弹窗时关闭自动刷新
   applyDialog.visible = true
   applyDialog.form = {
     tankId: row.id,
@@ -105,7 +89,7 @@ function openApplyDialog(row) {
 }
 
 function closeApplyDialog() {
-  autoRefresh.value = true // 关闭弹窗时恢复自动刷新
+  // autoRefresh.value = true // 关闭弹窗时恢复自动刷新
   applyDialog.visible = false
   applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 }
@@ -118,7 +102,7 @@ async function handleApplySubmit(formData) {
     await feedApply(formData)
     ElMessage.success('加料申请已提交！')
     closeApplyDialog()
-    await handleRefresh() // 重新获取列表
+    await card.value.search() // 重新获取列表
   } finally {
     applyDialog.loading = false
   }
@@ -132,11 +116,6 @@ function handleDialogVisibleUpdate(val) {
     applyDialog.visible = true
   }
 }
-
-// 页面加载时获取数据
-onMounted(() => {
-  initPage()
-})
 </script>
 
 <style scoped>

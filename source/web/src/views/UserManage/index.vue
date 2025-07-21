@@ -1,19 +1,12 @@
 <template>
   <div class="user-manage-container">
     <DataTable
-      :data="records"
-      :total="total"
-      :loading="loading"
+      ref="table"
       :columns="columns"
       :search-fields="searchFields"
       :action-buttons="actionButtons"
       :header-buttons="headerButtons"
-      @search="handleSearch"
-      @reset="handleReset"
-      @page-change="handlePageChange"
-      @size-change="handleSizeChange"
-      @action="handleAction"
-      @header-action="handleHeaderAction"
+      :request="getUserList"
       @link-click="handleLinkClick"
     />
 
@@ -169,15 +162,53 @@ import { base64ToFile, canvasToBase64 } from '@/utils/fileUtils'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, actionButtons, headerButtons } from './config'
+import { searchFields, columns } from './config'
 import { getUserFormConfig, getPasswordFormConfig } from './config'
 
 const roles = getOptions(ROLE_MAP)
 
-// 数据
-const records = ref([])
-const loading = ref(false)
-const total = ref(0)
+const table = ref()
+
+const actionButtons = [
+  {
+    key: 'edit',
+    text: '编辑',
+    type: 'primary',
+    size: 'large',
+    action: ( row ) => openDialog('edit', row)
+  },
+  {
+    key: 'photo',
+    text: '人脸录入',
+    type: 'warning',
+    size: 'large',
+    action: ( row ) => openPhotoDialog(row)
+  },
+  {
+    key: 'password',
+    text: '修改密码',
+    type: 'info',
+    size: 'large',
+    action: ( row ) => openPasswordDialog(row)
+  },
+  {
+    key: 'delete',
+    text: '删除',
+    type: 'danger',
+    size: 'large',
+    action: ( row ) => confirmDelete(row)
+  }
+]
+
+const headerButtons = [
+  {
+    key: 'add',
+    text: '新增用户',
+    type: 'primary',
+    size: 'large',
+    action: () => openDialog('add')
+  }
+]
 
 // 对话框配置
 const dialogConfig = getUserFormConfig()
@@ -187,108 +218,16 @@ const passwordDialogConfig = getPasswordFormConfig()
 const dialog = reactive({
   visible: false,
   mode: 'add', // add/edit
-  index: null,
   loading: false,
-  form: { roleCode: '', account: '', userName: '', remark: '' }
+  form: { id: null, roleCode: '', account: '', userName: '', remark: '' }
 })
-
-const deleteDialog = reactive({
-  visible: false,
-  index: null
-})
-
-const photoDialog = reactive({
-  visible: false,
-  index: null,
-  currentPhoto: null,
-  isCapturing: false,
-  cameraLoading: false,
-  submitLoading: false
-})
-
-const passwordDialog = reactive({
-  visible: false,
-  index: null,
-  loading: false,
-  form: { newPassword: '', confirmPassword: '' }
-})
-
-const photoPreviewDialog = reactive({
-  visible: false,
-  imageSrc: ''
-})
-
-
-
-const videoRef = ref()
-
-// 事件处理函数
-async function handleSearch(params) {
-  loading.value = true
-  try {
-    const response = await getUserList(params)
-    records.value = response.data || []
-    total.value = response.total || 0
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleReset(params) {
-  await handleSearch(params)
-}
-
-async function handlePageChange(params) {
-  await handleSearch(params)
-}
-
-async function handleSizeChange(params) {
-  await handleSearch(params)
-}
-
-function handleAction({ action, row, index }) {
-  switch (action) {
-    case 'edit':
-      openDialog('edit', index)
-      break
-    case 'delete':
-      confirmDelete(index)
-      break
-    case 'photo':
-      openPhotoDialog(index)
-      break
-    case 'password':
-      openPasswordDialog(index)
-      break
-  }
-}
-
-function handleHeaderAction({ action }) {
-  switch (action) {
-    case 'add':
-      openDialog('add')
-      break
-  }
-}
-
-// 处理链接点击事件（照片查看）
-function handleLinkClick({ row, index }) {
-  if (row.facePath) {
-    // 显示照片预览 - facePath字段存储的是base64格式的图片数据
-    photoPreviewDialog.imageSrc = `data:image/png;base64,${row.facePath}`
-    photoPreviewDialog.visible = true
-  } else {
-    ElMessage.warning('该用户暂无照片')
-  }
-}
 
 // 对话框相关函数
-function openDialog(mode, index = null) {
+function openDialog(mode, row) {
   dialog.mode = mode
   dialog.visible = true
-  dialog.index = index
-  if (mode === 'edit' && index !== null) {
-    Object.assign(dialog.form, records.value[index])
+  if (mode === 'edit' && row !== null) {
+    Object.assign(dialog.form, row)
   } else {
     dialog.form = { roleCode: '', account: '', userName: '', remark: '' }
   }
@@ -304,23 +243,21 @@ async function handleDialogSubmit(formData) {
       ElMessage.success('新增用户成功')
       dialog.visible = false
       // 新增：刷新后自动弹出人脸录入弹窗（用id查找）
-      await handleSearch({ page: 1, pageSize: 10 })
-      const newId = res && res.id
-      if (newId) {
-        const idx = records.value.findIndex(u => u.id === newId)
-        if (idx !== -1) {
-          openPhotoDialog(idx)
-        }
-      }
+      await table.value.search()
+      // const newId = res && res.id
+      // if (newId) {
+      //   const idx = records.value.findIndex(u => u.id === newId)
+      //   if (idx !== -1) {
+      //     openPhotoDialog(idx)
+      //   }
+      // }
       return
     } else {
-      const user = records.value[dialog.index]
-      const userId = user.userId || user.id
-      await updateUser(userId, formData)
+      await updateUser(formData)
       ElMessage.success('编辑用户成功')
     }
     dialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 })
+    await table.value.search()
   } finally {
     dialog.loading = false
   }
@@ -330,21 +267,24 @@ function closeDialog() {
   dialog.visible = false
 }
 
-function confirmDelete(index) {
-  deleteDialog.index = index
+// 删除
+const deleteDialog = reactive({
+  visible: false,
+  id: null
+})
+
+function confirmDelete(row) {
+  deleteDialog.id = row.id
   deleteDialog.visible = true
 }
 
 async function handleDeleteUser() {
-  const index = deleteDialog.index
   try {
-    const user = records.value[index]
-    const userId = user.userId || user.id
-    await deleteUser(userId)
+    await deleteUser(deleteDialog.id)
     ElMessage.success('删除用户成功')
   } finally {
     deleteDialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 })
+    await table.value.search()
   }
 }
 
@@ -353,12 +293,21 @@ function closeDeleteDialog() {
 }
 
 // 人脸录入相关
+const photoDialog = reactive({
+  visible: false,
+  id: null,
+  currentPhoto: null,
+  isCapturing: false,
+  cameraLoading: false,
+  submitLoading: false
+})
+
+const videoRef = ref()
+
 let cameraStream = null
 
-function openPhotoDialog(index) {
-  console.log('打开人脸录入弹窗 - 索引:', index, '用户数据:', records.value[index])
-  
-  photoDialog.index = index
+function openPhotoDialog(row) {
+  photoDialog.id = row.id
   photoDialog.visible = true
   photoDialog.currentPhoto = null
   photoDialog.isCapturing = false
@@ -433,14 +382,7 @@ async function submitPhoto() {
   photoDialog.submitLoading = true
   try {
     // 检查用户ID
-    if (photoDialog.index === null || photoDialog.index === undefined) {
-      throw new Error('用户索引为空')
-    }
-    const user = records.value[photoDialog.index]
-    if (!user) {
-      throw new Error('用户数据不存在')
-    }
-    const id = user.id
+    const id = photoDialog.id
     if (!id) {
       throw new Error('用户ID为空')
     }
@@ -452,7 +394,7 @@ async function submitPhoto() {
     await updateUserPhoto(id, imageFile)
     ElMessage.success('照片提交成功')
     photoDialog.visible = false
-    await handleSearch({ page: 1, pageSize: 10 })
+    await table.value.search()
   } finally {
     photoDialog.submitLoading = false
   }
@@ -467,8 +409,15 @@ function closePhotoDialog() {
 }
 
 // 修改密码相关
-function openPasswordDialog(index) {
-  passwordDialog.index = index
+const passwordDialog = reactive({
+  visible: false,
+  id: null,
+  loading: false,
+  form: { newPassword: '', confirmPassword: '' }
+})
+
+function openPasswordDialog(row) {
+  passwordDialog.id = row.id
   passwordDialog.visible = true
   passwordDialog.form = { newPassword: '', confirmPassword: '' }
 }
@@ -484,9 +433,8 @@ async function handlePasswordSubmit(formData) {
   passwordDialog.loading = true
   try {
     const encryptedPassword = encryptPassword(formData.newPassword)
-    const user = records.value[passwordDialog.index]
     const requestData = {
-      id: user.id,
+      id: passwordDialog.id,
       password: encryptedPassword
     }
     await updateUserPassword(requestData)
@@ -503,16 +451,25 @@ function closePasswordDialog() {
   passwordDialog.visible = false
 }
 
+// 处理链接点击事件（照片查看）
+const photoPreviewDialog = reactive({
+  visible: false,
+  imageSrc: ''
+})
+
+function handleLinkClick({ row, index }) {
+  if (row.facePath) {
+    // 显示照片预览 - facePath字段存储的是base64格式的图片数据
+    photoPreviewDialog.imageSrc = `data:image/png;base64,${row.facePath}`
+    photoPreviewDialog.visible = true
+  } else {
+    ElMessage.warning('该用户暂无照片')
+  }
+}
+
 function closePhotoPreview() {
   photoPreviewDialog.visible = false
 }
-
-// 页面加载时获取数据
-onMounted(() => {
-  handleSearch({ page: 1, pageSize: 10 })
-})
-
-
 </script>
 
 <style scoped>

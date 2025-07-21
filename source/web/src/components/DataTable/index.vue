@@ -74,13 +74,13 @@
         <div v-if="headerButtons.length > 0" class="header-buttons">
           <el-button
             v-for="button in headerButtons"
-            :key="button.action"
+            :key="button.key"
             v-show="hasButtonPermission(button)"
             :type="button.type || 'primary'"
             :size="button.size || 'large'"
             :disabled="button.disabled"
             :loading="button.loading"
-            @click="handleHeaderButtonClick(button.action)"
+            @click="button.action"
           >
             {{ button.text }}
           </el-button>
@@ -91,7 +91,7 @@
       
       <!-- 数据表格 -->
       <el-table 
-        :data="data" 
+        :data="records" 
         style="width: 100%;" 
         :class="tableClass" 
         v-loading="loading"
@@ -114,12 +114,12 @@
               <div class="action-buttons">
                 <el-button
                   v-for="button in actionButtons"
-                  :key="button.action"
+                  :key="button.key"
                   :type="button.type || 'primary'"
                   :size="button.size || 'large'"
                   :disabled="button.disabled ? button.disabled(scope.row, scope.$index) : false"
                   :loading="button.loading ? button.loading(scope.row, scope.$index) : false"
-                  @click="handleActionButtonClick(button.action, scope.row, scope.$index)"
+                  @click="button.action(scope.row, scope.$index)"
                 >
                   {{ button.text }}
                 </el-button>
@@ -194,21 +194,6 @@ import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 
 // Props 定义
 const props = defineProps({
-  // 数据源
-  data: {
-    type: Array,
-    default: () => []
-  },
-  // 总数
-  total: {
-    type: Number,
-    default: 0
-  },
-  // 加载状态
-  loading: {
-    type: Boolean,
-    default: false
-  },
   // 表格列配置
   columns: {
     type: Array,
@@ -248,21 +233,30 @@ const props = defineProps({
   userRole: {
     type: String,
     default: ''
+  },
+  request: {
+    type: Function,
+    default: () => {}
+  },
+  beforeRequest: {
+    type: Function,
+    default: params => params
   }
 })
 
 // Emits 定义
 const emit = defineEmits([
-  'search',
-  'reset',
-  'page-change',
-  'size-change',
   'action',
   'header-action',
   'link-click'
 ])
 
+defineExpose({search})
+
 // 响应式数据
+const records = ref([])
+const loading = ref(false)
+const total = ref(0)
 const searchForm = reactive({})
 const pageSize = ref(10)
 const currentPage = ref(1)
@@ -278,73 +272,50 @@ const initSearchForm = () => {
 // 搜索处理
 function handleSearch() {
   currentPage.value = 1
-  // 处理搜索参数，特别是时间范围
-  const searchParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
-  // 处理时间范围参数
-  props.searchFields.forEach(field => {
-    if (field.type === 'datetimerange' || field.type === 'daterange') {
-      const timeValue = searchForm[field.key]
-      if (Array.isArray(timeValue) && timeValue.length === 2) {
-        searchParams[`startTime`] = timeValue[0]
-        searchParams[`endTime`] = timeValue[1]
-        searchParams[field.key] = timeValue
-      }
-    }
-  })
-  emit('search', searchParams)
+  search()
 }
 
 // 重置搜索
 function resetSearch() {
   initSearchForm()
   currentPage.value = 1
-  const resetParams = { page: currentPage.value, pageSize: pageSize.value }
-  props.searchFields.forEach(field => {
-    if (field.type === 'datetimerange' || field.type === 'daterange') {
-      const timeValue = searchForm[field.key]
-      if (Array.isArray(timeValue) && timeValue.length === 2) {
-        resetParams[`startTime`] = timeValue[0]
-        resetParams[`endTime`] = timeValue[1]
-        resetParams[field.key] = timeValue
-      }
-    }
-  })
-  emit('reset', resetParams)
+  search()
 }
 
 // 页码变化
 function handlePageChange(page) {
   currentPage.value = page
-  const pageParams = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value }
-  props.searchFields.forEach(field => {
-    if (field.type === 'datetimerange' || field.type === 'daterange') {
-      const timeValue = searchForm[field.key]
-      if (Array.isArray(timeValue) && timeValue.length === 2) {
-        pageParams[`startTime`] = timeValue[0]
-        pageParams[`endTime`] = timeValue[1]
-        pageParams[field.key] = timeValue
-      }
-    }
-  })
-  emit('page-change', pageParams)
+  search()
 }
 
 // 每页大小变化
 function handleSizeChange(size) {
   pageSize.value = size
   currentPage.value = 1
-  const sizeParams = { ...searchForm, page: currentPage.value, pageSize: pageSize.value }
-  props.searchFields.forEach(field => {
-    if (field.type === 'datetimerange' || field.type === 'daterange') {
-      const timeValue = searchForm[field.key]
-      if (Array.isArray(timeValue) && timeValue.length === 2) {
-        sizeParams[`startTime`] = timeValue[0]
-        sizeParams[`endTime`] = timeValue[1]
-        sizeParams[field.key] = timeValue
+  search()
+}
+
+async function search() {
+  try {
+    loading.value = true
+    const params = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value }
+    props.searchFields.forEach(field => {
+      if (field.type === 'datetimerange' || field.type === 'daterange') {
+        const timeValue = searchForm[field.key]
+        if (Array.isArray(timeValue) && timeValue.length === 2) {
+          params[`startTime`] = timeValue[0]
+          params[`endTime`] = timeValue[1]
+          params[field.key] = timeValue
+        }
       }
-    }
-  })
-  emit('size-change', sizeParams)
+    })
+    const response = await props.request(props.beforeRequest(params))
+    records.value = response.data || []
+    total.value = response.total || 0
+  } finally {
+    loading.value = false
+  }
+  return records.value
 }
 
 // 处理自定义操作
@@ -369,10 +340,6 @@ function handleCustomClick(event, row, index) {
   }
 }
 
-// 处理操作按钮点击
-function handleActionButtonClick(action, row, index) {
-  emit('action', { action, row, index })
-}
 
 // 检查按钮权限
 function hasButtonPermission(button) {
@@ -385,13 +352,6 @@ function hasButtonPermission(button) {
   return button.roles.includes(props.userRole)
 }
 
-// 处理头部按钮点击
-function handleHeaderButtonClick(action) {
-  emit('header-action', { action })
-}
-
-
-
 // 监听数据变化，重新计算分页
 watch(() => props.total, () => {
   if (currentPage.value > 1 && props.total === 0) {
@@ -402,6 +362,7 @@ watch(() => props.total, () => {
 // 生命周期
 onMounted(() => {
   initSearchForm()
+  search()
 })
 
 onUnmounted(() => {

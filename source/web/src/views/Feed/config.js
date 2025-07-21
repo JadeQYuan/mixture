@@ -74,24 +74,6 @@ export const columns = [
   }
 ]
 
-export const actionButtons = [
-  {
-    action: 'feed',
-    text: '加料',
-    type: 'primary',
-    size: 'large'
-  }
-]
-
-export const headerButtons = [
-  {
-    action: 'add',
-    text: '新增',
-    type: 'primary',
-    size: 'large'
-  }
-]
-
 // 加料操作对话框表单配置
 export function getFeedOperationConfig() {
   return {

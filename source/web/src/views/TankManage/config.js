@@ -35,31 +35,6 @@ export const columns = [
   }
 ]
 
-export const actionButtons = [
-  {
-    action: 'edit',
-    text: '编辑',
-    type: 'primary',
-    size: 'large'
-  },
-  {
-    action: 'delete',
-    text: '删除',
-    type: 'danger',
-    size: 'large',
-    disabled: (row) => row.status === 'active' // 正常状态禁用删除
-  }
-]
-
-export const headerButtons = [
-  {
-    action: 'add',
-    text: '新增',
-    type: 'primary',
-    size: 'large'
-  }
-] 
-
 // 料罐管理对话框表单配置
 export function getTankFormConfig() {
   return {

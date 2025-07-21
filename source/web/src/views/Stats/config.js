@@ -135,11 +135,3 @@ export const columns = [
   }
 ]
 
-export const headerButtons = [
-  {
-    action: 'export',
-    text: '导出',
-    type: 'success',
-    size: 'large',
-  }
-] 

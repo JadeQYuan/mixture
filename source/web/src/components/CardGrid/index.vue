@@ -1,30 +1,19 @@
 <template>
-  <div class="card-grid-container" v-loading="pageLoading" element-loading-text="页面加载中...">
+  <div class="card-grid-container">
     <el-card class="card-grid-card">
       <!-- 头部操作栏 -->
       <div class="card-header-bar">
-        <div style="flex:1"></div>
-        <!-- 刷新按钮 -->
-        <el-button
-          type="primary"
-          size="large"
-          :loading="loading"
-          @click="handleRefresh"
-        >
-          <el-icon><Refresh /></el-icon>
-          刷新
-        </el-button>
         <!-- 配置化的头部操作按钮 -->
         <div v-if="headerButtons.length > 0" class="header-buttons">
           <el-button
             v-for="button in headerButtons"
-            :key="button.action"
+            :key="button.key"
             v-show="hasButtonPermission(button)"
             :type="button.type || 'primary'"
             :size="button.size || 'large'"
             :disabled="button.disabled"
             :loading="button.loading"
-            @click="handleHeaderButtonClick(button.action)"
+            @click="button.action()"
           >
             {{ button.text }}
           </el-button>
@@ -36,7 +25,7 @@
       <!-- 卡片网格 -->
       <div class="card-grid" v-loading="loading">
         <el-card
-          v-for="(item, index) in data"
+          v-for="(item, index) in records"
           :key="item.id || index"
           class="grid-card"
           shadow="hover"
@@ -60,12 +49,12 @@
             <div class="card-actions">
               <el-button
                 v-for="button in actionButtons"
-                :key="button.action"
+                :key="button.key"
                 :type="button.type || 'primary'"
                 :size="button.size || 'large'"
                 :disabled="button.disabled ? button.disabled(item, index) : false"
                 :loading="button.loading ? button.loading(item, index) : false"
-                @click="handleActionButtonClick(button.action, item, index)"
+                @click="button.action(item, index)"
               >
                 {{ button.text }}
               </el-button>
@@ -75,7 +64,7 @@
       </div>
       
       <!-- 空状态 -->
-      <div v-if="!loading && data.length === 0" class="empty-state">
+      <div v-if="!loading && records.length === 0" class="empty-state">
         <el-empty description="暂无数据" />
       </div>
     </el-card>
@@ -84,25 +73,9 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
-import { Refresh } from '@element-plus/icons-vue'
 
 // Props 定义
 const props = defineProps({
-  // 数据源
-  data: {
-    type: Array,
-    default: () => []
-  },
-  // 加载状态
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  // 页面加载状态
-  pageLoading: {
-    type: Boolean,
-    default: false
-  },
   // 显示字段配置
   displayFields: {
     type: Array,
@@ -123,16 +96,6 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  // 是否启用自动刷新
-  autoRefresh: {
-    type: Boolean,
-    default: false
-  },
-  // 自动刷新间隔（毫秒）
-  refreshInterval: {
-    type: Number,
-    default: 5000
-  },
   // 卡片header字段名
   headerField: {
     type: String,
@@ -142,25 +105,18 @@ const props = defineProps({
   headerRender: {
     type: Function,
     default: null
+  },
+  request: {
+    type: Function,
+    default: () => []
   }
 })
 
-// Emits 定义
-const emit = defineEmits([
-  'refresh',
-  'action',
-  'header-action'
-])
+// 响应式数据
+const records = ref([])
+const loading = ref(false)
 
-// 处理刷新按钮点击
-function handleRefresh() {
-  emit('refresh')
-}
-
-// 处理操作按钮点击
-function handleActionButtonClick(action, item, index) {
-  emit('action', { action, row: item, index })
-}
+defineExpose({search})
 
 // 检查按钮权限
 function hasButtonPermission(button) {
@@ -171,31 +127,6 @@ function hasButtonPermission(button) {
   
   // 检查当前用户角色是否在允许的角色列表中
   return button.roles.includes(props.userRole)
-}
-
-// 自动刷新定时器
-const autoRefreshTimer = ref(null)
-
-// 启动自动刷新
-function startAutoRefresh() {
-  if (props.autoRefresh && !autoRefreshTimer.value) {
-    autoRefreshTimer.value = setInterval(() => {
-      emit('refresh')
-    }, props.refreshInterval)
-  }
-}
-
-// 停止自动刷新
-function stopAutoRefresh() {
-  if (autoRefreshTimer.value) {
-    clearInterval(autoRefreshTimer.value)
-    autoRefreshTimer.value = null
-  }
-}
-
-// 处理头部按钮点击
-function handleHeaderButtonClick(action) {
-  emit('header-action', { action })
 }
 
 // 获取卡片header
@@ -209,13 +140,25 @@ function getHeader(item) {
   return ''
 }
 
+async function search() {
+  try {
+    loading.value = true
+    const response = await props.request()
+    records.value = response
+  } finally {
+    loading.value = false
+  }
+  return records
+}
+
 // 生命周期
 onMounted(() => {
-  startAutoRefresh()
+  // startAutoRefresh()
+  search()
 })
 
 onUnmounted(() => {
-  stopAutoRefresh()
+  // stopAutoRefresh()
 })
 
 // 新增：监听autoRefresh和refreshInterval变化，动态启停定时器
@@ -264,7 +207,6 @@ watch(
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   flex: 1;
-  overflow-y: auto;
   padding: 0;
   max-height: 650px;
 }

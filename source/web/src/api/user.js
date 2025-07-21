@@ -11,7 +11,7 @@ export function createUser(data) {
 }
 
 // 修改用户信息
-export function updateUser(id, data) {
+export function updateUser(data) {
   return http.put(`/api/user/updateUserInfo`, data)
 }
 

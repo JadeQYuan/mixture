@@ -128,15 +128,6 @@ export const columns = [
   }
 ]
 
-export const actionButtons = [
-  {
-    action: 'remark',
-    text: '备注',
-    type: 'primary',
-    size: 'large'
-  }
-]
-
 export const remarkDialogConfig = {
   title: '备注',
   width: '500px',

@@ -8,19 +8,6 @@ export const displayFields = [
   // }
 ]
 
-// 操作按钮配置
-export const actionButtons = [
-  {
-    type: 'primary',
-    text: '申请',
-    action: 'apply',
-    size: 'large'
-  }
-]
-
-// 头部按钮配置
-export const headerButtons = []
-
 // 加料申请表单配置
 export function getFeedApplyFormConfig() {
   return {
