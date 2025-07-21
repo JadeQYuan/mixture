@@ -1,5 +1,6 @@
 package cn.domain.service;
 
+import cn.domain.constant.Constants;
 import cn.domain.entity.User;
 import cn.domain.exception.AppException;
 import cn.domain.mapper.UserMapper;
@@ -71,8 +72,9 @@ public class UserService {
     }
 
     public PageVo<User> getUserList(UserQo userQo) {
+        boolean isAdmin = getCurrentUserInfo().getRoleCode().equals(Constants.ADMIN);
         PageHelper.startPage(userQo.getPageNo(), userQo.getPageSize());
-        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userQo.getUserName(), userQo.getAccount());
+        Page<User> userList = (Page<User>)userMapper.getUserInfoByName(userQo.getUserName(), userQo.getAccount(), isAdmin);
         if (CollectionUtils.isEmpty(userList)) {
             return new PageVo<>();
         }
@@ -229,7 +231,7 @@ public class UserService {
 
     private Integer compareFaceFeature(FaceFeature faceFeature, Integer id) {
         Integer userId = null;
-        List<User> userInfoList = userMapper.getUserInfoByName(null, null);
+        List<User> userInfoList = userMapper.getUserInfoByName(null, null, null);
         for (User user : userInfoList) {
             Integer idTemp = user.getId();
             if (id != null && id == idTemp) {

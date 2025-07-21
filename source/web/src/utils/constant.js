@@ -1,5 +1,6 @@
 // 角色常量映射表
 export const ROLE_MAP = {
+  Admin: '管理员',
   MaterialClerk: '物料员',
   SeniorOperator: '高级操作员',
   Operator: '操作员',

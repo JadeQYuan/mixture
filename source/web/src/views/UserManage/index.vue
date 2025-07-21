@@ -152,10 +152,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/api/user'
-import { ROLE_MAP, getOptions } from '@/utils/constant'
 import { encryptPassword } from '@/utils/crypto'
 import { getCameraErrorMessage, startGlobalCamera } from '@/utils/camera'
 import { base64ToFile, canvasToBase64 } from '@/utils/fileUtils'
@@ -164,11 +163,12 @@ import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { searchFields, columns } from './config'
 import { getUserFormConfig, getPasswordFormConfig } from './config'
-
-const roles = getOptions(ROLE_MAP)
+import { useStore } from 'vuex'
 
 const table = ref()
 
+const store = useStore()
+const userId = computed(() => store.state.userInfo?.id || '')
 const actionButtons = [
   {
     key: 'edit',
@@ -185,6 +185,13 @@ const actionButtons = [
     action: ( row ) => openPhotoDialog(row)
   },
   {
+    key: 'photoUpload',
+    text: '照片上传',
+    type: 'warning',
+    size: 'large',
+    action: ( row ) => openPhotoDialog(row)
+  },
+  {
     key: 'password',
     text: '修改密码',
     type: 'info',
@@ -196,7 +203,8 @@ const actionButtons = [
     text: '删除',
     type: 'danger',
     size: 'large',
-    action: ( row ) => confirmDelete(row)
+    action: ( row ) => confirmDelete(row),
+    disabled: (row) => row.id === userId.value
   }
 ]
 

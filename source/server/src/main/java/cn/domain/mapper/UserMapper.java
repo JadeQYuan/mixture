@@ -27,12 +27,15 @@ public interface UserMapper {
         "<if test='account != null and account != \"\"'>",
         "AND account LIKE '%' || #{account} || '%'",
         "</if>",
+        "<if test='isAdmin != null and !isAdmin '>",
+        "AND role_code != 'Admin' ",
+        "</if>",
         "and del_flag = 1",
         "</where>",
         "ORDER BY update_time DESC",
         "</script>"
     })
-    List<User> getUserInfoByName(String userName, String account);
+    List<User> getUserInfoByName(String userName, String account, Boolean isAdmin);
 
     @Select("SELECT id " +
             "FROM user_info WHERE account = #{account} and del_flag = 1")

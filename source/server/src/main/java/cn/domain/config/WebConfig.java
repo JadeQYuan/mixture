@@ -1,6 +1,6 @@
 package cn.domain.config;
 
-import cn.domain.filter.TeeFilter;
+import cn.domain.filter.AuthFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +16,9 @@ import java.util.List;
 public class WebConfig extends WebMvcConfigurationSupport {
 
     @Bean
-    public FilterRegistrationBean<TeeFilter> cookieFilter() {
-        FilterRegistrationBean<TeeFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new TeeFilter());
+    public FilterRegistrationBean<AuthFilter> cookieFilter() {
+        FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new AuthFilter());
         registrationBean.addUrlPatterns("/api/*"); // 拦截所有请求路径
         registrationBean.setOrder(0);// 优先级，越低越优先
         List<String> excludedUris = new ArrayList<>();

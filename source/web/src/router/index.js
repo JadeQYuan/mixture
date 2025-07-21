@@ -57,31 +57,31 @@ const routes = [
         path: 'feed',
         name: 'Feed',
         component: Feed,
-        meta: { roles: ['SeniorOperator', 'MaterialClerk'], title: '加料管理' }
+        meta: { roles: ['Admin', 'SeniorOperator', 'MaterialClerk'], title: '加料管理' }
       },
       {
         path: 'record',
         name: 'Record',
         component: Record,
-        meta: { roles: ['MaterialClerk'], title: '加料记录' }
+        meta: { roles: ['Admin', 'MaterialClerk'], title: '加料记录' }
       },
       {
         path: 'stats',
         name: 'Stats',
         component: Stats,
-        meta: { roles: ['Accountant'], title: '领料统计' }
+        meta: { roles: ['Admin', 'Accountant'], title: '领料统计' }
       },
       {
         path: 'tank-manage',
         name: 'TankManage',
         component: TankManage,
-        meta: { roles: ['MaterialClerk'], title: '料罐管理' }
+        meta: { roles: ['Admin', 'MaterialClerk'], title: '料罐管理' }
       },  
       {
         path: 'user-manage',
         name: 'UserManage',
         component: UserManage,
-        meta: { roles: ['MaterialClerk'], title: '用户管理' }
+        meta: { roles: ['Admin', 'MaterialClerk'], title: '用户管理' }
       },
     ]
   },

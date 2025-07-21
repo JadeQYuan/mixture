@@ -2,30 +2,12 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import store from './store'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { createStore } from 'vuex'
 import { setupMessage } from './utils/message'
 import { ElMessage } from 'element-plus'
-
-const store = createStore({
-  state() {
-    return {
-      userInfo: null
-    }
-  },
-  mutations: {
-    setUserInfo(state, userInfo) {
-      state.userInfo = userInfo
-    }
-  },
-  actions: {
-    setUserInfo({ commit }, userInfo) {
-      commit('setUserInfo', userInfo)
-    }
-  }
-})
 
 // 启动应用
 async function startApp() {

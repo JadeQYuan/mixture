@@ -49,12 +49,11 @@ export const columns = [
   {
     prop: 'remark',
     label: '描述',
-    width: '240',
   },
   {
     type: 'actions',
     label: '操作',
-    width: '420'
+    width: '500'
   }
 ]
 
@@ -65,7 +64,7 @@ export const userFormFields = [
     label: '角色',
     type: 'radio',
     size: 'large',
-    options: getOptions(ROLE_MAP)
+    options: getOptions(ROLE_MAP).filter(item => item.value != 'Admin')
   },
   {
     prop: 'account',

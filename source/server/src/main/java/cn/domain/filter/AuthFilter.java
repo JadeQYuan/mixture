@@ -1,6 +1,6 @@
 package cn.domain.filter;
 
-import cn.domain.constant.Contants;
+import cn.domain.constant.Constants;
 import cn.domain.exception.AppException;
 import cn.domain.util.TokenUtil;
 
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TeeFilter implements Filter {
+public class AuthFilter implements Filter {
 
     private String[] excludedUris;
 
@@ -50,7 +50,7 @@ public class TeeFilter implements Filter {
 
         try {
             if (!flag) {
-                String authorization = request.getHeader(Contants.AUTHORIZATION);
+                String authorization = request.getHeader(Constants.AUTHORIZATION);
                 try {
                     String userId = TokenUtil.getSubject(authorization);
                     TokenUtil.setToken(Integer.parseInt(userId));

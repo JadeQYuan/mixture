@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -59,7 +60,9 @@ public class MixtureService {
     public void executeReturn(Mixture mixture) {
         mixture.setReturnUserId(TokenUtil.getToken());
         Mixture info = mixtureMapper.selectById(mixture.getId());
-        mixture.setActualWeight(info.getFullWeight() + info.getFlameRetardantWeight() - mixture.getReturnWeight());
+        mixture.setActualWeight(BigDecimal.valueOf(info.getFullWeight())
+                .add(BigDecimal.valueOf(info.getFlameRetardantWeight()))
+                .add(BigDecimal.valueOf(-mixture.getReturnWeight())).doubleValue());
         mixtureMapper.executeReturn(mixture);
         tankService.updateUser(mixture.getTankId(), null);
     }

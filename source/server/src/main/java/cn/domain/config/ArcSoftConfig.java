@@ -1,16 +1,15 @@
 package cn.domain.config;
 
+import cn.domain.exception.AppException;
 import com.arcsoft.face.EngineConfiguration;
 import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.FunctionConfiguration;
 import com.arcsoft.face.enums.DetectMode;
 import com.arcsoft.face.enums.DetectOrient;
 import com.arcsoft.face.enums.ErrorInfo;
-import cn.domain.constant.Contants;
-import cn.domain.exception.AppException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,22 +18,70 @@ import java.io.File;
 @Slf4j
 @Data
 @Configuration
+@ConfigurationProperties(prefix = "face")
 public class ArcSoftConfig {
 
-    @Value("${face.appId}")
+    /**
+     * 引擎模式
+     */
+    private String detectMode = "IMAGE";
+
+    /**
+     * 配置人脸角度
+     */
+    private String detectFaceOrientPriority = "ASF_OP_ALL_OUT";
+
+    /**
+     * 设置识别的最小人脸比
+     */
+    private Integer detectFaceScale = 32;
+
+    /**
+     * 最大检测人脸数
+     */
+    private Integer detectFaceMaxNum = 8;
+
+    /**
+     * 是否支持3d 检测
+     */
+    private Boolean supportFace3dAngle = true;
+
+    /**
+     * 是否支持人脸检测
+     */
+    private Boolean supportFaceDetect = true;
+
+    /**
+     * 是否支持人脸识别
+     */
+    private Boolean supportFaceRecognition = true;
+
+    /**
+     * 性别检测
+     */
+    private Boolean supportGender = true;
+
+    /**
+     * 年龄检测
+     */
+    private Boolean supportAge = true;
+
+    /**
+     * 是否支持活体检测
+     */
+    private Boolean supportLiveness = true;
+
+    /**
+     * 是否至此IR活体检测
+     */
+    private Boolean supportIrLiveness = true;
+
     private String appid;
 
     // win平台sdk
-    @Value("${face.windows.sdkKey}")
-    private String winsdkkey;
-
-
-    // linux平台sdk
-    private String linuxsdkkey;
-
+    private String sdkkey;
 
     // dll/so库路径
-    @Value("${face.libpath}")
     private String libpath;
 
     /**
@@ -44,18 +91,9 @@ public class ArcSoftConfig {
      */
     @Bean
     public FaceEngine faceEngine() {
-        /*String sdkkey = "";
-        String os = System.getProperty("os.name");
-        if (os.toLowerCase().startsWith("win")) {
-            sdkkey = winsdkkey;
-            String projectPath = System.getProperty("user.dir");
-            libpath = projectPath + "\\WIN64";
-        } else {
-            sdkkey = linuxsdkkey;
-        }*/
         libpath = new File("").getAbsolutePath() + libpath;
         FaceEngine faceEngine = new FaceEngine(libpath);
-        int errorCode = faceEngine.activeOnline(appid, winsdkkey);
+        int errorCode = faceEngine.activeOnline(appid, sdkkey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
             log.error("引擎注册失败");
             throw new AppException("引擎注册失败");
@@ -78,13 +116,13 @@ public class ArcSoftConfig {
     private EngineConfiguration getFaceEngineConfiguration() {
         EngineConfiguration engineConfiguration = new EngineConfiguration();
         // 配置引擎模式
-        if ("IMAGE".equals(Contants.DETECT_MODE)) {
+        if ("IMAGE".equals(detectMode)) {
             engineConfiguration.setDetectMode(DetectMode.ASF_DETECT_MODE_IMAGE);
         } else {
             engineConfiguration.setDetectMode(DetectMode.ASF_DETECT_MODE_VIDEO);
         }
         // 配置人脸角度 全角度 ASF_OP_ALL_OUT 不够准确且检测速度慢
-        switch (Contants.DETECT_FACE_ORIENT_PRIORITY) {
+        switch (detectFaceOrientPriority) {
             case "ASF_OP_0_ONLY":
                 engineConfiguration.setDetectFaceOrientPriority(DetectOrient.ASF_OP_0_ONLY);
                 break;
@@ -104,8 +142,8 @@ public class ArcSoftConfig {
                 engineConfiguration.setDetectFaceOrientPriority(DetectOrient.ASF_OP_ALL_OUT);
         }
         // 设置识别的最小人脸比
-        engineConfiguration.setDetectFaceScaleVal(Contants.DETECT_FACE_SCALE);
-        engineConfiguration.setDetectFaceMaxNum(Contants.DETECT_FACE_MAX_NUM);
+        engineConfiguration.setDetectFaceScaleVal(detectFaceScale);
+        engineConfiguration.setDetectFaceMaxNum(detectFaceMaxNum);
         // 功能配置
         initFuncConfiguration(engineConfiguration);
         return engineConfiguration;
@@ -119,19 +157,19 @@ public class ArcSoftConfig {
     private void initFuncConfiguration(EngineConfiguration engineConfiguration) {
         FunctionConfiguration functionConfiguration = new FunctionConfiguration();
         // 是否支持年龄检测
-        functionConfiguration.setSupportAge(Contants.SUPPORT_AGE);
+        functionConfiguration.setSupportAge(supportAge);
         // 是否支持3d 检测
-        functionConfiguration.setSupportFace3dAngle(Contants.SUPPORT_FACE_3D_ANGLE);
+        functionConfiguration.setSupportFace3dAngle(supportFace3dAngle);
         // 是否支持人脸检测
-        functionConfiguration.setSupportFaceDetect(Contants.SUPPORT_FACE_DETECT);
+        functionConfiguration.setSupportFaceDetect(supportFaceDetect);
         // 是否支持人脸识别
-        functionConfiguration.setSupportFaceRecognition(Contants.SUPPORT_FACE_RECOGNITION);
+        functionConfiguration.setSupportFaceRecognition(supportFaceRecognition);
         // 是否支持性别检测
-        functionConfiguration.setSupportGender(Contants.SUPPORT_GENDER);
+        functionConfiguration.setSupportGender(supportGender);
         // 是否支持活体检测
-        functionConfiguration.setSupportLiveness(Contants.SUPPORT_LIVENESS);
+        functionConfiguration.setSupportLiveness(supportLiveness);
         // 是否支持IR活体检测
-        functionConfiguration.setSupportIRLiveness(Contants.SUPPORT_IR_LIVENESS);
+        functionConfiguration.setSupportIRLiveness(supportIrLiveness);
         engineConfiguration.setFunctionConfiguration(functionConfiguration);
     }
 }

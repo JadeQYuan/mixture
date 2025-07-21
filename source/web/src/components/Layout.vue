@@ -28,7 +28,7 @@
           <div class="user-name">{{ userName }}</div>
         </div>
         <div class="logout-btn-box">
-          <el-button color="rgba(140, 166, 191, 1)" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
+          <el-button type="info" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
         </div>
       </div>
     </div>
@@ -80,6 +80,8 @@ onMounted(async () => {
       const userInfo = await getCurrentUser()
       store.dispatch('setUserInfo', userInfo)
     } catch (e) {}
+  } else {
+    router.push('/')
   }
   
   // 如果当前正好在/app，自动跳转到第一个有权限的子路由
