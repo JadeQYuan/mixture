@@ -11,24 +11,35 @@
 
     <!-- 退料操作对话框 -->
     <Dialog
+      title="退料"
       :visible="returnDialog.visible"
-      :title="returnDialogConfig.title"
-      :width="returnDialogConfig.width"
       @update:visible="handleDialogVisibleUpdate"
     >
       <Form
-        :fields="returnDialogConfig.fields"
+        :fields="returnDialogConfig.fileds"
         :rules="returnDialogConfig.rules"
-        :steps="returnDialogConfig.steps"
-        :current-step="returnDialog.step"
         :form-data="returnDialog.form"
-        :loading="returnDialog.loading"
-        :footer-buttons="returnDialogConfig.footerButtons"
-        @submit="handleReturnSubmit"
-        @next-step="handleNextStep"
-        @prev-step="handlePrevStep"
-        @cancel="closeReturnDialog"
-      />
+        :extends="returnDialog.step"
+        :footer-buttons="footerButtons"
+      >
+        <template #form-top>
+           <!-- 步骤条 -->
+          <el-steps 
+            v-if="returnDialogConfig.steps && returnDialogConfig.steps.length > 0" 
+            :active="returnDialog.step" 
+            finish-status="success" 
+            align-center 
+            style="margin-bottom: 24px; margin-top: 32px;"
+          >
+            <el-step 
+              v-for="step in returnDialogConfig.steps" 
+              :key="step.title" 
+              :title="step.title" 
+              :description="step.description"
+            />
+          </el-steps>
+        </template>
+      </Form>
     </Dialog>
   </div>
 </template>
@@ -40,7 +51,7 @@ import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/a
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, getReturnOperationConfig } from './config'
+import { displayFields, returnDialogConfig } from './config'
 
 const card = ref()
 
@@ -62,6 +73,36 @@ const actionButtons = [
     type: 'warning',
     size: 'large',
     action: ( row ) => openReturnDialog(row)
+  }
+]
+
+const footerButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: ( row ) => closeReturnDialog(row)
+  },
+  {
+    key: 'prev',
+    text: '上一步',
+    type: 'info',
+    action: ( row ) => handlePrevStep(row),
+    visible: (step) => step > 0
+  },
+  {
+    key: 'next',
+    text: '下一步',
+    type: 'primary',
+    validate: true,
+    action: ( row ) => handleNextStep(row),
+    visible: (step) => step < 1
+  },
+  {
+    key: 'feed',
+    text: '提交',
+    type: 'success',
+    action: ( row ) => handleReturnSubmit(row),
+    visible: (step) => step === 1
   }
 ]
 
@@ -98,9 +139,6 @@ function stopWeightTimer() {
   }
 }
 
-// 退料对话框配置
-const returnDialogConfig = getReturnOperationConfig()
-
 // 退料对话框
 const returnDialog = reactive({
   visible: false,
@@ -121,7 +159,8 @@ function openReturnDialog(row) {
   startWeightTimer()
 }
 
-function handleNextStep(step) {
+function handleNextStep() {
+  const step = returnDialog.step + 1
   if (step === 1) {
     // 第0步：检查当前重量是否已获取
     if (!returnDialog.form.returnWeight) {
@@ -134,12 +173,13 @@ function handleNextStep(step) {
   } 
 }
 
-function handlePrevStep(step) {
-  returnDialog.step = step
+function handlePrevStep() {
+  const step = returnDialog.step - 1
   // 如果返回到需要获取数据的步骤，重新启动定时器
   if (step === 0) {
     startWeightTimer()
   }
+  returnDialog.step = step
 }
 
 function closeReturnDialog() {

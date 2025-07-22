@@ -8,17 +8,15 @@
       :request="getFeedRecordList"
     />
     <Dialog
-      :visible="remarkDialog"
       :title="remarkDialogConfig.title"
       :width="remarkDialogConfig.width"
-      @update:visible="val => remarkDialog = val"
+      :visible="remarkDialogVisible"
+      @update:visible="val => remarkDialogVisible = val"
     >
       <Form
         :fields="remarkDialogConfig.fields"
         :form-data="remarkForm"
-        :footer-buttons="remarkDialogConfig.footerButtons"
-        @submit="saveRemark"
-        @cancel="closeRemarkDialog"
+        :footer-buttons="dialogFormButtons"
       />
     </Dialog>
   </div>
@@ -45,27 +43,38 @@ const actionButtons = [
   }
 ]
 
+const dialogFormButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closeRemarkDialog()
+  },
+  {
+    key: 'feed',
+    text: '提交',
+    type: 'primary',
+    action: ( formdata ) => saveRemark(formdata),
+  }
+]
+
 // 备注弹窗相关
-const remarkDialog = ref(false)
-const remarkRow = ref(null)
-const remarkText = ref('')
-// 删除本地 remarkDialogConfig 定义，直接使用导入的配置
-const remarkForm = ref({ remark: '' })
+const remarkDialogVisible = ref(false)
+const remarkForm = ref({ id: null, remark: '' })
 
 function openRemarkDialog(row) {
-  remarkRow.value = row
   remarkForm.value.remark = row.remark || ''
-  remarkDialog.value = true
+  remarkForm.value.id = row.id
+  remarkDialogVisible.value = true
 }
 
 function closeRemarkDialog() {
-  remarkDialog.value = false
+  remarkDialogVisible.value = false
 }
 
-async function saveRemark() {
-  await saveFeedRemark({ id: remarkRow.value.id, remark: remarkForm.value.remark })
+async function saveRemark(formdata) {
+  await saveFeedRemark(formdata)
   ElMessage.success('保存成功')
-  remarkDialog.value = false
+  remarkDialogVisible.value = false
   await table.value.search();
 }
 </script>

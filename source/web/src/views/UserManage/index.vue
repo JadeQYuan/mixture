@@ -21,9 +21,7 @@
         :fields="dialogConfig.fields"
         :rules="dialogConfig.rules"
         :form-data="dialog.form"
-        :loading="dialog.loading"
-        @submit="handleDialogSubmit"
-        @cancel="closeDialog"
+        :footer-buttons="dialogButtons"
       />
     </Dialog>
 
@@ -75,37 +73,25 @@
       <!-- 底部按钮区域 -->
       <template #footer>
         <div style="text-align: center;">
+          <el-button @click="closePhotoDialog" size="large">取消</el-button>
           <!-- 摄像头未就绪 -->
-          <template v-if="photoDialog.cameraLoading">
-            <el-button @click="closePhotoDialog" size="large">取消</el-button>
-            <el-button type="primary" size="large" :loading="true">准备中...</el-button>
-          </template>
+          <el-button v-if="photoDialog.cameraLoading" type="primary" size="large" :loading="true">准备中...</el-button>
           
           <!-- 摄像头已就绪 -->
-          <template v-else-if="photoDialog.isCapturing && !photoDialog.currentPhoto">
-            <el-button @click="closePhotoDialog" size="large">取消</el-button>
-            <el-button type="success" size="large" @click="capturePhoto">拍照</el-button>
-          </template>
+          <el-button v-if="photoDialog.isCapturing && !photoDialog.currentPhoto" type="success" size="large" @click="capturePhoto">拍照</el-button>
           
-          <!-- 已拍照 -->
-          <template v-else-if="photoDialog.currentPhoto">
-            <el-button @click="closePhotoDialog" size="large">取消</el-button>
-            <el-button type="warning" size="large" @click="retakePhoto">重拍</el-button>
-            <el-button 
-              type="success" 
-              size="large" 
-              @click="submitPhoto"
-              :loading="photoDialog.submitLoading"
-            >
-              提交
-            </el-button>
-          </template>
-          
+          <el-button v-if="photoDialog.currentPhoto" type="warning" size="large" @click="retakePhoto">重拍</el-button>
+          <el-button 
+            v-if="photoDialog.currentPhoto"
+            type="success" 
+            size="large" 
+            @click="submitPhoto"
+            :loading="photoDialog.submitLoading"
+          >
+            提交
+          </el-button>
           <!-- 摄像头获取失败 -->
-          <template v-else>
-            <el-button @click="closePhotoDialog" size="large">取消</el-button>
-            <el-button type="primary" size="large" @click="getCamera">重新获取摄像头</el-button>
-          </template>
+          <el-button type="primary" size="large" @click="getCamera">重新获取摄像头</el-button>
         </div>
       </template>
     </Dialog>
@@ -121,9 +107,7 @@
         :fields="passwordDialogConfig.fields"
         :rules="passwordDialogConfig.rules"
         :form-data="passwordDialog.form"
-        :loading="passwordDialog.loading"
-        @submit="handlePasswordSubmit"
-        @cancel="closePasswordDialog"
+        :footer-buttons="passwordDialogButtons"
       />
     </Dialog>
 
@@ -199,6 +183,13 @@ const actionButtons = [
     action: ( row ) => openPasswordDialog(row)
   },
   {
+    key: 'clearPhoto',
+    text: '修改密码',
+    type: 'info',
+    size: 'large',
+    action: ( row ) => openPasswordDialog(row)
+  },
+  {
     key: 'delete',
     text: '删除',
     type: 'danger',
@@ -229,6 +220,22 @@ const dialog = reactive({
   loading: false,
   form: { id: null, roleCode: '', account: '', userName: '', remark: '' }
 })
+
+const dialogButtons = [
+  {
+    key: 'submit',
+    text: '保存',
+    type: 'primary',
+    validate: true,
+    loading: () => dialog.loading,
+    action: (formData) => handleDialogSubmit(formData)
+  },
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closeDialog()
+  }
+]
 
 // 对话框相关函数
 function openDialog(mode, row) {
@@ -309,6 +316,22 @@ const photoDialog = reactive({
   cameraLoading: false,
   submitLoading: false
 })
+
+const photoDialogButtons = [
+  {
+    key: 'submit',
+    text: '保存',
+    type: 'primary',
+    validate: true,
+    loading: () => dialog.loading,
+    action: (formData) => handleDialogSubmit(formData)
+  },
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closeDialog()
+  }
+]
 
 const videoRef = ref()
 
@@ -423,6 +446,22 @@ const passwordDialog = reactive({
   loading: false,
   form: { newPassword: '', confirmPassword: '' }
 })
+
+const passwordDialogButtons = [
+  {
+    key: 'submit',
+    text: '保存',
+    type: 'primary',
+    validate: true,
+    loading: () => passwordDialog.loading,
+    action: (formData) => handlePasswordSubmit(formData)
+  },
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closePasswordDialog()
+  }
+]
 
 function openPasswordDialog(row) {
   passwordDialog.id = row.id

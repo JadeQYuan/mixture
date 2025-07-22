@@ -15,13 +15,13 @@
     
     <template #footer>
       <div class="dialog-footer">
-        <el-button size="large" @click="handleCancel">{{ cancelText }}</el-button>
+        <el-button size="large" @click="handleCancel">{{ cancelText }}</el-button> 
         <el-button 
           :type="confirmType" 
           size="large" 
           @click="handleConfirm"
           :loading="loading"
-        >
+          >
           {{ confirmText }}
         </el-button>
       </div>

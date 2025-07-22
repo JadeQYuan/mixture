@@ -6,6 +6,7 @@
     :close-on-click-modal="closeOnClickModal"
     :before-close="handleBeforeClose"
     center
+    align-center
   >
     <!-- 自定义头部 -->
     <template #header>

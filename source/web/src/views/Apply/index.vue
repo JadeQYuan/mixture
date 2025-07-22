@@ -20,12 +20,7 @@
         :fields="applyDialogConfig.fields"
         :rules="applyDialogConfig.rules"
         :form-data="applyDialog.form"
-        :loading="applyDialog.loading"
-        :label-width="applyDialogConfig.labelWidth"
-        :label-position="applyDialogConfig.labelPosition"
-        :footer-buttons="applyDialogConfig.footerButtons"
-        @submit="handleApplySubmit"
-        @cancel="closeApplyDialog"
+        :footer-buttons="applyDialogButtons"
       />
     </Dialog>
   </div>
@@ -39,7 +34,7 @@ import { getApplyTankList } from '@/api/tank'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, getFeedApplyFormConfig } from './config'
+import { displayFields, applyDialogConfig } from './config'
 
 const card = ref()
 
@@ -64,15 +59,28 @@ const actionButtons = [
   }
 ]
 
-// 加料申请对话框配置
-const applyDialogConfig = getFeedApplyFormConfig()
-
 // 加料申请对话框
 const applyDialog = reactive({
   visible: false,
   loading: false,
   form: { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
 })
+
+const applyDialogButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closeApplyDialog()
+  },
+  {
+    key: 'submit',
+    text: '提交',
+    type: 'primary',
+    validate: true,
+    loading: () => applyDialog.loading,
+    action: (formData) => handleApplySubmit(formData)
+  }
+]
 
 // 加料申请对话框相关函数
 function openApplyDialog(row) {

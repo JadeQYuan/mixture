@@ -18,15 +18,28 @@
       <Form
         :fields="feedDialogConfig.fields"
         :rules="feedDialogConfig.rules"
-        :steps="feedDialogConfig.steps"
-        :current-step="feedDialog.step"
         :form-data="feedDialog.form"
-        :loading="feedDialog.loading"
-        @submit="handleFeedSubmit"
-        @next-step="handleNextStep"
-        @prev-step="handlePrevStep"
-        @cancel="closeFeedDialog"
-      />
+        :extends="feedDialog.step"
+        :footerButtons="footerButtons"
+      >
+        <template #form-top>
+           <!-- 步骤条 -->
+          <el-steps 
+            v-if="feedDialogConfig.steps && feedDialogConfig.steps.length > 0" 
+            :active="feedDialog.step" 
+            finish-status="success" 
+            align-center 
+            style="margin-bottom: 24px; margin-top: 32px;"
+          >
+            <el-step 
+              v-for="step in feedDialogConfig.steps" 
+              :key="step.title" 
+              :title="step.title" 
+              :description="step.description"
+            />
+          </el-steps>
+        </template>
+      </Form>
     </Dialog>
   </div>
 </template>
@@ -38,8 +51,7 @@ import { getFeedManageList, submitFeedOperation, getTankWeightData } from '@/api
 import DataTable from '@/components/DataTable'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns } from './config'
-import { getFeedOperationConfig } from './config'
+import { searchFields, columns, feedDialogConfig } from './config'
 
 const table = ref()
 
@@ -56,7 +68,6 @@ const actionButtons = [
 // 定时器相关
 const weightTimer = ref(null)
 const currentTankId = ref(null)
-const currentStep = ref(0)
 const weightTimerActive = ref(false)
 
 // 修改后的递归定时器逻辑
@@ -79,7 +90,6 @@ async function fetchWeightDataWithDelay(step) {
 
 function startWeightTimer(step) {
   stopWeightTimer()
-  currentStep.value = step
   weightTimerActive.value = true
   fetchWeightDataWithDelay(step)
 }
@@ -92,9 +102,6 @@ function stopWeightTimer() {
   }
 }
 
-// 加料对话框配置
-const feedDialogConfig = getFeedOperationConfig()
-
 // 加料对话框
 const feedDialog = reactive({
   visible: false,
@@ -103,11 +110,41 @@ const feedDialog = reactive({
   form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: 0, actualWeight: null }
 })
 
+const footerButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: ( row ) => closeFeedDialog(row)
+  },
+  {
+    key: 'prev',
+    text: '上一步',
+    type: 'info',
+    action: ( row ) => handlePrevStep(row),
+    visible: (step) => step > 0
+  },
+  {
+    key: 'next',
+    text: '下一步',
+    type: 'primary',
+    validate: true,
+    action: ( row ) => handleNextStep(row),
+    visible: (step) => step < 3
+  },
+  {
+    key: 'feed',
+    text: '提交',
+    type: 'success',
+    loading: () => feedDialog.loading,
+    action: ( row ) => handleFeedSubmit(row),
+    visible: (step) => step === 3
+  }
+]
+
 // 加料对话框相关函数
 function openFeedDialog(row) {
   feedDialog.visible = true
   feedDialog.step = 0
-  currentStep.value = 0
   feedDialog.form.id = row.id
   feedDialog.form.tankId = row.tankId
   feedDialog.form.tankNo = row.tankNo
@@ -123,7 +160,8 @@ function openFeedDialog(row) {
   feedDialog.form.flameRetardantWeight = 0
 }
 
-function handleNextStep(step) {
+function handleNextStep() {
+  const step = feedDialog.step + 1
   if (step === 1) {
     // 第0步：检查底罐重量是否已获取
     if (!feedDialog.form.bottomWeight) {
@@ -139,8 +177,8 @@ function handleNextStep(step) {
     if (!feedDialog.form.fullWeight) {
       ElMessage.warning('正在获取加料重量数据，请稍候');
     } else { 
-            // 加料重量确定，进入第三步
-            stopWeightTimer()
+      // 加料重量确定，进入第三步
+      stopWeightTimer()
       feedDialog.step = step
       // 第三步不需要定时器，用户手动输入阻燃粉重量 
     }
@@ -169,7 +207,6 @@ function handlePrevStep(step) {
 function closeFeedDialog() {
   feedDialog.visible = false
   stopWeightTimer()
-  currentStep.value = 0
 }
 
 async function handleFeedSubmit(formData) {
@@ -179,7 +216,6 @@ async function handleFeedSubmit(formData) {
     feedDialog.loading = true
     // 确保清除定时器
     stopWeightTimer()
-    currentStep.value = 0
     await submitFeedOperation(formData)
     ElMessage.success('加料数据已提交！')
     feedDialog.visible = false

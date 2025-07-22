@@ -25,7 +25,7 @@ const headerButtons = [
   {
     key: 'export',
     text: '导出',
-    type: 'success',
+    type: 'primary',
     size: 'large',
     action: () => handleExport()
   }

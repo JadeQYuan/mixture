@@ -12,20 +12,15 @@
     <!-- 料罐管理对话框 -->
     <Dialog
       :visible="dialog.visible"
-      :title="dialog.config.title"
-      :width="dialog.config.width"
-      :header-config="dialog.config.headerConfig"
+      :title="dialog.title"
+      :width="dialogConfig.width"
       @update:visible="val => dialog.visible = val"
     >
       <Form
-        :fields="dialog.config.fields"
-        :rules="dialog.config.rules"
+        :fields="dialogConfig.fields"
+        :rules="dialogConfig.rules"
         :form-data="dialog.form"
-        :loading="dialog.loading"
-        :footer-buttons="dialog.config.buttons"
-        @submit="handleDialogOk"
-        @cancel="dialog.visible = false"
-        @footer-action="handleFooterAction"
+        :footer-buttons="dialogFormButtons"
       />
     </Dialog>
 
@@ -46,13 +41,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getTankList, createTank, updateTank, deleteTank } from '@/api/tank'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, getTankFormConfig } from './config'
+import { searchFields, columns, dialogConfig } from './config'
 
 const table = ref()
 
@@ -72,7 +67,8 @@ const actionButtons = [
     text: '编辑',
     type: 'primary',
     size: 'large',
-    action: (row) => openDialog('edit', row)
+    action: (row) => openDialog('edit', row),
+    disabled: (row) => row.userAccount
   },
   {
     key: 'delete',
@@ -80,18 +76,36 @@ const actionButtons = [
     type: 'danger',
     size: 'large',
     disabled: (row) => row.status === 'active', // 正常状态禁用删除
-    action: (row) => confirmDelete(row)
+    action: (row) => confirmDelete(row),
+    disabled: (row) => row.userAccount
   }
 ]
 
 // 对话框
 const dialog = reactive({
   visible: false,
+  title: "料罐信息",
   mode: 'add', // add/edit
+  id: null,
   loading: false,
-  form: { tankNo: '', remark: '' },
-  config: getTankFormConfig()
+  form: { tankNo: '', remark: '' }
 })
+
+const dialogFormButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => dialog.visible = false
+  },
+  {
+    key: 'submit',
+    text: '保存',
+    type: 'primary',
+    validate: true,
+    loading: () => dialog.loading,
+    action: (formData) => handleDialogOk(formData)
+  }
+]
 
 // 对话框相关函数
 function openDialog(mode, row) {
@@ -99,21 +113,12 @@ function openDialog(mode, row) {
   dialog.visible = true
   
   // 更新对话框标题
-  dialog.config.title = mode === 'add' ? '新增料罐' : '编辑料罐'
+  dialog.title = mode === 'add' ? '新增料罐' : '编辑料罐'
   
   if (mode === 'edit' && row !== null) {
     Object.assign(dialog.form, row)
   } else {
     dialog.form = { tankNo: '', remark: '' }
-  }
-}
-
-// 处理底部按钮点击事件
-function handleFooterAction({ action, formData }) {
-  if (action === 'submit') {
-    handleDialogOk(formData)
-  } else if (action === 'cancel') {
-    dialog.visible = false
   }
 }
 
@@ -126,8 +131,8 @@ async function handleDialogOk(formData) {
     } else {
       // 确保编辑时包含ID
       const updateData = { ...formData }
-      if (dialog.index !== null && records.value[dialog.index]) {
-        updateData.id = records.value[dialog.index].id
+      if (dialog.id !== null) {
+        updateData.id = dialog.id
       }
       await updateTank(updateData)
       ElMessage.success('编辑料罐成功')

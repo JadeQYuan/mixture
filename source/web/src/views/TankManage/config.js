@@ -35,37 +35,28 @@ export const columns = [
   }
 ]
 
-// 料罐管理对话框表单配置
-export function getTankFormConfig() {
-  return {
-    title: '料罐信息',
-    width: '600px',
-    fields: [
-      {
-        prop: 'tankNo',
-        label: '料罐编号',
-        type: 'input',
-        required: true,
-        size: 'large',
-        style: { width: '100%' }
-      },
-      {
-        prop: 'remark',
-        label: '描述',
-        type: 'textarea',
-        required: false,
-        size: 'large',
-        style: { width: '100%' }
-      }
-    ],
-    rules: {
-      tankNo: [
-        { required: true, message: '请输入料罐编号', trigger: 'blur' }
-      ]
+export const dialogConfig = {
+  fields: [
+    {
+      prop: 'tankNo',
+      label: '料罐编号',
+      type: 'input',
+      required: true,
+      size: 'large',
+      style: { width: '100%' }
     },
-    buttons: [
-      { action: 'submit', text: '保存', type: 'primary', size: 'large' },
-      { action: 'cancel', text: '取消', size: 'large' }
+    {
+      prop: 'remark',
+      label: '描述',
+      type: 'textarea',
+      required: false,
+      size: 'large',
+      style: { width: '100%' }
+    }
+  ],
+  rules: {
+    tankNo: [
+      { required: true, message: '请输入料罐编号', trigger: 'blur' }
     ]
   }
 }

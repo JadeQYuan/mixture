@@ -1,32 +1,18 @@
 <template>
   <div class="form-container">
-    <!-- 步骤条 -->
-    <el-steps 
-      v-if="steps && steps.length > 0" 
-      :active="currentStep" 
-      finish-status="success" 
-      align-center 
-      style="margin-bottom: 24px; margin-top: 32px;"
-    >
-      <el-step 
-        v-for="step in steps" 
-        :key="step.title" 
-        :title="step.title" 
-        :description="step.description"
-      />
-    </el-steps>
+    <slot name="form-top"></slot>
     
     <!-- 表单内容 -->
     <el-form 
+      ref="formRef" 
       :model="formData" 
       :rules="rules" 
-      ref="formRef" 
       :label-width="labelWidth"
       :label-position="labelPosition"
       style="margin-top: 32px;"
     >
       <!-- 动态表单字段 -->
-      <template v-for="field in currentFields" :key="field.prop">
+      <template v-for="field in props.fields" :key="field.prop">
         <el-form-item 
           v-if="getFieldVisible(field)"
           :label="field.label" 
@@ -184,59 +170,19 @@
     <div class="form-footer">
       <!-- 配置化的底部按钮 -->
       <template v-if="footerButtons.length > 0">
-        <el-button
-          v-for="button in footerButtons"
-          :key="button.action"
-          :type="button.type || 'default'"
-          :size="button.size || 'large'"
-          :disabled="button.disabled"
-          :loading="button.loading"
-          @click="handleFooterButtonClick(button.action)"
-        >
-          {{ button.text }}
-        </el-button>
-      </template>
-      
-      <!-- 步骤按钮 -->
-      <template v-else-if="steps && steps.length > 0">
-        <el-button @click="handleCancel" size="large">取消</el-button>
-        <el-button 
-          v-if="currentStep > 0" 
-          @click="handlePrevStep" 
-          size="large"
-        >
-          上一步
-        </el-button>
-        <el-button 
-          v-if="currentStep < steps.length - 1" 
-          type="primary" 
-          @click="handleNextStep" 
-          size="large"
-        >
-          下一步
-        </el-button>
-        <el-button 
-          v-else 
-          type="success" 
-          @click="handleSubmit" 
-          size="large" 
-          :loading="loading"
-        >
-          提交
-        </el-button>
-      </template>
-      
-      <!-- 默认按钮 -->
-      <template v-else>
-        <el-button @click="handleCancel" size="large">取消</el-button>
-        <el-button 
-          type="primary" 
-          @click="handleSubmit" 
-          size="large" 
-          :loading="loading"
-        >
-          确定
-        </el-button>
+        <template v-for="button in footerButtons">
+          <el-button
+            v-if="getButtonVisible(button)"
+            :key="button.key"
+            :type="button.type || 'default'"
+            :size="button.size || 'large'"
+            :disabled="button.disabled"
+            :loading="getButtonLoading(button)"
+            @click="handleFooterButtonClick(button.validate, button.action)"
+          >
+            {{ button.text }}
+          </el-button>
+        </template>
       </template>
     </div>
   </div>
@@ -251,16 +197,6 @@ const props = defineProps({
   fields: {
     type: Array,
     default: () => []
-  },
-  // 步骤配置
-  steps: {
-    type: Array,
-    default: () => []
-  },
-  // 当前步骤
-  currentStep: {
-    type: Number,
-    default: 0
   },
   // 表单数据
   formData: {
@@ -287,83 +223,61 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  // 加载状态
-  loading: {
-    type: Boolean,
-    default: false
+  extends: {
+    type: [Object, Number, String]
   }
 })
-
-// Emits 定义
-const emit = defineEmits([
-  'submit',
-  'cancel',
-  'prev-step',
-  'next-step',
-  'footer-action'
-])
 
 // 响应式数据
 const formRef = ref()
 
-// 计算当前步骤的字段
-const currentFields = computed(() => {
-  if (!props.steps || props.steps.length === 0) {
-    return props.fields
-  }
-  
-  // 对于加料操作，所有步骤都显示相同的字段，只是某些字段在不同步骤中禁用
-  return props.fields
-})
-
-// 处理取消
-function handleCancel() {
-  emit('cancel')
-}
-
-// 处理提交
-function handleSubmit() {
-  formRef.value?.validate(async (valid) => {
-    if (valid) {
-      emit('submit', props.formData)
-    }
-  })
-}
-
-// 处理上一步
-function handlePrevStep() {
-  emit('prev-step', props.currentStep - 1)
-}
-
-// 处理下一步
-function handleNextStep() {
-  formRef.value?.validate(async (valid) => {
-    if (valid) {
-      emit('next-step', props.currentStep + 1)
-    }
-  })
-}
-
 // 处理底部按钮点击
-function handleFooterButtonClick(action) {
-  if (action === 'submit') {
+function handleFooterButtonClick(validate, action) {
+  if (validate) {
     // 对于submit动作，先验证表单，然后发出submit事件
     formRef.value?.validate(async (valid) => {
       if (valid) {
-        emit('submit', props.formData)
+        action(props.formData)
       }
     })
   } else {
-    // 其他动作发出footer-action事件
-    emit('footer-action', { action, formData: props.formData })
+    action(props.formData)
   }
+}
+
+// 获取按钮显示状态
+function getButtonLoading(button) {
+  // 如果按钮有自定义的visible函数，使用它
+  if (typeof button.loading === 'function') {
+    return button.loading()
+  }
+  // 否则使用静态的visible值，默认为true
+  return button.loading === false
+}
+
+// 获取按钮显示状态
+function getButtonVisible(button) {
+  // 如果按钮有自定义的visible函数，使用它
+  if (typeof button.visible === 'function') {
+    if (props.extends !== null) {
+      return button.visible(props.extends, props.formData)
+    } else {
+      return button.visible(props.formData)
+    }
+  }
+  // 否则使用静态的visible值，默认为true
+  return button.visible !== false
 }
 
 // 获取字段禁用状态
 function getFieldDisabled(field) {
   // 如果字段有自定义的disabled函数，使用它
   if (typeof field.disabled === 'function') {
-    return field.disabled(props.currentStep, props.formData)
+    if (props.extends) {
+      return field.disabled(props.extends, props.formData)
+    } else {
+      return field.disabled(props.formData)
+    }
   }
   // 否则使用静态的disabled值
   return field.disabled || false
@@ -373,7 +287,11 @@ function getFieldDisabled(field) {
 function getFieldVisible(field) {
   // 如果字段有自定义的visible函数，使用它
   if (typeof field.visible === 'function') {
-    return field.visible(props.currentStep, props.formData)
+    if (props.extends) {
+      return field.visible(props.extends, props.formData)
+    } else {
+      return field.visible(props.formData)
+    }
   }
   // 否则使用静态的visible值，默认为true
   return field.visible !== false
