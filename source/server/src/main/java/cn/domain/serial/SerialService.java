@@ -30,7 +30,7 @@ public class SerialService {
     }
 
     private byte[] readBuffer;
-    private byte[] writeBuffer = new byte[1];
+    private final byte[] writeBuffer = new byte[1];
     private double weight;
 
     /**
@@ -51,8 +51,21 @@ public class SerialService {
             if (!serialConfig.isSend()) {
                 new Thread(() -> {
                     while (true) {
-                        serialPort.readBytes(readBuffer, 11);
-                        weight = parse(new String(readBuffer).trim());
+                        try {
+                            int i = serialPort.readBytes(readBuffer, 1);
+                            if (i < 1 || readBuffer[0] != 'w') {
+                                continue;
+                            }
+                            i = serialPort.readBytes(readBuffer, 1, 1);
+                            if (i < 1 || readBuffer[1] != 'n') {
+                                continue;
+                            }
+                            serialPort.readBytes(readBuffer, 9, 2);
+                            weight = parse(readBuffer);
+                        } catch (Exception e) {
+                            log.error("串口读取异常: ",  e);
+                            weight = 0.0;
+                        }
                     }
                 }).start();
             }
@@ -110,7 +123,7 @@ public class SerialService {
             if (serialConfig.isSend()) {
                 serialPort.writeBytes(writeBuffer, 1);
                 serialPort.readBytes(readBuffer, 11);
-                return parse(new String(readBuffer).trim());
+                return parse(readBuffer);
             } else {
                 return weight;
             }
@@ -121,12 +134,10 @@ public class SerialService {
         }
     }
 
-    public double parse(String value) {
-        if (value.startsWith("wn")) {
-            if (value.endsWith("kg")) {
-                return Double.parseDouble(value.substring(2, 9));
-            }
+    public double parse(byte[] bytes) {
+        if (bytes[0] != 'w' || bytes[1] != 'n' || bytes[9] != 'k' || bytes[10] != 'g') {
+            return 0.0;
         }
-        return 0.0;
+        return Double.parseDouble(new String(bytes, 2, 7));
     }
 }
