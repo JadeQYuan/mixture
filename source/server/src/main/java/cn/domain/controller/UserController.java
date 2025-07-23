@@ -91,4 +91,12 @@ public class UserController {
     public void uploadPhoto(@RequestParam(value = "imageFile") MultipartFile multipartFile, @RequestParam Integer id) throws Exception {
         userService.uploadPhoto(multipartFile, id);
     }
+
+    /**
+     * 删除用户照片
+     */
+    @DeleteMapping("/deletePhoto")
+    public void deleteUserPhoto(@RequestBody User user) {
+        userService.deleteUserPhoto(user.getId());
+    }
 }

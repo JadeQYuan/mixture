@@ -175,7 +175,6 @@
           :total="total"
           :page-size="pageSize"
           :current-page="currentPage"
-          :page-sizes="pageSizes"
           size="large"
           prev-text="上一页"
           next-text="下一页"

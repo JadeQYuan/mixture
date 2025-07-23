@@ -13,12 +13,12 @@
  */
 export const CAMERA_CONFIG = {
   // 蓝光配置 - 最高清晰度（最高）
-  BLURAY: {
-    width: { ideal: 1920, max: 2560 },
-    height: { ideal: 1080, max: 1440 },
-    facingMode: 'user',
-    frameRate: { ideal: 30, max: 60 }
-  },
+  // BLURAY: {
+  //   width: { ideal: 1920, max: 2560 },
+  //   height: { ideal: 1080, max: 1440 },
+  //   facingMode: 'user',
+  //   frameRate: { ideal: 30, max: 60 }
+  // },
 
   // 高清配置 - 用于用户管理拍照（高）
   HD: {
@@ -95,7 +95,7 @@ async function checkCameraAvailability() {
  * 预加载摄像头权限
  * 在应用启动时调用，避免使用时调用慢
  */
-async function preloadCameraPermission() {
+export async function preloadCameraPermission() {
   // 如果已经在预加载中，返回现有的Promise
   if (preloadPromise) {
     return preloadPromise
@@ -151,7 +151,7 @@ async function preloadCameraPermission() {
  * @returns {Promise<MediaStream>} 摄像头流
  */
 async function startCamera(customOptions = {}) {
-  const configs = ['BLURAY', 'HD', 'MEDIUM', 'LOW', 'PRELOAD']
+  const configs = ['HD', 'MEDIUM', 'LOW', 'PRELOAD']
   
   for (const configType of configs) {
     try {

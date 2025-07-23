@@ -190,6 +190,26 @@ public class UserService {
         userMapper.updateFaceInfo(id, fileNew.getPath(), JSONObject.toJSONString(faceFeature));
     }
 
+    public void deleteUserPhoto(Integer id) {
+        User userInfo = userMapper.getUserInfo(id);
+        if (userInfo == null) {
+            throw new AppException("用户不存在");
+        }
+        String facePath1 = userInfo.getFacePath();
+        if (!StringUtils.isEmpty(facePath1)) {
+            File file = new File(facePath1);
+            if (file.exists()) {
+                String days = DateUtil.getDays();
+                File fileBack = new File(new File(facePathBack).getAbsolutePath() + "/back_" + days + "_" + id + ".png");
+                if (!fileBack.getParentFile().exists()) {
+                    fileBack.getParentFile().mkdirs();
+                }
+                file.renameTo(fileBack);
+            }
+        }
+        userMapper.updateFaceInfo(id, null, null);
+    }
+
     public String loginByAccount(User user) {
         String account = user.getAccount();
         String password = user.getPassword();

@@ -1,16 +1,13 @@
 <script setup>
 import Logo from './components/Logo.vue'
 import { onMounted, onBeforeUnmount } from 'vue'
-import { startGlobalCamera, stopGlobalCamera } from './utils/camera'
+import { preloadCameraPermission } from './utils/camera'
 
 onMounted(() => {
   // 应用启动时预加载并启动全局摄像头
-  startGlobalCamera()
+  preloadCameraPermission()
 })
 
-onBeforeUnmount(() => {
-  stopGlobalCamera()
-})
 </script>
 
 <template>

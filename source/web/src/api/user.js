@@ -30,6 +30,11 @@ export function deleteUser(id) {
   return http.delete(`/api/user/delete`, { data: { id: id } })
 }
 
+// 删除用户照片
+export function deleteUserPhoto(id) {
+  return http.delete(`/api/user/deletePhoto`, { data: { id } })
+}
+
 // 修改密码
 export function updateUserPassword(data) {
   return http.put('/api/user/updatePassword', data)

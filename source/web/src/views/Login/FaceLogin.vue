@@ -30,14 +30,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
 import { faceLogin } from '@/api/login'
 import { getCurrentUser } from '@/api/user'
 import { useStore } from 'vuex'
-import { startGlobalCamera, getCameraErrorMessage } from '@/utils/camera'
+import { startGlobalCamera, getCameraErrorMessage, stopGlobalCamera } from '@/utils/camera'
 
 const router = useRouter()
 const store = useStore()
@@ -202,6 +202,10 @@ onMounted(async () => {
       }
     }, 1000)
   }
+})
+
+onBeforeMount(() => {
+  stopGlobalCamera()
 })
 
 </script>
