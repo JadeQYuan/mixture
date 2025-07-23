@@ -49,49 +49,79 @@
     >
       <div style="margin-top: 24px;">
         <!-- 摄像头/照片区域 -->
-        <div style="text-align: center; margin-bottom: 16px;">
-          <!-- 摄像头区域 -->
+        <div class="face-video-area">
           <video 
             v-if="!photoDialog.currentPhoto"
-            ref="videoRef" 
-            style="width: 600px; height: 450px; border-radius: 8px; background: #000;"
-            autoplay 
+            ref="videoRef"
+            autoplay
             muted
           ></video>
-          
-          <!-- 已拍摄照片区域 -->
-          <div v-if="photoDialog.currentPhoto" style="text-align: center;">
-            <el-image 
-              :src="`data:image/png;base64,${photoDialog.currentPhoto}`" 
-              style="width: 600px; height: 450px; border-radius: 8px;"
-              fit="cover"
-            />
-          </div>
+          <el-image
+            v-else
+            :src="`data:image/png;base64,${photoDialog.currentPhoto}`"
+            style="width: 100%; height: 100%; border-radius: 8px;"
+            fit="cover"
+          />
         </div>
       </div>
-      
       <!-- 底部按钮区域 -->
       <template #footer>
         <div style="text-align: center;">
           <el-button @click="closePhotoDialog" size="large">取消</el-button>
-          <!-- 摄像头未就绪 -->
           <el-button v-if="photoDialog.cameraLoading" type="primary" size="large" :loading="true">准备中...</el-button>
-          
-          <!-- 摄像头已就绪 -->
           <el-button v-if="photoDialog.isCapturing && !photoDialog.currentPhoto" type="success" size="large" @click="capturePhoto">拍照</el-button>
-          
           <el-button v-if="photoDialog.currentPhoto" type="warning" size="large" @click="retakePhoto">重拍</el-button>
-          <el-button 
-            v-if="photoDialog.currentPhoto"
-            type="success" 
-            size="large" 
-            @click="submitPhoto"
-            :loading="photoDialog.submitLoading"
+          <el-button v-if="photoDialog.currentPhoto" type="success" size="large" @click="submitPhoto" :loading="photoDialog.submitLoading">提交</el-button>
+        </div>
+      </template>
+    </Dialog>
+
+    <!-- 照片上传对话框 -->
+    <Dialog
+      :visible="uploadDialog.visible"
+      title="照片上传"
+      width="800px"
+      @update:visible="val => { uploadDialog.visible = val; if (!val) closeUploadDialog() }"
+    >
+      <div style="margin-top: 24px;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <el-upload
+            class="avatar-uploader"
+            :file-list="uploadDialog.fileList"
+            :limit="1"
+            :show-file-list="false"
+            :auto-upload="false"
+            :on-change="handleUploadChange"
+            :before-upload="beforeAvatarUpload"
+            :on-remove="handleRemove"
+            :accept="'image/*'"
           >
-            提交
-          </el-button>
-          <!-- 摄像头获取失败 -->
-          <el-button type="primary" size="large" @click="getCamera">重新获取摄像头</el-button>
+            <img v-if="uploadDialog.currentPhoto" 
+            :src="`data:image/png;base64,${uploadDialog.currentPhoto}`" 
+            class="avatar" 
+            style="width: 600px; height: 450px; border-radius: 8px;"
+            fit="cover"
+            />
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+        </div>
+      </div>
+      <template #footer>
+        <div style="text-align: center;">
+          <el-button @click="closeUploadDialog" size="large">取消</el-button>
+          <el-button
+            v-if="uploadDialog.currentPhoto"
+            type="warning"
+            size="large"
+            @click="removeUploadPhoto"
+          >重新上传</el-button>
+          <el-button
+            type="success"
+            size="large"
+            @click="submitUploadPhoto"
+            :loading="uploadDialog.submitLoading"
+            :disabled="!uploadDialog.currentPhoto"
+          >提交</el-button>
         </div>
       </template>
     </Dialog>
@@ -132,27 +162,42 @@
       </template>
     </Dialog>
 
+    <!-- 删除照片确认对话框 -->
+    <ConfirmDialog
+      :visible="deletePhotoDialog.visible"
+      title="确认删除照片"
+      message="确定要删除该用户的照片吗？"
+      confirm-type="danger"
+      confirm-text="删除"
+      @update:visible="val => deletePhotoDialog.visible = val"
+      @confirm="handleDeletePhoto"
+      @cancel="closeDeletePhotoDialog"
+    />
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/api/user'
 import { encryptPassword } from '@/utils/crypto'
-import { getCameraErrorMessage, startGlobalCamera } from '@/utils/camera'
-import { base64ToFile, canvasToBase64 } from '@/utils/fileUtils'
+import { getCameraErrorMessage, startGlobalCamera, stopGlobalCamera } from '@/utils/camera'
+import { base64ToFile, canvasToBase64, fileToBase64 } from '@/utils/fileUtils'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { searchFields, columns } from './config'
 import { getUserFormConfig, getPasswordFormConfig } from './config'
 import { useStore } from 'vuex'
+import { Plus } from '@element-plus/icons-vue'
+import { deleteUserPhoto } from '@/api/user' // 你需要实现该接口
 
 const table = ref()
 
 const store = useStore()
 const userId = computed(() => store.state.userInfo?.id || '')
+// 1. actionButtons 拆分入口
 const actionButtons = [
   {
     key: 'edit',
@@ -173,7 +218,7 @@ const actionButtons = [
     text: '照片上传',
     type: 'warning',
     size: 'large',
-    action: ( row ) => openPhotoDialog(row)
+    action: ( row ) => openUploadDialog(row)
   },
   {
     key: 'password',
@@ -183,11 +228,12 @@ const actionButtons = [
     action: ( row ) => openPasswordDialog(row)
   },
   {
-    key: 'clearPhoto',
-    text: '修改密码',
-    type: 'info',
+    key: 'deletePhoto',
+    text: '删除照片',
+    type: 'danger',
     size: 'large',
-    action: ( row ) => openPasswordDialog(row)
+    action: (row) => confirmDeletePhoto(row),
+    disabled: (row) => !row.facePath // 没有照片时禁用
   },
   {
     key: 'delete',
@@ -352,7 +398,6 @@ function openPhotoDialog(row) {
 
 async function getCamera() {
   if (photoDialog.cameraLoading) return
-  
   try {
     photoDialog.cameraLoading = true
     // 直接获取全局摄像头
@@ -377,7 +422,6 @@ function capturePhoto() {
     ElMessage.warning('请先启动摄像头')
     return
   }
-  
   try {
     // 创建canvas来捕获视频帧
     const canvas = document.createElement('canvas')
@@ -393,7 +437,6 @@ function capturePhoto() {
     // 使用工具类将canvas转换为base64图片数据
     const photoData = canvasToBase64(canvas, 'image/png', 0.8)
     photoDialog.currentPhoto = photoData
-    
     ElMessage.success('拍照成功')
   } catch (error) {
     console.error('拍照失败:', error)
@@ -428,6 +471,8 @@ async function submitPhoto() {
     await table.value.search()
   } finally {
     photoDialog.submitLoading = false
+    photoDialog.currentPhoto = null
+    stopGlobalCamera()
   }
 }
 
@@ -437,6 +482,81 @@ function closePhotoDialog() {
   photoDialog.currentPhoto = null
   photoDialog.isCapturing = false
   photoDialog.cameraLoading = false
+  stopGlobalCamera()
+}
+
+// 3. uploadDialog 只用于照片上传
+const uploadDialog = reactive({
+  visible: false,
+  id: null,
+  fileList: [],
+  currentPhoto: null,
+  submitLoading: false
+})
+
+function openUploadDialog(row) {
+  uploadDialog.id = row.id
+  uploadDialog.visible = true
+  uploadDialog.currentPhoto = null
+  uploadDialog.fileList = []
+}
+
+function handleUploadChange(file, fileList) {
+  uploadDialog.fileList = fileList.slice(-1)
+  if (fileList.length > 0) {
+    const rawFile = fileList[0].raw
+    fileToBase64(rawFile).then(base64 => {
+      uploadDialog.currentPhoto = base64
+    })
+  } else {
+    uploadDialog.currentPhoto = null
+  }
+}
+function beforeAvatarUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过2MB')
+    return false
+  }
+  return true
+}
+function handleRemove() {
+  uploadDialog.currentPhoto = null
+  uploadDialog.fileList = []
+}
+function removeUploadPhoto() {
+  uploadDialog.currentPhoto = null
+  uploadDialog.fileList = []
+}
+async function submitUploadPhoto() {
+  if (!uploadDialog.currentPhoto) {
+    ElMessage.error('请先上传图片')
+    return
+  }
+  uploadDialog.submitLoading = true
+  try {
+    const id = uploadDialog.id
+    if (!id) throw new Error('用户ID为空')
+    const imageFile = base64ToFile(uploadDialog.currentPhoto, 'face_photo.png', 'image/png')
+    await updateUserPhoto(id, imageFile)
+    ElMessage.success('照片提交成功')
+    uploadDialog.visible = false
+    await table.value.search()
+  } finally {
+    uploadDialog.submitLoading = false
+    uploadDialog.currentPhoto = null
+    uploadDialog.fileList = []
+  }
+}
+function closeUploadDialog() {
+  uploadDialog.visible = false
+  uploadDialog.currentPhoto = null
+  uploadDialog.fileList = []
 }
 
 // 修改密码相关
@@ -517,9 +637,87 @@ function handleLinkClick({ row, index }) {
 function closePhotoPreview() {
   photoPreviewDialog.visible = false
 }
+
+// 1. 新增 deletePhotoDialog 响应式对象
+const deletePhotoDialog = reactive({
+  visible: false,
+  id: null
+})
+
+// 2. openDeletePhotoDialog
+function openDeletePhotoDialog(row) {
+  deletePhotoDialog.id = row.id
+  deletePhotoDialog.visible = true
+}
+
+function closeDeletePhotoDialog() {
+  deletePhotoDialog.visible = false
+}
+
+// 3. handleDeletePhoto
+async function handleDeletePhoto() {
+  try {
+    await deleteUserPhoto(deletePhotoDialog.id)
+    ElMessage.success('照片已删除')
+  } finally {
+    deletePhotoDialog.visible = false
+    await table.value.search()
+  }
+}
+
+// 4. confirmDeletePhoto 只做弹窗显示
+function confirmDeletePhoto(row) {
+  openDeletePhotoDialog(row)
+}
 </script>
 
 <style scoped>
 .user-manage-container {
 }
-</style> 
+
+.avatar-uploader .avatar {
+  width: 600px;
+  height: 450px;
+  display: block;
+}
+.face-video-area {
+  width: 600px;
+  height: 450px;
+  border-radius: 8px;
+  background: #000;
+  overflow: hidden;
+  display: block;
+  margin: 0 auto;
+}
+.face-video-area video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+.el-icon.avatar-uploader-icon {
+  font-size: 60px;
+  color: #8c939d;
+  width: 600px;
+  height: 450px;
+  text-align: center;
+}
+</style>

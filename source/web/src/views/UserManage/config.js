@@ -53,7 +53,7 @@ export const columns = [
   {
     type: 'actions',
     label: '操作',
-    width: '500'
+    width: '700'
   }
 ]
 
