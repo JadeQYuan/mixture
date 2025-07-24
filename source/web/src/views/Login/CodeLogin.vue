@@ -9,7 +9,7 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" size="large" />
         </el-form-item>
-        <el-form-item>
+        <el-form-item label-width="30px">
           <el-button type="primary" size="large" class="login-btn" @click="login" :loading="loading">登录</el-button>
         </el-form-item>
       </el-form>
@@ -119,10 +119,6 @@ const goHome = () => {
   width: 85% !important;
 }
 
-/* 文本域宽度 */
-:deep(.el-textarea) {
-  width: 85% !important;
-}
 .login-btn {
   width: 100%;
   font-size: 1.5em;

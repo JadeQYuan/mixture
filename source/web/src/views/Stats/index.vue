@@ -53,7 +53,7 @@ function handlerParams(params) {
 
 async function handleExport() {
   // 1. 拉取所有数据
-  const list = await table.value.search()
+  const list = await table.value.search({ pageNo: 1, pageSize: 1000000 })
   if (list.length == 0) {
     ElMessage.warning('无可导出数据')
     return

@@ -468,10 +468,10 @@ async function submitPhoto() {
     await updateUserPhoto(id, imageFile)
     ElMessage.success('照片提交成功')
     photoDialog.visible = false
+    photoDialog.currentPhoto = null
     await table.value.search()
   } finally {
     photoDialog.submitLoading = false
-    photoDialog.currentPhoto = null
     stopGlobalCamera()
   }
 }
@@ -546,10 +546,10 @@ async function submitUploadPhoto() {
     await updateUserPhoto(id, imageFile)
     ElMessage.success('照片提交成功')
     uploadDialog.visible = false
+    uploadDialog.currentPhoto = null
     await table.value.search()
   } finally {
     uploadDialog.submitLoading = false
-    uploadDialog.currentPhoto = null
     uploadDialog.fileList = []
   }
 }

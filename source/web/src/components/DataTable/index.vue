@@ -294,10 +294,10 @@ function handleSizeChange(size) {
   search()
 }
 
-async function search() {
+async function search(param = {}) {
   try {
     loading.value = true
-    const params = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value }
+    const params = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value, ...param }
     props.searchFields.forEach(field => {
       if (field.type === 'datetimerange' || field.type === 'daterange') {
         const timeValue = searchForm[field.key]

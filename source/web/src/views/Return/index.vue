@@ -116,7 +116,7 @@ async function fetchWeightDataWithDelay() {
   if (!weightTimerActive.value) return;
   if (currentTankId.value) {
     const response = await getTankWeightData()
-    if (response) {
+    if (response !== null && response !== undefined) {
       returnDialog.form.returnWeight = response
     }
   }

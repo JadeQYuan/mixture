@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeMount } from 'vue'
+import { ref, onMounted, onBeforeMount, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
@@ -109,15 +109,6 @@ async function captureAndRecognize() {
     
     // 拍照
     const imageFile = await capturePhoto()
-    if (!imageFile) {
-      retryCount++
-      isProcessing.value = false
-      // 减少延迟，立即重试
-      setTimeout(() => {
-        captureAndRecognize()
-      }, 50)
-      return
-    }
     
     // 调用人脸识别接口
     const response = await faceLogin(imageFile)
@@ -126,7 +117,13 @@ async function captureAndRecognize() {
       // 识别成功，与密码登录逻辑保持一致
       const token = response
       localStorage.setItem('token', token)
-      
+      stopGlobalCamera()
+      isProcessing.value = false
+      isCameraActive.value = false
+      // 减少延迟跳转时间
+      setTimeout(() => {
+        router.push('/app')
+      }, 500)
       // 登录成功后获取用户信息
       try {
         const userInfo = await getCurrentUser()
@@ -134,21 +131,7 @@ async function captureAndRecognize() {
       } catch (error) {
         console.error('获取用户信息失败:', error)
       }
-      
       ElMessage.success('识别成功，正在跳转...')
-      
-      // 减少延迟跳转时间
-      setTimeout(() => {
-        router.push('/app')
-      }, 500)
-    } else {
-      // 识别失败，减少等待时间后重新识别
-      ElMessage.error(response.message || '人脸识别失败')
-      retryCount++
-      isProcessing.value = false
-      setTimeout(() => {
-        captureAndRecognize()
-      }, 2000)
     }
   } catch (error) {
     // 错误已由http拦截器处理，不再重复提示
@@ -177,7 +160,7 @@ const goHome = () => {
 }
 
 onMounted(async () => {
-  
+
   // 如果使用全局摄像头，检查其状态并设置视频源
   if (videoRef.value) {
     await startCameraStream()
@@ -204,8 +187,10 @@ onMounted(async () => {
   }
 })
 
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   stopGlobalCamera()
+  isCameraActive.value = false
+  isProcessing.value = false
 })
 
 </script>

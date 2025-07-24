@@ -75,7 +75,7 @@ async function fetchWeightDataWithDelay(step) {
   if (!weightTimerActive.value) return;
   if (currentTankId.value) {
     const response = await getTankWeightData()
-    if (response) {
+    if (response !== null && response !== undefined) {
       if (step === 0) {
         feedDialog.form.bottomWeight = response
       } else if (step === 1) {
@@ -192,8 +192,8 @@ function handleNextStep() {
   }
 }
 
-function handlePrevStep(step) {
-  feedDialog.step = step
+function handlePrevStep() {
+  const step = feedDialog.step - 1
   // 如果返回到需要获取数据的步骤，重新启动对应步骤的定时器并立即获取数据
   if (step === 0) {
     // 返回第一步，立即启动底罐重量获取
@@ -202,6 +202,7 @@ function handlePrevStep(step) {
     // 返回第二步，立即启动加料重量获取
     startWeightTimer(1)
   }
+  feedDialog.step = step
 }
 
 function closeFeedDialog() {
