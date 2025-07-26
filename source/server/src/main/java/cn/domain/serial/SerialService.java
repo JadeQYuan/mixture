@@ -44,19 +44,27 @@ public class SerialService {
             serialPort.setParity(serialConfig.getParity());
             serialPort.setNumStopBits(serialConfig.getStopBits());
             serialPort.openPort(1000);
+            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
             isConnected = true;
             readBuffer = new byte[12];
             writeBuffer[0] = 'R';
             log.info("串口连接成功: {}", serialConfig.getSerialPort());
             if (!serialConfig.isSend()) {
                 new Thread(() -> {
-                    while (true) {
+                    while (isConnected) {
                         try {
-                            int i = serialPort.readBytes(readBuffer, 1);
+                            int i = serialPort.readBytes(readBuffer, 1, 0);
+                            log.info("读取重量数据: i = {}", i);
+                            if (i > 0) {
+                                log.info("读取重量数据1: {}", new String(readBuffer, 0, 1));
+                            }
                             if (i < 1 || readBuffer[0] != 'w') {
                                 continue;
                             }
                             i = serialPort.readBytes(readBuffer, 1, 1);
+                            if (i > 0) {
+                                log.info("读取重量数据2: {}", new String(readBuffer, 1, 1));
+                            }
                             if (i < 1 || readBuffer[1] != 'n') {
                                 continue;
                             }
@@ -135,6 +143,7 @@ public class SerialService {
     }
 
     public double parse(byte[] bytes) {
+        log.info("读取重量数据all: {}", new String(bytes));
         if (bytes[0] != 'w' || bytes[1] != 'n' || bytes[9] != 'k' || bytes[10] != 'g') {
             return 0.0;
         }
