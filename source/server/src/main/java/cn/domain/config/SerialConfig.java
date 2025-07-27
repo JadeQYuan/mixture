@@ -48,7 +48,4 @@ public class SerialConfig {
      * 读取寄存器数量，要读取的连续寄存器个数
      */
     private int quantity = 2;
-
-    private boolean send = false;
-
 }

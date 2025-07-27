@@ -92,16 +92,22 @@
             :show-file-list="false"
             :auto-upload="false"
             :on-change="handleUploadChange"
+            :on-exceed="handleUploadExceed"
             :before-upload="beforeAvatarUpload"
             :on-remove="handleRemove"
             :accept="'image/*'"
           >
-            <img v-if="uploadDialog.currentPhoto" 
-            :src="`data:image/png;base64,${uploadDialog.currentPhoto}`" 
-            class="avatar" 
-            style="width: 600px; height: 450px; border-radius: 8px;"
-            fit="cover"
+            <el-image v-if="uploadDialog.currentPhoto"
+              :src="`data:image/png;base64,${uploadDialog.currentPhoto}`"
+              style="width: 100%; height: 100%; border-radius: 8px;"
+              fit="cover"
             />
+            <!-- <img v-if="uploadDialog.currentPhoto" 
+              :src="`data:image/png;base64,${uploadDialog.currentPhoto}`" 
+              class="avatar" 
+              style="width: 600px; height: 450px; border-radius: 8px;"
+              fit="cover"
+            /> -->
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </div>
@@ -109,12 +115,6 @@
       <template #footer>
         <div style="text-align: center;">
           <el-button @click="closeUploadDialog" size="large">取消</el-button>
-          <el-button
-            v-if="uploadDialog.currentPhoto"
-            type="warning"
-            size="large"
-            @click="removeUploadPhoto"
-          >重新上传</el-button>
           <el-button
             type="success"
             size="large"
@@ -363,22 +363,6 @@ const photoDialog = reactive({
   submitLoading: false
 })
 
-const photoDialogButtons = [
-  {
-    key: 'submit',
-    text: '保存',
-    type: 'primary',
-    validate: true,
-    loading: () => dialog.loading,
-    action: (formData) => handleDialogSubmit(formData)
-  },
-  {
-    key: 'cancel',
-    text: '取消',
-    action: () => closeDialog()
-  }
-]
-
 const videoRef = ref()
 
 let cameraStream = null
@@ -512,6 +496,19 @@ function handleUploadChange(file, fileList) {
     uploadDialog.currentPhoto = null
   }
 }
+
+function handleUploadExceed(files) {
+  uploadDialog.fileList = files.slice(-1)
+  if (files.length > 0) {
+    const rawFile = files[0]
+    fileToBase64(rawFile).then(base64 => {
+      uploadDialog.currentPhoto = base64
+    })
+  } else {
+    uploadDialog.currentPhoto = null
+  }
+}
+
 function beforeAvatarUpload(file) {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
@@ -525,14 +522,12 @@ function beforeAvatarUpload(file) {
   }
   return true
 }
+
 function handleRemove() {
   uploadDialog.currentPhoto = null
   uploadDialog.fileList = []
 }
-function removeUploadPhoto() {
-  uploadDialog.currentPhoto = null
-  uploadDialog.fileList = []
-}
+
 async function submitUploadPhoto() {
   if (!uploadDialog.currentPhoto) {
     ElMessage.error('请先上传图片')
@@ -675,10 +670,14 @@ function confirmDeletePhoto(row) {
 .user-manage-container {
 }
 
-.avatar-uploader .avatar {
+.avatar-uploader {
   width: 600px;
   height: 450px;
+  border-radius: 8px;
+  background: #000;
+  overflow: hidden;
   display: block;
+  margin: 0 auto;
 }
 .face-video-area {
   width: 600px;

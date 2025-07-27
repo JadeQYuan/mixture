@@ -1,6 +1,7 @@
 package cn.domain.serial;
 
 import cn.domain.config.SerialConfig;
+import cn.domain.exception.AppException;
 import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -18,6 +23,8 @@ public class SerialService {
 
     private SerialPort serialPort;
     private boolean isConnected = false;
+    private boolean isReading = false;
+    private LocalDateTime readingTime;
 
     @PostConstruct
     public void init() {
@@ -30,8 +37,9 @@ public class SerialService {
     }
 
     private byte[] readBuffer;
-    private final byte[] writeBuffer = new byte[1];
-    private double weight;
+    private Double weight;
+
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     /**
      * 连接到串口设备
@@ -47,36 +55,7 @@ public class SerialService {
             serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
             isConnected = true;
             readBuffer = new byte[12];
-            writeBuffer[0] = 'R';
             log.info("串口连接成功: {}", serialConfig.getSerialPort());
-            if (!serialConfig.isSend()) {
-                new Thread(() -> {
-                    while (isConnected) {
-                        try {
-                            int i = serialPort.readBytes(readBuffer, 1, 0);
-                            log.info("读取重量数据: i = {}", i);
-                            if (i > 0) {
-                                log.info("读取重量数据1: {}", new String(readBuffer, 0, 1));
-                            }
-                            if (i < 1 || readBuffer[0] != 'w') {
-                                continue;
-                            }
-                            i = serialPort.readBytes(readBuffer, 1, 1);
-                            if (i > 0) {
-                                log.info("读取重量数据2: {}", new String(readBuffer, 1, 1));
-                            }
-                            if (i < 1 || readBuffer[1] != 'n') {
-                                continue;
-                            }
-                            serialPort.readBytes(readBuffer, 9, 2);
-                            weight = parse(readBuffer);
-                        } catch (Exception e) {
-                            log.error("串口读取异常: ",  e);
-                            weight = 0.0;
-                        }
-                    }
-                }).start();
-            }
         } catch (Exception e) {
             log.error("串口连接失败: {} ", serialConfig.getSerialPort(),  e);
             isConnected = false;
@@ -91,6 +70,8 @@ public class SerialService {
             try {
                 serialPort.closePort();
                 isConnected = false;
+                isReading = false;
+                weight = null;
                 log.info("串口连接已断开");
             } catch (Exception e) {
                 log.error("断开串口连接时发生错误: ", e);
@@ -113,6 +94,11 @@ public class SerialService {
         return isConnected && serialPort != null;
     }
 
+    public void stopReading() {
+        isReading = false;
+        weight = null;
+    }
+
     /**
      * 读取重量数据
      * @return 重量值（千克）
@@ -123,23 +109,49 @@ public class SerialService {
             reconnect();
             if (!isConnected()) {
                 log.error("串口重连失败，无法读取重量数据");
-                return null;
+                throw new AppException("串口连接失败");
             }
         }
+        readingTime = LocalDateTime.now();
+        if (!isReading) {
+            isReading = true;
+            read();
+        }
+        return weight;
+    }
 
-        try {
-            if (serialConfig.isSend()) {
-                serialPort.writeBytes(writeBuffer, 1);
-                serialPort.readBytes(readBuffer, 11);
-                return parse(readBuffer);
-            } else {
-                return weight;
+    private void read() {
+        executor.execute(() -> {
+            while (isConnected && isReading && Duration.between(readingTime, LocalDateTime.now()).getSeconds() < 15) {
+                try {
+                    int i = serialPort.readBytes(readBuffer, 1, 0);
+                    if (i < 0) {
+                        log.error("串口读取失败: i = {}", i);
+                        disconnect();
+                        continue;
+                    }
+                    log.info("读取重量数据: i = {}", i);
+                    if (i > 0) {
+                        log.info("读取重量数据1: {}", new String(readBuffer, 0, 1));
+                    }
+                    if (i < 1 || readBuffer[0] != 'w') {
+                        continue;
+                    }
+                    i = serialPort.readBytes(readBuffer, 1, 1);
+                    if (i > 0) {
+                        log.info("读取重量数据2: {}", new String(readBuffer, 1, 1));
+                    }
+                    if (i < 1 || readBuffer[1] != 'n') {
+                        continue;
+                    }
+                    serialPort.readBytes(readBuffer, 9, 2);
+                    weight = parse(readBuffer);
+                } catch (Exception e) {
+                    log.error("串口读取异常: ",  e);
+                    weight = 0.0;
+                }
             }
-        } catch (Exception e) {
-            isConnected = false;
-            log.error("读取重量数据时发生未知错误: ", e);
-            return null;
-        }
+        });
     }
 
     public double parse(byte[] bytes) {

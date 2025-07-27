@@ -54,6 +54,7 @@ public class MixtureService {
     public void executeMixes(Mixture mixture) {
         mixture.setFeedingUserId(TokenUtil.getToken());
         mixtureMapper.executeMixes(mixture);
+        serialService.stopReading();
     }
 
     @Transactional
@@ -65,6 +66,7 @@ public class MixtureService {
                 .add(BigDecimal.valueOf(-mixture.getReturnWeight())).doubleValue());
         mixtureMapper.executeReturn(mixture);
         tankService.updateUser(mixture.getTankId(), null);
+        serialService.stopReading();
     }
 
     public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {

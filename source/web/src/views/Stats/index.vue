@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFeedStatsList } from '@/api/mixture'
 import DataTable from '@/components/DataTable'
@@ -21,15 +21,16 @@ import * as XLSX from 'xlsx'
 
 const table = ref()
 
-const headerButtons = [
+const headerButtons = reactive([
   {
     key: 'export',
     text: '导出',
     type: 'primary',
     size: 'large',
-    action: () => handleExport()
+    loading: false,
+    action: () => handleExport(0)
   }
-] 
+])
 
 // 处理动态时间类型和范围
 function handlerParams(params) {
@@ -51,9 +52,10 @@ function handlerParams(params) {
   return query
 }
 
-async function handleExport() {
+async function handleExport(index) {
+  headerButtons[index].loading = true
   // 1. 拉取所有数据
-  const list = await table.value.search({ pageNo: 1, pageSize: 1000000 })
+  const list = await table.value.searchAll()
   if (list.length == 0) {
     ElMessage.warning('无可导出数据')
     return
@@ -61,11 +63,13 @@ async function handleExport() {
   try {
     // 2. 组装导出数据和表头，顺序与columns一致，内容优先用render
     const exportColumns = columns.filter(col => col.type !== 'actions')
-    const headers = exportColumns.map(col => col.label)
+    const headers = exportColumns.map(col => col.exportLabel || col.label)
     const exportData = list.map(row => {
       const item = {}
       exportColumns.forEach(col => {
-        if (typeof col.render === 'function') {
+        if (typeof col.exportRender === 'function') {
+          item[col.label] = col.exportRender(row)
+        } else if (typeof col.render === 'function') {
           item[col.label] = col.render(row)
         } else {
           item[col.label] = row[col.prop]
@@ -83,6 +87,8 @@ async function handleExport() {
   } catch (e) {
     console.error('导出失败', e)
     ElMessage.error('导出失败')
+  } finally {
+    headerButtons[index].loading = false
   }
 }
 </script>

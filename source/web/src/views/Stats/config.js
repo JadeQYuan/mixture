@@ -73,8 +73,10 @@ export const columns = [
   {
     prop: 'planWeight',
     label: '计划加料',
+    exportLabel: '计划加料(kg)',
     width: '120',
-    render: (row) => `${row.planWeight} kg`
+    render: (row) => `${row.planWeight} kg`,
+    exportRender: (row) => `${row.planWeight}`
   },
   {
     prop: 'applyUserAccount',
@@ -90,20 +92,26 @@ export const columns = [
   {
     prop: 'bottomWeight',
     label: '罐底重量',
+    exportLabel: '罐底重量(kg)',
     width: '120',
-    render: (row) => `${row.bottomWeight} kg`
+    render: (row) => `${row.bottomWeight} kg`,
+    exportRender: (row) => `${row.bottomWeight}`
   },
   {
     prop: 'fullWeight',
     label: '满罐重量',
+    exportLabel: '满罐重量(kg)',
     width: '120',
-    render: (row) => `${row.fullWeight} kg`
+    render: (row) => `${row.fullWeight} kg`,
+    exportRender: (row) => `${row.fullWeight}`
   },
   {
     prop: 'flameRetardantWeight',
     label: '阻燃粉重量',
+    exportLabel: '阻燃粉重量(kg)',
     width: '120',
-    render: (row) => `${row.flameRetardantWeight} kg`
+    render: (row) => `${row.flameRetardantWeight} kg`,
+    exportRender: (row) => `${row.flameRetardantWeight}`
   },
   {
     prop: 'feedingTime',
@@ -123,15 +131,19 @@ export const columns = [
   },
   {
     prop: 'returnWeight',
-    label: '退料重量',
+    label: '退料重量',  
+    exportLabel: '退料重量(kg)',
     width: '120',
-    render: (row) => `${row.returnWeight} kg`
+    render: (row) => `${row.returnWeight} kg`,
+    exportRender: (row) => `${row.returnWeight}`
   },
   {
     prop: 'actualWeight',
     label: '实际用料',
+    exportLabel: '实际用料(kg)',
     width: '100',
-    render: (row) => `${row.actualWeight} kg`
+    render: (row) => `${row.actualWeight} kg`,
+    exportRender: (row) => `${row.actualWeight}`
   }
 ]
 

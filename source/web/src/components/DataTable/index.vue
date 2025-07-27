@@ -250,7 +250,7 @@ const emit = defineEmits([
   'link-click'
 ])
 
-defineExpose({search})
+defineExpose({search, searchAll})
 
 // 响应式数据
 const records = ref([])
@@ -294,10 +294,10 @@ function handleSizeChange(size) {
   search()
 }
 
-async function search(param = {}) {
+async function search() {
   try {
     loading.value = true
-    const params = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value, ...param }
+    const params = { ...searchForm, pageNo: currentPage.value, pageSize: pageSize.value }
     props.searchFields.forEach(field => {
       if (field.type === 'datetimerange' || field.type === 'daterange') {
         const timeValue = searchForm[field.key]
@@ -314,7 +314,22 @@ async function search(param = {}) {
   } finally {
     loading.value = false
   }
-  return records.value
+}
+
+async function searchAll() {
+  const params = { ...searchForm, pageNo: 1, pageSize: 1000000 }
+  props.searchFields.forEach(field => {
+    if (field.type === 'datetimerange' || field.type === 'daterange') {
+      const timeValue = searchForm[field.key]
+      if (Array.isArray(timeValue) && timeValue.length === 2) {
+        params[`startTime`] = timeValue[0]
+        params[`endTime`] = timeValue[1]
+        params[field.key] = timeValue
+      }
+    }
+  })
+  const response = await props.request(props.beforeRequest(params))
+  return response.data || []
 }
 
 // 处理自定义操作
