@@ -133,6 +133,18 @@ export const remarkDialogConfig = {
   width: '500px',
   fields: [
     {
+      prop: 'materialName',
+      label: '材料名称',
+      type: 'radio',
+      placeholder: '请选择材料名称',
+      options: getOptions(MATERIAL_MAP)
+    },
+    {
+      prop: 'productSpec',
+      label: '产品型号',
+      type: 'input',
+    },
+    {
       prop: 'remark',
       label: '备注',
       type: 'textarea',

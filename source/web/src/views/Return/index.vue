@@ -72,6 +72,7 @@ const actionButtons = [
     text: '退料',
     type: 'warning',
     size: 'large',
+    disabled: (row) => row.status === 0,
     action: ( row ) => openReturnDialog(row)
   }
 ]

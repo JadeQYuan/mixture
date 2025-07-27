@@ -97,16 +97,16 @@ public interface MixtureMapper {
             "WHERE id = #{id}")
     void executeReturn(Mixture mixture);
 
-    @Update("UPDATE mixture_info SET remark = #{remark}, " +
+    @Update("UPDATE mixture_info SET remark = #{remark}, material_name = #{materialName}, product_spec = #{productSpec}, " +
             "update_time = datetime('now', 'localtime'), status = 2 " +
             "WHERE id = #{id}")
     void updateRemark(Mixture mixture);
 
     @Select("<script>" +
-            "SELECT m.id, m.tank_id as tankId, t.tank_no as tankNo, t.remark " +
+            "SELECT m.id, m.tank_id as tankId, m.apply_time as applyTime, m.status, t.tank_no as tankNo, t.remark " +
             "FROM mixture_info m " +
             "LEFT JOIN tank_info t ON m.tank_id = t.id " +
-            "WHERE m.status = 1 " +
+            "WHERE m.status in (0, 1) " +
             "AND t.user_id = #{userId} " +
             "</script>")
     List<Mixture> getTankForReturn(Integer userId);

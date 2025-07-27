@@ -59,9 +59,11 @@ const dialogFormButtons = [
 
 // 备注弹窗相关
 const remarkDialogVisible = ref(false)
-const remarkForm = ref({ id: null, remark: '' })
+const remarkForm = ref({ id: null, remark: '', materialName: '', productSpec: '' })
 
 function openRemarkDialog(row) {
+  remarkForm.value.materialName = row.materialName
+  remarkForm.value.productSpec = row.productSpec
   remarkForm.value.remark = row.remark || ''
   remarkForm.value.id = row.id
   remarkDialogVisible.value = true
