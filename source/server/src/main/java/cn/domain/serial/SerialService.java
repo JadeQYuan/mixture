@@ -52,7 +52,7 @@ public class SerialService {
             serialPort.setParity(serialConfig.getParity());
             serialPort.setNumStopBits(serialConfig.getStopBits());
             serialPort.openPort(1000);
-            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
+            serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 30000, 15000);
             isConnected = true;
             readBuffer = new byte[12];
             log.info("串口连接成功: {}", serialConfig.getSerialPort());
@@ -122,8 +122,13 @@ public class SerialService {
 
     private void read() {
         executor.execute(() -> {
-            while (isConnected && isReading && Duration.between(readingTime, LocalDateTime.now()).getSeconds() < 15) {
+            while (isConnected && isReading) {
                 try {
+                    if (Duration.between(readingTime, LocalDateTime.now()).getSeconds() > 15) {
+                        log.error("串口读取暂停 ");
+                        disconnect();
+                        continue;
+                    }
                     int i = serialPort.readBytes(readBuffer, 1, 0);
                     if (i < 0) {
                         log.error("串口读取失败: i = {}", i);

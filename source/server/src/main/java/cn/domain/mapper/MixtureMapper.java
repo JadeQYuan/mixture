@@ -98,7 +98,7 @@ public interface MixtureMapper {
     void executeReturn(Mixture mixture);
 
     @Update("UPDATE mixture_info SET remark = #{remark}, material_name = #{materialName}, product_spec = #{productSpec}, " +
-            "update_time = datetime('now', 'localtime'), status = 2 " +
+            "update_time = datetime('now', 'localtime') " +
             "WHERE id = #{id}")
     void updateRemark(Mixture mixture);
 

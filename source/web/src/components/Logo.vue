@@ -1,6 +1,6 @@
 <template>
   <div class="logo-global">
-    <img class="img-logo" src="/src/assets/img-logo.svg" alt="logo" />
+    <img class="img-logo" src="/src/assets/img-logo.png" alt="logo" />
     <img class="text-logo" src="/src/assets/text-logo.svg" alt="logo" />
   </div>
 </template>

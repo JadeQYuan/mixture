@@ -15,6 +15,7 @@
     >
       <Form
         :fields="remarkDialogConfig.fields"
+        :rules="remarkDialogConfig.rules"
         :form-data="remarkForm"
         :footer-buttons="dialogFormButtons"
       />

@@ -136,6 +136,7 @@ export const remarkDialogConfig = {
       prop: 'materialName',
       label: '材料名称',
       type: 'radio',
+      required: true,
       placeholder: '请选择材料名称',
       options: getOptions(MATERIAL_MAP)
     },
@@ -153,5 +154,10 @@ export const remarkDialogConfig = {
       required: false,
       style: { width: '100%' }
     }
-  ]
+  ],
+  rules: {
+    materialName: [
+      { required: true, message: '请选择材料名称', trigger: 'change' }
+    ]
+  }
 } 

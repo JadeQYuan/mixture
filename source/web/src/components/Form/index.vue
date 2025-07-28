@@ -231,6 +231,11 @@ const props = defineProps({
 // 响应式数据
 const formRef = ref()
 
+// 新增：暴露resetFields方法
+function resetFields() {
+  formRef.value?.resetFields?.()
+}
+
 // 处理底部按钮点击
 function handleFooterButtonClick(validate, action) {
   if (validate) {
@@ -299,7 +304,8 @@ function getFieldVisible(field) {
 
 // 暴露表单引用
 defineExpose({
-  formRef
+  formRef,
+  resetFields
 })
 </script>
 

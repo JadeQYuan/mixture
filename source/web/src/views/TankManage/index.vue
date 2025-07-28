@@ -17,6 +17,7 @@
       @update:visible="val => dialog.visible = val"
     >
       <Form
+        ref="tankForm"
         :fields="dialogConfig.fields"
         :rules="dialogConfig.rules"
         :form-data="dialog.form"
@@ -50,6 +51,7 @@ import Form from '@/components/Form'
 import { searchFields, columns, dialogConfig } from './config'
 
 const table = ref()
+const tankForm = ref()
 
 const headerButtons = [
   {
@@ -119,6 +121,8 @@ function openDialog(mode, row) {
     Object.assign(dialog.form, row)
   } else {
     dialog.form = { tankNo: '', remark: '' }
+    // 清空校验状态
+    tankForm.value?.resetFields?.()
   }
 }
 
@@ -156,6 +160,8 @@ function confirmDelete(row) {
 
 function closeDeleteDialog() {
   deleteDialog.visible = false
+  // 清空校验状态
+  tankForm.value?.resetFields?.()
 }
 
 async function handleDeleteTank() {

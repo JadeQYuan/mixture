@@ -16,6 +16,7 @@
       @update:visible="handleDialogVisibleUpdate"
     >
       <Form
+        ref="returnForm"
         :fields="returnDialogConfig.fileds"
         :rules="returnDialogConfig.rules"
         :form-data="returnDialog.form"
@@ -54,6 +55,7 @@ import Form from '@/components/Form'
 import { displayFields, returnDialogConfig } from './config'
 
 const card = ref()
+const returnForm = ref()
 
 const headerButtons = [
   {
@@ -189,6 +191,8 @@ function closeReturnDialog() {
   stopWeightTimer()
   returnDialog.step = 0
   returnDialog.form = { id: null, tankId: null, tankNo: '', returnWeight: null }
+  // 清空校验状态
+  returnForm.value?.resetFields?.()
 }
 
 async function handleReturnSubmit(formData) {

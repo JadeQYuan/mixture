@@ -17,6 +17,7 @@
       @update:visible="handleDialogVisibleUpdate"
     >
       <Form
+        ref="applyForm"
         :fields="applyDialogConfig.fields"
         :rules="applyDialogConfig.rules"
         :form-data="applyDialog.form"
@@ -37,6 +38,7 @@ import Form from '@/components/Form'
 import { displayFields, applyDialogConfig } from './config'
 
 const card = ref()
+const applyForm = ref()
 
 const headerButtons = [
   {
@@ -100,6 +102,8 @@ function closeApplyDialog() {
   // autoRefresh.value = true // 关闭弹窗时恢复自动刷新
   applyDialog.visible = false
   applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
+  // 清空校验状态
+  applyForm.value?.resetFields?.()
 }
 
 async function handleApplySubmit(formData) {

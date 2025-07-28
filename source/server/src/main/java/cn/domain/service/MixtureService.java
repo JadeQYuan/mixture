@@ -73,8 +73,8 @@ public class MixtureService {
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = LocalDateTime.now().minusDays(3);
         mixtureQo.setStatus(Arrays.asList(1, 2));
-        mixtureQo.setApplyStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        mixtureQo.setApplyEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        mixtureQo.setFeedingStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        mixtureQo.setFeedingEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);

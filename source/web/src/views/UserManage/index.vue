@@ -18,6 +18,7 @@
       @update:visible="val => dialog.visible = val"
     >
       <Form
+        ref="userForm"
         :fields="dialogConfig.fields"
         :rules="dialogConfig.rules"
         :form-data="dialog.form"
@@ -134,6 +135,7 @@
       @update:visible="val => passwordDialog.visible = val"
     >
       <Form
+        ref="passwordForm"
         :fields="passwordDialogConfig.fields"
         :rules="passwordDialogConfig.rules"
         :form-data="passwordDialog.form"
@@ -267,6 +269,8 @@ const dialog = reactive({
   form: { id: null, roleCode: '', account: '', userName: '', remark: '' }
 })
 
+const userForm = ref()
+
 const dialogButtons = [
   {
     key: 'submit',
@@ -326,6 +330,8 @@ async function handleDialogSubmit(formData) {
 
 function closeDialog() {
   dialog.visible = false
+  // 清空校验状态
+  userForm.value?.resetFields?.()
 }
 
 // 删除
@@ -562,6 +568,8 @@ const passwordDialog = reactive({
   form: { newPassword: '', confirmPassword: '' }
 })
 
+const passwordForm = ref()
+
 const passwordDialogButtons = [
   {
     key: 'submit',
@@ -611,6 +619,8 @@ async function handlePasswordSubmit(formData) {
 
 function closePasswordDialog() {
   passwordDialog.visible = false
+  // 清空校验状态
+  passwordForm.value?.resetFields?.()
 }
 
 // 处理链接点击事件（照片查看）
