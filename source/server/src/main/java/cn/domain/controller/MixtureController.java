@@ -46,6 +46,14 @@ public class MixtureController {
 
 
     /**
+     * 底罐重量
+     */
+    @PostMapping("/bottom")
+    public void bottom(@RequestBody Mixture mixture) {
+        mixtureService.bottom(mixture);
+    }
+
+    /**
      * 执行加料操作
      */
     @PostMapping("/feed")

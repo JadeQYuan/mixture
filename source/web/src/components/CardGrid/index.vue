@@ -208,7 +208,8 @@ watch(
   gap: 24px;
   flex: 1;
   padding: 0;
-  max-height: 650px;
+  max-height: 850px;
+  overflow-y: auto;
 }
 
 .grid-card {

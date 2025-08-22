@@ -119,6 +119,7 @@
                   :size="button.size || 'large'"
                   :disabled="button.disabled ? button.disabled(scope.row, scope.$index) : false"
                   :loading="button.loading ? button.loading(scope.row, scope.$index) : false"
+                  v-show="button.visible ? button.visible(scope.row, scope.$index) : true"
                   @click="button.action(scope.row, scope.$index)"
                 >
                   {{ button.text }}

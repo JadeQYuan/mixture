@@ -86,7 +86,10 @@ public interface MixtureMapper {
     })
     List<MixtureVo> selectByCondition(MixtureQo mixtureQo);
 
-    @Update("UPDATE mixture_info SET bottom_weight = #{bottomWeight}, full_weight = #{fullWeight}, " +
+    @Update("UPDATE mixture_info SET bottom_weight = #{bottomWeight} WHERE id = #{id}")
+    void bottom(Mixture mixture);
+
+    @Update("UPDATE mixture_info SET full_weight = #{fullWeight}, " +
             "flame_retardant_weight = #{flameRetardantWeight}, " +
             "feeding_time = datetime('now', 'localtime'), feeding_user_id = #{feedingUserId}, " +
             "status = 1 WHERE id = #{id}")

@@ -5,6 +5,11 @@ export function getFeedManageList(params) {
   return http.get('/api/mixture/list', { params })
 }
 
+// 保存底罐重量
+export function saveBottomTankWeight(data) {
+  return http.post('/api/mixture/bottom', data)
+}
+
 // 执行加料操作
 export function submitFeedOperation(data) {
   return http.post('/api/mixture/feed', data)

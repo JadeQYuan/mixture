@@ -51,6 +51,11 @@ public class MixtureService {
         tankService.updateUser(mixture.getTankId(), userId);
     }
 
+    public void bottom(Mixture mixture) {
+        mixtureMapper.bottom(mixture);
+        serialService.stopReading();
+    }
+
     public void executeMixes(Mixture mixture) {
         mixture.setFeedingUserId(TokenUtil.getToken());
         mixtureMapper.executeMixes(mixture);
