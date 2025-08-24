@@ -55,13 +55,13 @@ export const columns = [
     prop: 'planWeight',
     label: '计划加料',
     width: '120',
-    render: (row) => `${row.planWeight} kg`
+    render: (row) => row.planWeight ? `${row.planWeight} kg` : ''
   },
   {
     prop: 'applyUserAccount',
     label: '申请人员',
     width: '160',
-    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
+    render: (row) => row.applyUserAccount ? `${row.applyUserName}(${row.applyUserAccount})` : ''
   },
   {
     prop: 'applyTime',
@@ -132,3 +132,76 @@ export const feedDialogConfig = {
     { title: '确认提交', description: '确认加料数据' }
   ]
 }
+
+// 备料对话框表单配置
+export const prepareDialogConfig = {
+  title: '备料',
+  width: '700px',
+  // 表单字段配置
+  fields: [
+    {
+      prop: 'tankNo',
+      label: '料罐',
+      type: 'input',
+      disabled: true,
+      size: 'large',
+      style: { width: '100%' }
+    },
+    {
+      prop: 'shiftType',
+      label: '班次',
+      type: 'radio',
+      placeholder: '请选择班次',
+      required: true,
+      options: getOptions(SHIFT_TYPE_MAP),
+      size: 'large',
+      style: { width: '100%' }
+    },
+    {
+      prop: 'materialName',
+      label: '材料名称',
+      type: 'radio',
+      placeholder: '请选择材料名称',
+      required: true,
+      options: getOptions(MATERIAL_MAP),
+      size: 'large',
+      style: { width: '100%' }
+    },
+    {
+      prop: 'productSpec',
+      label: '产品型号',
+      type: 'input',
+      placeholder: '请输入产品规格型号',
+      required: false,
+      size: 'large',
+      style: { width: '100%' }
+    },
+    {
+      prop: 'planWeight',
+      label: '计划加料',
+      type: 'number',
+      placeholder: '请输入计划加料重量',
+      required: true,
+      size: 'large',
+      style: { width: '100%' },
+      suffix: 'kg',
+      inputType: 'number',
+      props: {
+        min: 0,
+        step: 1
+      }
+    }
+  ],
+  // 表单验证规则
+  rules: {
+    tankNo: [
+      { required: true, message: '料罐不能为空', trigger: 'blur' }
+    ],
+    shiftType: [
+      { required: true, message: '请选择班次', trigger: 'change' }
+    ],
+    materialName: [
+      { required: true, message: '请选择材料名称', trigger: 'change' }
+    ]
+  }
+} 

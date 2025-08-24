@@ -26,7 +26,14 @@ public class Mixture {
     private Integer feedingUserId;             // 加料操作员ID（关联user_info表）
     private String returnTime;                 // 退料时间
     private Integer returnUserId;              // 退料操作员ID（关联user_info表）
-    private Integer status;                    // 状态（1-待处理，2-已处理，3-其他）
+    /**
+     * 0. 申请加料
+     * 1. 加料完成/已领料
+     * 2. 已退料
+     * 3. 备料
+     * 4. 已备料
+     */
+    private Integer status;                    // 状态
     private String remark;                     // 备注信息
     private String createTime;                 // 创建时间
     private String updateTime;                 // 更新时间

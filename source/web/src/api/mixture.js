@@ -15,6 +15,16 @@ export function submitFeedOperation(data) {
   return http.post('/api/mixture/feed', data)
 }
 
+// 执行备料操作
+export function submitPrepare(data) {
+  return http.post('/api/mixture/prepare', data)
+}
+
+// 执行领料操作
+export function submitPicking(data) {
+  return http.post('/api/mixture/picking', data)
+}
+
 // 执行退料操作
 export function submitReturnOperation(data) {
   return http.post('/api/mixture/return', data)

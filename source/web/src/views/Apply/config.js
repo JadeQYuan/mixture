@@ -1,13 +1,5 @@
 import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions } from '@/utils/constant'
 
-// 卡片显示字段配置
-export const displayFields = [
-  // {
-  //   prop: 'tankNo',
-  //   label: '料罐',
-  // }
-]
-
 // 加料申请表单配置
 export const applyDialogConfig = {
   title: '加料申请',

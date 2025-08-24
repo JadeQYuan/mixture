@@ -78,6 +78,22 @@ public class MixtureController {
     }
 
     /**
+     * 执行备料操作
+     */
+    @PostMapping("/prepare")
+    public void prepare(@RequestBody Mixture mixture) {
+        mixtureService.prepare(mixture);
+    }
+
+    /**
+     * 执行领料操作
+     */
+    @PostMapping("/picking")
+    public void picking(@RequestBody Mixture mixture) {
+        mixtureService.picking(mixture);
+    }
+
+    /**
      * 获取加料统计列表
      */
     @GetMapping("/stats")

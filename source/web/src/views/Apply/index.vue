@@ -24,6 +24,20 @@
         :footer-buttons="applyDialogButtons"
       />
     </Dialog>
+
+    <!-- 领料对话框 -->
+    <ConfirmDialog
+      :visible="pickingDialog.visible"
+      title="确认领料"
+      message="确定要领取该料罐吗？"
+      icon="Warning"
+      icon-type="danger"
+      confirm-text="确认"
+      confirm-type="primary"
+      @update:visible="val => pickingDialog.visible = val"
+      @confirm="confirmPicking"
+      @cancel="val => pickingDialog.visible = val"
+    />
   </div>
 </template>
 
@@ -32,10 +46,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { feedApply } from '@/api/mixture'
 import { getApplyTankList } from '@/api/tank'
+import { submitPicking } from '@/api/mixture'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { displayFields, applyDialogConfig } from './config'
+import { applyDialogConfig } from './config'
+import ConfirmDialog from '@/components/Dialog/ConfirmDialog.vue'
+import { dialogConfig } from '../TankManage/config'
 
 const card = ref()
 const applyForm = ref()
@@ -50,6 +67,16 @@ const headerButtons = [
   }
 ] 
 
+// 卡片显示字段配置
+const displayFields = [
+  {
+    prop: 'fullWeight',
+    label: '满罐重量',
+    visible: (row) => row.picking,
+    render: (row) => row.fullWeight ? `${row.fullWeight} kg` : ''
+  }
+]
+
 // 操作按钮配置
 const actionButtons = [
   {
@@ -57,7 +84,16 @@ const actionButtons = [
     text: '申请',
     action: 'apply',
     size: 'large',
+    visible: (row) => !row.picking,
     action: ( row ) => openApplyDialog(row)
+  },
+  {
+    key: 'primary',
+    text: '领料',
+    action: 'picking',
+    size: 'large',
+    visible: (row) => row.picking,
+    action: ( row ) => openPickingDialog(row)
   }
 ]
 
@@ -128,6 +164,32 @@ function handleDialogVisibleUpdate(val) {
     applyDialog.visible = true
   }
 }
+
+// 领料对话框
+const pickingDialog = reactive({
+  visible: false,
+  form: {id: null, tankId: null, tankNo: ''}
+})
+
+function openPickingDialog(row) {
+  pickingDialog.visible = true
+  pickingDialog.form.id = row.mixtureId
+  pickingDialog.form.tankId = row.id
+  pickingDialog.form.tankNo = row.tankNo
+}
+
+async function confirmPicking() {
+  if (pickingDialog.loading) return // 防止重复提交
+  try {
+    pickingDialog.loading = true
+    await submitPicking(pickingDialog.form)
+    ElMessage.success('领料申请已提交！')
+    await card.value.search() // 重新获取列表
+  } finally {
+    pickingDialog.loading = false
+  }
+}
+
 </script>
 
 <style scoped>

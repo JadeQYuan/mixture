@@ -1,5 +1,7 @@
 package cn.domain.service;
 
+import cn.domain.entity.Mixture;
+import cn.domain.mapper.MixtureMapper;
 import cn.domain.mapper.TankMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -23,6 +25,9 @@ public class TankService {
 
     @Autowired
     private TankMapper tankMapper;
+
+    @Autowired
+    private MixtureMapper mixtureMapper;
 
     public PageVo<TankVo> getTankList(TankQo tankQo) {
         PageHelper.startPage(tankQo.getPageNo(), tankQo.getPageSize());
@@ -58,8 +63,19 @@ public class TankService {
         return tankMapper.selectByUserId(userId);
     }
 
-    public List<Tank> getTanksForApply() {
-        return tankMapper.getTanksForApply();
+    public List<TankVo> getTanksForApply() {
+        List<TankVo> tanks = tankMapper.getTanksForApply();
+        for (TankVo tank : tanks) {
+            Mixture mixture = mixtureMapper.tankStatus(tank.getId());
+            if (mixture != null && mixture.getStatus() == 4) {
+                tank.setMixtureId(mixture.getId());
+                tank.setPicking(true);
+                tank.setFullWeight(mixture.getFullWeight());
+            } else {
+                tank.setPicking(false);
+            }
+        }
+        return tanks;
     }
 
     private void insertTank(Tank tank) {

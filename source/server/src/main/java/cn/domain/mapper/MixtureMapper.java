@@ -31,7 +31,7 @@ public interface MixtureMapper {
      * @param id 加料记录ID
      * @return 加料信息对象
      */
-    @Select("SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType," +
+    @Select("SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType, f.status, " +
             "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
             "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
             "f.return_weight as returnWeight, " +
@@ -42,7 +42,7 @@ public interface MixtureMapper {
 
     @Select({
         "<script>",
-        "SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType," +
+        "SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType, f.status, " +
         "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
         "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
         "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
@@ -92,13 +92,25 @@ public interface MixtureMapper {
     @Update("UPDATE mixture_info SET full_weight = #{fullWeight}, " +
             "flame_retardant_weight = #{flameRetardantWeight}, " +
             "feeding_time = datetime('now', 'localtime'), feeding_user_id = #{feedingUserId}, " +
-            "status = 1 WHERE id = #{id}")
+            "status = #{status} WHERE id = #{id}")
     void executeMixes(Mixture mixture);
 
     @Update("UPDATE mixture_info SET return_weight = #{returnWeight}, actual_weight = #{actualWeight}, " +
             "return_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 2 " +
             "WHERE id = #{id}")
     void executeReturn(Mixture mixture);
+
+    @Insert("INSERT INTO mixture_info (tank_id, tank_no, shift_type, material_name, product_spec, plan_weight, " +
+            "status, create_time, update_time) " +
+            "VALUES (#{tankId}, #{tankNo}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
+            "3, datetime('now', 'localtime'), datetime('now', 'localtime'))")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    void executePrepare(Mixture mixture);
+
+    @Update("UPDATE mixture_info SET apply_user_id = #{applyUserId}, " +
+            "apply_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 2 " +
+            "WHERE id = #{id}")
+    void executePicking(Mixture mixture);
 
     @Update("UPDATE mixture_info SET remark = #{remark}, material_name = #{materialName}, product_spec = #{productSpec}, " +
             "update_time = datetime('now', 'localtime') " +
@@ -113,4 +125,13 @@ public interface MixtureMapper {
             "AND t.user_id = #{userId} " +
             "</script>")
     List<Mixture> getTankForReturn(Integer userId);
+
+    @Select("<script>" +
+            "SELECT m.id, m.status, m.full_weight as fullWeight " +
+            "FROM mixture_info m " +
+            "WHERE m.tank_id = #{tankId} " +
+            "order by create_time desc " +
+            "limit 1 " +
+            "</script>")
+    Mixture tankStatus(Integer tankId);
 }

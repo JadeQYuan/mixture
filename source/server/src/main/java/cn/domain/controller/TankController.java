@@ -58,7 +58,7 @@ public class TankController {
      * 获取料罐列表
      */
     @GetMapping("/apply")
-    public List<Tank> getTanksForApply() {
+    public List<TankVo> getTanksForApply() {
         return tankService.getTanksForApply();
     }
 }

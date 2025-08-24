@@ -15,4 +15,7 @@ public class TankVo {
     private String userAccount;        // 用户账号
     private String createTime;     // 更新时间
     private String updateTime;     // 更新时间
+    private Integer mixtureId;
+    private Boolean picking;
+    private Double fullWeight;
 } 

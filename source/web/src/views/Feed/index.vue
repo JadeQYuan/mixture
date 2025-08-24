@@ -3,6 +3,7 @@
     <DataTable
       ref="table"
       :columns="columns"
+      :header-buttons="headerButtons"
       :search-fields="searchFields"
       :action-buttons="actionButtons"
       :request="getFeedManageList"
@@ -76,21 +77,66 @@
         </template>
       </Form>
     </Dialog>
+
+    <!-- 料罐对话框 -->
+    <Dialog
+      :visible="tankDialog.visible"
+      title="选择料罐"
+      width="100%"
+      @update:visible="closeTankDialog"
+    >
+      <CardGrid
+        ref="card"
+        height="500px"
+        :action-buttons="tankDialogButtons"
+        :request="getApplyTankList"
+        :header-render="item => ('料罐：' + item.tankNo)"
+      />
+    </Dialog>
+
+    <!-- 备料对话框 -->
+    <Dialog
+      :visible="prepareDialog.visible"
+      :title="prepareDialog.config.title"
+      :width="prepareDialog.config.width"
+      @update:visible="closePrepareDialog"
+    >
+      <Form
+        ref="prepareForm"
+        :fields="prepareDialog.config.fields"
+        :rules="prepareDialog.config.rules"
+        :form-data="prepareDialog.form"
+        :footerButtons="prepareDialogButtons"
+      />
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getFeedManageList, submitFeedOperation, getTankWeightData, saveBottomTankWeight } from '@/api/mixture'
+import { getFeedManageList, submitFeedOperation, getTankWeightData, saveBottomTankWeight, submitPrepare } from '@/api/mixture'
+import { getApplyTankList } from '@/api/tank'
 import DataTable from '@/components/DataTable'
+import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
-import { searchFields, columns, feedDialogConfig, bottomTankConfig } from './config'
+import { searchFields, columns, feedDialogConfig, bottomTankConfig, prepareDialogConfig } from './config'
 
 const table = ref()
 const feedForm = ref()
 const bottomTankForm = ref()
+
+const headerButtons = reactive([
+  {
+    key: 'prepare',
+    text: '备料',
+    type: 'primary',
+    size: 'large',
+    loading: false,
+    action: () => handleTankSelect()
+  }
+])
 
 const actionButtons = [
   {
@@ -99,7 +145,7 @@ const actionButtons = [
     type: 'warning',
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
-    visible: (row) => !row.bottomWeight // 没有底罐重量时显示
+    visible: (row) => row.status === 0 && !row.bottomWeight // 没有底罐重量时显示
   },
   {
     key: 'feed',
@@ -107,7 +153,23 @@ const actionButtons = [
     type: 'primary',
     size: 'large',
     action: ( row ) => openFeedDialog(row),
-    visible: (row) => row.bottomWeight // 有底罐重量时显示
+    visible: (row) => row.status === 0 && row.bottomWeight // 有底罐重量时显示
+  },
+  {
+    key: 'bottomTank',
+    text: '底罐(备料)',
+    type: 'warning',
+    size: 'large',
+    action: ( row ) => openBottomTankDialog(row),
+    visible: (row) => row.status === 3 && !row.bottomWeight // 没有底罐重量时显示
+  },
+  {
+    key: 'feed',
+    text: '加料(备料)',
+    type: 'primary',
+    size: 'large',
+    action: ( row ) => openFeedDialog(row),
+    visible: (row) => row.status === 3 && row.bottomWeight // 有底罐重量时显示
   }
 ]
 
@@ -149,7 +211,7 @@ const bottomTankDialog = reactive({
   visible: false,
   step: 0,
   loading: false,
-  form: { id: null, tankId: null, tankNo: '', bottomWeight: null }
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null }
 })
 
 // 加料操作对话框
@@ -229,6 +291,10 @@ function openBottomTankDialog(row) {
   bottomTankDialog.form.id = row.id
   bottomTankDialog.form.tankId = row.tankId
   bottomTankDialog.form.tankNo = row.tankNo
+  bottomTankDialog.form.shiftType = row.shiftType
+  bottomTankDialog.form.materialName = row.materialName
+  bottomTankDialog.form.productSpec = row.productSpec
+  bottomTankDialog.form.planWeight = row.planWeight
   currentTankId.value = row.tankNo // 设置当前罐号
   bottomTankDialog.form.bottomWeight = null
   // 启动定时器，获取底罐重量
@@ -350,6 +416,80 @@ async function handleFeedSubmit(formData) {
   } finally {
     feedDialog.loading = false
   }
+}
+
+// 料罐选择二对话框
+const tankDialog = reactive({
+  visible: false,
+})
+
+const tankDialogButtons = [
+  {
+    key: 'submit',
+    text: '选择',
+    type: 'primary',
+    action: (row) => handlePrepare(row)
+  }
+]
+
+async function handleTankSelect() {
+  tankDialog.visible = true
+}
+
+function closeTankDialog() {
+  tankDialog.visible = false
+}
+
+// 底罐操作对话框
+const prepareDialog = reactive({
+  visible: false,
+  step: 0,
+  loading: false,
+  form: { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null },
+  config: prepareDialogConfig
+})
+
+const prepareDialogButtons = [
+  {
+    key: 'cancel',
+    text: '取消',
+    action: () => closePrepareDialog()
+  },
+  {
+    key: 'submit',
+    text: '提交',
+    type: 'primary',
+    validate: true,
+    loading: () => prepareDialog.loading,
+    action: (formData) => handlePrepareSubmit(formData)
+  }
+]
+
+// 加料操作相关函数
+async function handlePrepare(row) {
+  tankDialog.visible = false
+  prepareDialog.visible = true
+  prepareDialog.form.tankId = row.id
+  prepareDialog.form.tankNo = row.tankNo
+}
+
+async function handlePrepareSubmit(formData) {
+  if (prepareDialog.loading) return // 防止重复提交
+  
+  try {
+    prepareDialog.loading = true
+    console.log(formData)
+    await submitPrepare(formData)
+    ElMessage.success('加料数据已提交！')
+    prepareDialog.visible = false
+    await table.value.search() // 重新获取列表
+  } finally {
+    prepareDialog.loading = false
+  }
+}
+
+function closePrepareDialog() {
+  prepareDialog.visible = false
 }
 
 onUnmounted(() => {

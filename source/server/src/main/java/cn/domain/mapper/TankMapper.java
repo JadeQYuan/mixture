@@ -74,7 +74,7 @@ public interface TankMapper {
             "FROM tank_info t " +
             "WHERE user_id is null and t.del_flag = 1" +
             "</script>")
-    List<Tank> getTanksForApply();
+    List<TankVo> getTanksForApply();
 
     /**
      * 插入料罐信息

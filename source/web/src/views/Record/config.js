@@ -56,13 +56,13 @@ export const columns = [
     prop: 'planWeight',
     label: '计划加料',
     width: '120',
-    render: (row) => `${row.planWeight} kg`
+    render: (row) => row.planWeight ? `${row.planWeight} kg`: ''
   },
   {
     prop: 'applyUserAccount',
     label: '申请人员',
     width: '160',
-    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
+    render: (row) => row.applyUserAccount ? `${row.applyUserName}(${row.applyUserAccount})` : ''
   },
   {
     prop: 'applyTime',

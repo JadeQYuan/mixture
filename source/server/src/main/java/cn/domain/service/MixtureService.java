@@ -37,7 +37,7 @@ public class MixtureService {
     private SerialService serialService;
 
     public PageVo<MixtureVo> getMixesList(MixtureQo mixtureQo) {
-        mixtureQo.setStatus(Collections.singletonList(0));
+        mixtureQo.setStatus(Arrays.asList(0, 3));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
@@ -56,8 +56,16 @@ public class MixtureService {
         serialService.stopReading();
     }
 
+    @Transactional
     public void executeMixes(Mixture mixture) {
+        Mixture info = mixtureMapper.selectById(mixture.getId());
         mixture.setFeedingUserId(TokenUtil.getToken());
+        if (info.getStatus() == 0) {
+            mixture.setStatus(1);
+        } else if (info.getStatus() == 3) {
+            mixture.setStatus(4);
+            tankService.updateUser(mixture.getTankId(), null);
+        }
         mixtureMapper.executeMixes(mixture);
         serialService.stopReading();
     }
@@ -74,10 +82,24 @@ public class MixtureService {
         serialService.stopReading();
     }
 
+    @Transactional
+    public void prepare(Mixture mixture) {
+        mixtureMapper.executePrepare(mixture);
+        tankService.updateUser(mixture.getTankId(), TokenUtil.getToken());
+    }
+
+    @Transactional
+    public void picking(Mixture mixture) {
+        Integer userId = TokenUtil.getToken();
+        mixture.setApplyUserId(userId);
+        mixtureMapper.executePicking(mixture);
+        tankService.updateUser(mixture.getTankId(), userId);
+    }
+
     public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = LocalDateTime.now().minusDays(3);
-        mixtureQo.setStatus(Arrays.asList(1, 2));
+        mixtureQo.setStatus(Arrays.asList(1, 2, 3, 4));
         mixtureQo.setFeedingStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         mixtureQo.setFeedingEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");

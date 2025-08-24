@@ -35,29 +35,33 @@
           <div class="card-content">
             <!-- 信息展示区域 -->
             <div class="card-info">
-              <div 
-                v-for="field in displayFields" 
-                :key="field.prop"
-                class="info-item"
-              >
-                <span class="info-label">{{ field.label }}:</span>
-                <span class="info-value">{{ item[field.prop] || '-' }}</span>
-              </div>
+              <template v-for="field in displayFields">
+                <div 
+                  v-if="field.visible ? field.visible(item, index) : true"
+                  :key="field.prop"
+                  class="info-item"
+                >
+                  <span class="info-label">{{ field.label }}:</span>
+                  <span class="info-value">{{ field.render ? field.render(item, index) : item[field.prop] }}</span>
+                </div>
+              </template>
             </div>
             
             <!-- 操作按钮区域 -->
             <div class="card-actions">
-              <el-button
-                v-for="button in actionButtons"
-                :key="button.key"
-                :type="button.type || 'primary'"
-                :size="button.size || 'large'"
-                :disabled="button.disabled ? button.disabled(item, index) : false"
-                :loading="button.loading ? button.loading(item, index) : false"
-                @click="button.action(item, index)"
-              >
-                {{ button.text }}
-              </el-button>
+              <template v-for="button in actionButtons">
+                <el-button
+                  v-if="button.visible ? button.visible(item, index) : true"
+                  :key="button.key"
+                  :type="button.type || 'primary'"
+                  :size="button.size || 'large'"
+                  :disabled="button.disabled ? button.disabled(item, index) : false"
+                  :loading="button.loading ? button.loading(item, index) : false"
+                  @click="button.action(item, index)"
+                >
+                  {{ button.text }}
+                </el-button>
+              </template>
             </div>
           </div>
         </el-card>
