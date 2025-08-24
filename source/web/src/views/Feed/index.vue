@@ -7,6 +7,7 @@
       :search-fields="searchFields"
       :action-buttons="actionButtons"
       :request="getFeedManageList"
+      :rowStyle="rowStyle"
     />
 
     <!-- 加料操作对话框 -->
@@ -23,6 +24,7 @@
         :form-data="feedDialog.form"
         :extends="feedDialog.step"
         :footerButtons="footerButtons"
+        style="padding-right: 30px;"
       >
         <template #form-top>
            <!-- 步骤条 -->
@@ -58,6 +60,7 @@
         :form-data="bottomTankDialog.form"
         :extends="bottomTankDialog.step"
         :footer-buttons="bottomTankButtons"
+        style="padding-right: 30px;"
       >
         <template #form-top>
           <!-- 步骤条 -->
@@ -82,12 +85,11 @@
     <Dialog
       :visible="tankDialog.visible"
       title="选择料罐"
-      width="100%"
+      width="60%"
       @update:visible="closeTankDialog"
     >
       <CardGrid
         ref="card"
-        height="500px"
         :action-buttons="tankDialogButtons"
         :request="getApplyTankList"
         :header-render="item => ('料罐：' + item.tankNo)"
@@ -107,6 +109,7 @@
         :rules="prepareDialog.config.rules"
         :form-data="prepareDialog.form"
         :footerButtons="prepareDialogButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
   </div>
@@ -143,6 +146,7 @@ const actionButtons = [
     key: 'bottomTank',
     text: '底罐',
     type: 'warning',
+    color: 'rgb(51, 117, 185)',
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
     visible: (row) => row.status === 0 && !row.bottomWeight // 没有底罐重量时显示
@@ -158,7 +162,7 @@ const actionButtons = [
   {
     key: 'bottomTank',
     text: '底罐(备料)',
-    type: 'warning',
+    color: "rgb(78, 142, 47)",
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
     visible: (row) => row.status === 3 && !row.bottomWeight // 没有底罐重量时显示
@@ -166,12 +170,21 @@ const actionButtons = [
   {
     key: 'feed',
     text: '加料(备料)',
-    type: 'primary',
+    type: 'success',
     size: 'large',
     action: ( row ) => openFeedDialog(row),
     visible: (row) => row.status === 3 && row.bottomWeight // 有底罐重量时显示
   }
 ]
+
+function rowStyle({row, rowIndex}) {
+  if (row.status == 0) {
+    return {backgroundColor: 'rgb(217, 236, 255)'}
+  } else if (row.status == 3) {
+    return {backgroundColor: 'rgb(225, 243, 216)'}
+  }
+  return ""
+}
 
 // 定时器相关
 const weightTimer = ref(null)

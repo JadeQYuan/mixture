@@ -23,6 +23,7 @@
         :rules="dialogConfig.rules"
         :form-data="dialog.form"
         :footer-buttons="dialogButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
 
@@ -140,6 +141,7 @@
         :rules="passwordDialogConfig.rules"
         :form-data="passwordDialog.form"
         :footer-buttons="passwordDialogButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
 

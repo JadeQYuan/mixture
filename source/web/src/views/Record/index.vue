@@ -18,6 +18,7 @@
         :rules="remarkDialogConfig.rules"
         :form-data="remarkForm"
         :footer-buttons="dialogFormButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
   </div>

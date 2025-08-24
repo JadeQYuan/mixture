@@ -22,6 +22,7 @@
         :rules="applyDialogConfig.rules"
         :form-data="applyDialog.form"
         :footer-buttons="applyDialogButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
 
@@ -91,6 +92,7 @@ const actionButtons = [
     key: 'primary',
     text: '领料',
     action: 'picking',
+    type: 'success',
     size: 'large',
     visible: (row) => row.picking,
     action: ( row ) => openPickingDialog(row)

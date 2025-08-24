@@ -22,6 +22,7 @@
         :rules="dialogConfig.rules"
         :form-data="dialog.form"
         :footer-buttons="dialogFormButtons"
+        style="padding-right: 30px;"
       />
     </Dialog>
 

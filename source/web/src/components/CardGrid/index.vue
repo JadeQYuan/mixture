@@ -236,6 +236,7 @@ watch(
 
 .card-info {
   display: flex;
+  height: 30px;
   flex-direction: column;
   gap: 8px;
 }

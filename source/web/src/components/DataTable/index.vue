@@ -96,6 +96,8 @@
         :class="tableClass" 
         v-loading="loading"
         :row-key="rowKey"
+        :row-class-name="rowClassName ? rowClassName : ''"
+        :row-style="rowStyle ? rowStyle : {}"
       >
         <el-table-column type="index" label="序号" width="80" />
         <el-table-column 
@@ -117,6 +119,7 @@
                   :key="button.key"
                   :type="button.type || 'primary'"
                   :size="button.size || 'large'"
+                  :color="button.color"
                   :disabled="button.disabled ? button.disabled(scope.row, scope.$index) : false"
                   :loading="button.loading ? button.loading(scope.row, scope.$index) : false"
                   v-show="button.visible ? button.visible(scope.row, scope.$index) : true"
@@ -239,6 +242,14 @@ const props = defineProps({
     default: () => {}
   },
   beforeRequest: {
+    type: Function,
+    default: params => params
+  },
+  rowClassName: {
+    type: Function,
+    default: params => params
+  },
+  rowStyle: {
     type: Function,
     default: params => params
   }
@@ -427,7 +438,7 @@ onUnmounted(() => {
   font-size: 18px !important;
   flex: 1;
   min-height: 0;
-  max-height: calc(100vh - 350px);
+  max-height: 700px;
   overflow: auto;
 }
 

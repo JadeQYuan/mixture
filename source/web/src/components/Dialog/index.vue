@@ -5,6 +5,7 @@
     :width="width" 
     :close-on-click-modal="closeOnClickModal"
     :before-close="handleBeforeClose"
+    style="max-height: 850px; overflow-y: auto;"
     center
     align-center
   >
