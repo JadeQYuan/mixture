@@ -68,11 +68,11 @@ async function handleExport(index) {
       const item = {}
       exportColumns.forEach(col => {
         if (typeof col.exportRender === 'function') {
-          item[col.label] = col.exportRender(row)
+          item[col.exportLabel || col.label] = col.exportRender(row)
         } else if (typeof col.render === 'function') {
-          item[col.label] = col.render(row)
+          item[col.exportLabel || col.label] = col.render(row)
         } else {
-          item[col.label] = row[col.prop]
+          item[col.exportLabel || col.label] = row[col.prop]
         }
       })
       return item

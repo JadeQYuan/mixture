@@ -78,13 +78,11 @@ public class UserService {
         if (CollectionUtils.isEmpty(userList)) {
             return new PageVo<>();
         }
-        for (User user : userList) {
-            String facePath = user.getFacePath();
-            if (!StringUtils.isEmpty(facePath)) {
-                user.setFacePath(Base64Util.fileToBase64(facePath));
-            }
-        }
         return new PageVo<>(userList);
+    }
+
+    public String getUserImage(String facePath) {
+        return Base64Util.fileToBase64(facePath);
     }
 
     public User addUser(User user) {
@@ -251,7 +249,7 @@ public class UserService {
 
     private Integer compareFaceFeature(FaceFeature faceFeature, Integer id) {
         Integer userId = null;
-        List<User> userInfoList = userMapper.getUserInfoByName(null, null, null);
+        List<User> userInfoList = userMapper.getUserFeature();
         for (User user : userInfoList) {
             Integer idTemp = user.getId();
             if (id != null && id == idTemp) {

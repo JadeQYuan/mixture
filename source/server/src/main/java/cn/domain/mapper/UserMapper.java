@@ -18,7 +18,7 @@ public interface UserMapper {
     @Select({
         "<script>",
         "SELECT id, user_name as userName, account, role_code as roleCode, ",
-        "face_path as facePath, face_feature as faceFeature, remark, create_time as createTime, update_time as updateTime ",
+        "face_path as facePath, remark, create_time as createTime, update_time as updateTime ",
         "FROM user_info ",
         "<where>",
         "<if test='userName != null and userName != \"\"'>",
@@ -36,6 +36,18 @@ public interface UserMapper {
         "</script>"
     })
     List<User> getUserInfoByName(String userName, String account, Boolean isAdmin);
+
+    @Select({
+        "<script>",
+        "SELECT id, face_path as facePath, face_feature as faceFeature ",
+        "FROM user_info ",
+        "<where>",
+        "and del_flag = 1",
+        "</where>",
+        "ORDER BY update_time DESC",
+        "</script>"
+    })
+    List<User> getUserFeature();
 
     @Select("SELECT id " +
             "FROM user_info WHERE account = #{account} and del_flag = 1")

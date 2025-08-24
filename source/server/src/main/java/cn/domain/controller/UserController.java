@@ -40,6 +40,11 @@ public class UserController {
         return userService.getUserList(userQo);
     }
 
+    @GetMapping("/image")
+    public String getUserImage(String facePath) {
+        return userService.getUserImage(facePath);
+    }
+
     /**
      * 新增用户
      *

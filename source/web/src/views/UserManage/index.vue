@@ -182,7 +182,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto } from '@/api/user'
+import { getUserList, createUser, updateUser, deleteUser, updateUserPassword, updateUserPhoto, getUserImage } from '@/api/user'
 import { encryptPassword } from '@/utils/crypto'
 import { getCameraErrorMessage, startGlobalCamera, stopGlobalCamera } from '@/utils/camera'
 import { base64ToFile, canvasToBase64, fileToBase64 } from '@/utils/fileUtils'
@@ -629,10 +629,11 @@ const photoPreviewDialog = reactive({
   imageSrc: ''
 })
 
-function handleLinkClick({ row, index }) {
+async function handleLinkClick({ row, index }) {
   if (row.facePath) {
     // 显示照片预览 - facePath字段存储的是base64格式的图片数据
-    photoPreviewDialog.imageSrc = `data:image/png;base64,${row.facePath}`
+    const res = await getUserImage({facePath: row.facePath})
+    photoPreviewDialog.imageSrc = `data:image/png;base64,${res}`
     photoPreviewDialog.visible = true
   } else {
     ElMessage.warning('该用户暂无照片')

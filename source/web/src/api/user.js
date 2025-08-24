@@ -5,6 +5,11 @@ export function getUserList(params) {
   return http.get('/api/user/list', { params })
 }
 
+// 获取用户照片
+export function getUserImage(params) {
+  return http.get(`/api/user/image`, { params })
+}
+
 // 新增用户
 export function createUser(data) {
   return http.post('/api/user/add', data)
