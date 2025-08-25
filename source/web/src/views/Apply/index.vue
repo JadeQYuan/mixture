@@ -37,7 +37,7 @@
       confirm-type="primary"
       @update:visible="val => pickingDialog.visible = val"
       @confirm="confirmPicking"
-      @cancel="val => pickingDialog.visible = val"
+      @cancel="() => pickingDialog.visible = false"
     />
   </div>
 </template>
@@ -186,6 +186,7 @@ async function confirmPicking() {
     pickingDialog.loading = true
     await submitPicking(pickingDialog.form)
     ElMessage.success('领料申请已提交！')
+    pickingDialog.visible = false 
     await card.value.search() // 重新获取列表
   } finally {
     pickingDialog.loading = false

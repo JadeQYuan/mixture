@@ -108,7 +108,7 @@ public interface MixtureMapper {
     void executePrepare(Mixture mixture);
 
     @Update("UPDATE mixture_info SET apply_user_id = #{applyUserId}, " +
-            "apply_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 2 " +
+            "apply_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 1 " +
             "WHERE id = #{id}")
     void executePicking(Mixture mixture);
 
