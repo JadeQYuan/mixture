@@ -345,7 +345,9 @@ async function handleBottomTankSubmit() {
     closeBottomTankDialog()
     await table.value.search() // 重新获取列表
   } finally {
-    bottomTankDialog.loading = false
+    setTimeout(() => {
+      bottomTankDialog.loading = false
+    }, 300)
   }
 }
 
@@ -427,7 +429,9 @@ async function handleFeedSubmit(formData) {
     feedDialog.visible = false
     await table.value.search() // 重新获取列表
   } finally {
-    feedDialog.loading = false
+    setTimeout(()=> {
+      feedDialog.loading = false
+    }, 300)
   }
 }
 
@@ -497,7 +501,9 @@ async function handlePrepareSubmit(formData) {
     prepareDialog.visible = false
     await table.value.search() // 重新获取列表
   } finally {
-    prepareDialog.loading = false
+    setTimeout(() => {
+      prepareDialog.loading = false
+    }, 300)
   }
 }
 

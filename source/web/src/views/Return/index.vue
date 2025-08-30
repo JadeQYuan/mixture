@@ -104,6 +104,7 @@ const footerButtons = [
     key: 'feed',
     text: '提交',
     type: 'success',
+    loading: () => returnDialog.loading,
     action: ( row ) => handleReturnSubmit(row),
     visible: (step) => step === 1
   }
@@ -207,7 +208,9 @@ async function handleReturnSubmit(formData) {
     closeReturnDialog()
     await card.value.search() // 重新获取列表
   } finally {
-    returnDialog.loading = false
+    setTimeout(() => {
+      returnDialog.loading = false
+    }, 300)
   }
 }
 

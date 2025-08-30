@@ -326,7 +326,9 @@ async function handleDialogSubmit(formData) {
     dialog.visible = false
     await table.value.search()
   } finally {
-    dialog.loading = false
+    setTimeout(() => {
+      dialog.loading = false
+    }, 300)
   }
 }
 
@@ -405,7 +407,9 @@ async function getCamera() {
     ElMessage.error(errorMsg)
     photoDialog.isCapturing = false
   } finally {
-    photoDialog.cameraLoading = false
+    setTimeout(() => {
+      photoDialog.cameraLoading = false
+    }, 300)
   }
 }
 
@@ -463,7 +467,9 @@ async function submitPhoto() {
     photoDialog.currentPhoto = null
     await table.value.search()
   } finally {
-    photoDialog.submitLoading = false
+    setTimeout(() => {
+      photoDialog.submitLoading = false
+    }, 300)
     stopGlobalCamera()
   }
 }
@@ -552,7 +558,9 @@ async function submitUploadPhoto() {
     uploadDialog.currentPhoto = null
     await table.value.search()
   } finally {
-    uploadDialog.submitLoading = false
+    setTimeout(() => {
+      uploadDialog.submitLoading = false
+    }, 300)
     uploadDialog.fileList = []
   }
 }
@@ -615,7 +623,9 @@ async function handlePasswordSubmit(formData) {
   } catch (error) {
     ElMessage.error('密码修改失败')
   } finally {
-    passwordDialog.loading = false
+    setTimeout(() => {
+      passwordDialog.loading = false
+    }, 300)
   }
 }
 

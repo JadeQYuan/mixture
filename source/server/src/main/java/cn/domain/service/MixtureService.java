@@ -10,6 +10,8 @@ import cn.domain.pojo.MixtureVo;
 import cn.domain.pojo.PageVo;
 import cn.domain.util.TokenUtil;
 
+import lombok.CustomLog;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.List;
  * 混合料信息服务实现类
  */
 @Service
+@Slf4j
 public class MixtureService {
 
     @Autowired
@@ -65,6 +68,9 @@ public class MixtureService {
         } else if (info.getStatus() == 3) {
             mixture.setStatus(4);
             tankService.updateUser(mixture.getTankId(), null);
+        } else {
+            log.info("加料记录状态未匹配，id={} status={}", mixture.getId(), info.getStatus());
+            return;
         }
         mixtureMapper.executeMixes(mixture);
         serialService.stopReading();

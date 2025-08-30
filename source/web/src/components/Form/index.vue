@@ -250,14 +250,14 @@ function handleFooterButtonClick(validate, action) {
   }
 }
 
-// 获取按钮显示状态
+// 获取按钮loading状态
 function getButtonLoading(button) {
-  // 如果按钮有自定义的visible函数，使用它
+  // 如果按钮有自定义的loading函数，使用它
   if (typeof button.loading === 'function') {
     return button.loading()
   }
-  // 否则使用静态的visible值，默认为true
-  return button.loading === false
+  // 否则使用静态的loading值
+  return button.loading || false
 }
 
 // 获取按钮显示状态

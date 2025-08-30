@@ -88,7 +88,9 @@ async function handleExport(index) {
     console.error('导出失败', e)
     ElMessage.error('导出失败')
   } finally {
-    headerButtons[index].loading = false
+    setTimeout(() => {
+      headerButtons[index].loading = false
+    }, 300)
   }
 }
 </script>

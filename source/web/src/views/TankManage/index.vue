@@ -145,7 +145,9 @@ async function handleDialogOk(formData) {
     dialog.visible = false
     await table.value.search()
   } finally {
-    dialog.loading = false
+    setTimeout(() => {
+      dialog.loading = false
+    }, 300)
   }
 }
 

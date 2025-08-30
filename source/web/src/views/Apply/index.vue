@@ -154,7 +154,9 @@ async function handleApplySubmit(formData) {
     closeApplyDialog()
     await card.value.search() // 重新获取列表
   } finally {
-    applyDialog.loading = false
+    setTimeout(() => {
+      applyDialog.loading = false
+    }, 300)
   }
 }
 
@@ -189,7 +191,9 @@ async function confirmPicking() {
     pickingDialog.visible = false 
     await card.value.search() // 重新获取列表
   } finally {
-    pickingDialog.loading = false
+    setTimeout(() => {
+      pickingDialog.loading = false
+    }, 300)
   }
 }
 
