@@ -81,15 +81,28 @@
       </Form>
     </Dialog>
 
+    <!-- 加料确认对话框 -->
+    <ConfirmDialog
+      :visible="feedConfirmDialog.visible"
+      title="确认"
+      message="实际加料与计划加料相差较大, 确认继续?"
+      icon="Warning"
+      icon-type="danger"
+      confirm-text="确认"
+      confirm-type="primary"
+      @update:visible="val => feedConfirmDialog.visible = val"
+      @confirm="confirmFeed"
+      @cancel="() => feedConfirmDialog.visible = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getFeedManageList, submitFeedOperation, getTankWeightData, saveBottomTankWeight } from '@/api/mixture'
+import { getFeedManageList, submitFeedOperation, getTankWeightData, saveBottomTankWeight, getFeedThreshold } from '@/api/mixture'
 import DataTable from '@/components/DataTable'
-import { Dialog } from '@/components/Dialog'
+import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { searchFields, columns, feedDialogConfig, bottomTankConfig } from './config'
 
@@ -191,7 +204,9 @@ const feedDialog = reactive({
   visible: false,
   step: 0,
   loading: false,
-  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, flameRetardantWeight: 0, actualWeight: null }
+  threshold: 0,
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, 
+      flameRetardantWeight: 0, actualWeight: null }
 })
 
 const bottomTankButtons = [
@@ -235,7 +250,7 @@ const footerButtons = [
     key: 'prev',
     text: '上一步',
     type: 'info',
-    action: ( row ) => handlePrevStep(row),
+    action: () => handlePrevStep(),
     visible: (step) => step > 0
   },
   {
@@ -243,7 +258,7 @@ const footerButtons = [
     text: '下一步',
     type: 'primary',
     validate: true,
-    action: ( row ) => handleNextStep(row),
+    action: () => handleNextStep(false),
     visible: (step) => step < 2
   },
   {
@@ -320,7 +335,7 @@ function closeBottomTankDialog() {
 }
 
 // 加料操作相关函数
-function openFeedDialog(row) {
+async function openFeedDialog(row) {
   feedDialog.visible = true
   feedDialog.step = 0
   feedDialog.form.id = row.id
@@ -335,15 +350,23 @@ function openFeedDialog(row) {
   feedDialog.form.fullWeight = null
   feedDialog.form.flameRetardantWeight = 0
   // 启动定时器，获取满罐重量
-  startWeightTimer(val => feedDialog.form.fullWeight = val)
+  startWeightTimer(val => {
+    feedDialog.form.fullWeight = val
+    feedDialog.form.actualWeight = (val - feedDialog.form.bottomWeight).toFixed(2)
+  })
+  feedDialog.threshold = await getFeedThreshold()
 }
 
-function handleNextStep() {
+function handleNextStep(confirmed) {
   const step = feedDialog.step + 1
   if (step === 1) {
     // 第0步：检查满罐重量是否已获取
     if (!feedDialog.form.fullWeight) {
       ElMessage.warning('正在获取满罐重量数据，请稍候');
+    } else if (feedDialog.form.actualWeight < 0) {
+      ElMessage.warning('实际加料不正确, 请检查');
+    } else if (Math.abs((feedDialog.form.planWeight - feedDialog.form.actualWeight).toFixed(2)) > feedDialog.threshold && !confirmed) {
+      feedConfirmDialog.visible = true
     } else {
       // 满罐重量确定，进入第二步
       stopWeightTimer()
@@ -392,6 +415,16 @@ async function handleFeedSubmit(formData) {
       feedDialog.loading = false
     }, 300)
   }
+}
+
+// 加料确认对话框
+const feedConfirmDialog = reactive({
+  visible: false,
+})
+
+function confirmFeed() {
+  feedConfirmDialog.visible = false
+  handleNextStep(true)
 }
 
 onUnmounted(() => {

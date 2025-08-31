@@ -1,11 +1,20 @@
 // FeedRecord页面配置
 
 import { SHIFT_TYPE_MAP, MATERIAL_MAP, getOptions, getLabel } from '@/utils/constant'
+import { ref } from 'vue'
+import dayjs from 'dayjs';
+
+const selectDate = ref(null);
 
 export const searchFields = [
   {
     key: 'applyUserKey',
     label: '申请人员',
+    placeholder: '请输入姓名/工号'
+  },
+  {
+    key: 'pickingUserKey',
+    label: '用料人员',
     placeholder: '请输入姓名/工号'
   },
   {
@@ -26,6 +35,28 @@ export const searchFields = [
     type: 'select',
     placeholder: '请选择材料名称',
     options: getOptions(MATERIAL_MAP)
+  },
+  {
+    key: 'timeType',
+    label: '查询时间',
+    type: 'select',
+    placeholder: '请选择时间类型',
+    options: [
+      { label: '申请时间', value: 'applyTime' },
+      { label: '用料时间', value: 'pickingTime' },
+      { label: '加料时间', value: 'feedingTime' },
+      { label: '退料时间', value: 'returnTime' }
+    ],
+    defaultValue: 'applyTime'
+  },
+  {
+    key: 'timeRange',
+    label: '时间范围',
+    type: 'datetimerange',
+    placeholder: '请选择时间范围',
+    defaultValue: [ dayjs().subtract(7, 'day').startOf('day').format("YYYY-MM-DD HH:mm:ss"), dayjs().endOf('day').format("YYYY-MM-DD HH:mm:ss") ],
+    disabledDate: (date) => (date < dayjs(selectDate.value).subtract(1, 'month')) || (date > dayjs(selectDate.value).add(1, 'month')),
+    calendarChange: (date) => selectDate.value = date[0]
   },
 ]
 

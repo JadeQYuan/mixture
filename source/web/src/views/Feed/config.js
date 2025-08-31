@@ -118,6 +118,8 @@ export const feedDialogConfig = {
             suffix: 'kg', disabled: true },
     { prop: 'fullWeight', label: '满罐', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
             suffix: 'kg', disabled: true },
+    { prop: 'actualWeight', label: '实际加料', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
+            suffix: 'kg', disabled: true },
     { prop: 'flameRetardantWeight', label: '阻燃粉', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
             suffix: 'kg', inputType: 'number', disabled: (currentStep) => currentStep !== 1 , visible: (currentStep) => currentStep >= 1, 
             props: { min: 0, step: 0.1 } }

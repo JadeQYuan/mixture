@@ -17,6 +17,9 @@
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             :default-value="field.defaultValue"
+            :disabled-date="field.disabledDate"
+            @calendar-change="field.calendarChange"
+            :clearable=false
             size="large"
             class="fixed-width-input"
             style="width: 400px;"

@@ -1,5 +1,6 @@
 package cn.domain.controller;
 
+import cn.domain.config.AppConfig;
 import cn.domain.entity.Mixture;
 import cn.domain.service.MixtureService;
 import cn.domain.pojo.MixtureQo;
@@ -28,6 +29,9 @@ public class MixtureController {
     @Autowired
     private MixtureService mixtureService;
 
+    @Autowired
+    private AppConfig appConfig;
+
     /**
      * 获取加料管理列表
      */
@@ -39,7 +43,7 @@ public class MixtureController {
     /**
      * 获取加料记录列表
      */
-    @GetMapping("/recordList")
+    @GetMapping("/record")
     public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
         return mixtureService.getMixesRecordList(mixtureQo);
     }
@@ -132,5 +136,14 @@ public class MixtureController {
     @GetMapping("/weight")
     public Double getWeightData() {
         return mixtureService.getWeightData();
+    }
+
+    /**
+     * 加料阈值
+     * @return
+     */
+    @GetMapping("/feedThreshold")
+    public Double feedThreshold() {
+        return appConfig.getFeedThreshold();
     }
 }

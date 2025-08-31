@@ -37,7 +37,7 @@ export function getTankWeightData() {
 
 // 获取领料记录列表
 export function getFeedRecordList(params) {
-  return http.get('/api/mixture/recordList', { params })
+  return http.get('/api/mixture/record', { params })
 }
 
 // 获取领料记录列表
@@ -68,4 +68,9 @@ export function getPickingTankList() {
 // 获取加料申请用的料罐列表
 export function cancelApply() {
   return http.post('/api/mixture/cancel')
+}
+
+// 获取加料阈值
+export function getFeedThreshold() {
+  return http.get('/api/mixture/feedThreshold')
 } 

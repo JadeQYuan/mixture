@@ -5,6 +5,7 @@
       :columns="columns"
       :search-fields="searchFields"
       :action-buttons="actionButtons"
+      :beforeRequest="handlerParams"
       :request="getFeedRecordList"
     />
     <Dialog
@@ -58,6 +59,29 @@ const dialogFormButtons = [
     action: ( formdata ) => saveRemark(formdata),
   }
 ]
+
+// 处理动态时间类型和范围
+function handlerParams(params) {
+  const { timeType, timeRange, startTime, endTime, ...rest } = params
+  let query = { ...rest }
+  if (timeType && Array.isArray(timeRange) && timeRange.length === 2) {
+    const [start, end] = timeRange
+    if (timeType === 'applyTime') {
+      query.applyStartTime = start
+      query.applyEndTime = end
+    } else if (timeType === 'pickingTime') {
+      query.pickingStartTime = start
+      query.pickingEndTime = end
+    } else if (timeType === 'feedingTime') {
+      query.feedingStartTime = start
+      query.feedingEndTime = end
+    } else if (timeType === 'returnTime') {
+      query.returnStartTime = start
+      query.returnEndTime = end
+    }
+  }
+  return query
+}
 
 // 备注弹窗相关
 const remarkDialogVisible = ref(false)

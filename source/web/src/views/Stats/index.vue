@@ -34,7 +34,7 @@ const headerButtons = reactive([
 
 // 处理动态时间类型和范围
 function handlerParams(params) {
-  const { timeType, timeRange, ...rest } = params
+  const { timeType, timeRange, startTime, endTime, ...rest } = params
   let query = { ...rest }
   if (timeType && Array.isArray(timeRange) && timeRange.length === 2) {
     const [start, end] = timeRange
