@@ -1,16 +1,30 @@
 <template>
   <div class="home-container" @click="goToFace">
-    <h2 class="welcome-title">欢迎使用原材料智能管理系统</h2>
+    <h2 class="welcome-title">欢迎使用</h2>
+    <h2 class="welcome-title">原材料智能管理系统</h2>
     <div class="click-hint" :style="hintStyle">
       请点击进入系统
     </div>
+    <el-card class="todo-content" v-if="todo.list.length > 0">
+      <template v-for="item in todo.list">
+        <el-row>
+          <el-space>
+            <el-text type="primary" class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
+            <el-tag type="primary" class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-tag>
+            <el-tag type="success" class="todo-info">{{ item.materialName }} </el-tag>
+            <el-text type="warning" class="todo-info">{{ item.planWeight }} kg</el-text>
+          </el-space>
+        </el-row>
+      </template>
+    </el-card>
     <div class="login-link" @click.stop="goToLogin">密码登录</div>
     <el-button class="back-btn" size="large" @click.stop="goToLogin">返回</el-button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { getTodoList } from '@/api/mixture'
+import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -54,9 +68,19 @@ function animateHint() {
   animationId = requestAnimationFrame(animateHint)
 }
 
-onMounted(() => {
+
+const todo = reactive({
+  list: []
+})
+
+async function getTodo() {
+  todo.list = await getTodoList()
+}
+
+onMounted(async () => {
   // 启动动画
   animateHint()
+  await getTodo()
 })
 
 onUnmounted(() => {
@@ -83,7 +107,6 @@ onUnmounted(() => {
   text-align: center;
   font-size: 5em;
   font-weight: bold;
-  margin-bottom: 60px;
   color: #1976d2;
   letter-spacing: 2px;
 }
@@ -98,6 +121,7 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   animation: pulse 2s infinite;
+  margin-top: 60px;
   margin-bottom: 40px;
 }
 
@@ -141,5 +165,18 @@ onUnmounted(() => {
   font-size: 1.2em;
   padding: 16px 32px;
   border-radius: 12px;
+}
+
+.todo-content {
+  position: fixed;
+  top: 50px;
+  right: 80px;
+  width: 500px;
+  max-height: 400px;
+  opacity: 0.5;
+  overflow: scroll;
+}
+.todo-info {
+  font-size: 22px;
 }
 </style> 

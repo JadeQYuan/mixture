@@ -32,6 +32,11 @@ public class MixtureController {
     @Autowired
     private AppConfig appConfig;
 
+    @GetMapping("/todo")
+    public List<MixtureVo> getTodoList(MixtureQo mixtureQo) {
+        return mixtureService.getTodoList(mixtureQo);
+    }
+
     /**
      * 获取加料管理列表
      */

@@ -35,6 +35,11 @@ public class MixtureService {
     @Autowired
     private SerialService serialService;
 
+    public List<MixtureVo> getTodoList(MixtureQo mixtureQo) {
+        mixtureQo.setStatus(Arrays.asList(0, 3));
+        return mixtureMapper.selectByCondition(mixtureQo);
+    }
+
     public PageVo<MixtureVo> getMixesList(MixtureQo mixtureQo) {
         mixtureQo.setStatus(Arrays.asList(0, 3));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");

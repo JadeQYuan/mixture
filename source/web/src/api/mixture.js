@@ -41,6 +41,11 @@ export function getTankWeightData() {
 }
 
 // 获取领料记录列表
+export function getTodoList() {
+  return http.get('/api/mixture/todo')
+}
+
+// 获取领料记录列表
 export function getFeedRecordList(params) {
   return http.get('/api/mixture/record', { params })
 }

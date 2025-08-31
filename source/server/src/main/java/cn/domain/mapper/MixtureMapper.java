@@ -79,9 +79,9 @@ public interface MixtureMapper {
     int apply(Mixture mixture);
 
     @Insert("INSERT INTO mixture_info (tank_id, tank_no, apply_user_id, shift_type, material_name, product_spec, plan_weight, " +
-            "status, create_time, update_time) " +
+            "apply_time, status, create_time, update_time) " +
             "VALUES (#{tankId}, #{tankNo}, #{applyUserId}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
-            "3, datetime('now', 'localtime'), datetime('now', 'localtime'))")
+            "datetime('now', 'localtime'), 3, datetime('now', 'localtime'), datetime('now', 'localtime'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void prepare(Mixture mixture);
 
