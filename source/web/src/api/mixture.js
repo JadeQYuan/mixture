@@ -59,3 +59,13 @@ export function getReturnTankList() {
 export function saveFeedRemark(data) {
   return http.post('/api/mixture/remark', data)
 } 
+
+// 获取加料申请用的料罐列表
+export function getPickingTankList() {
+  return http.get('/api/mixture/picking')
+} 
+
+// 获取加料申请用的料罐列表
+export function cancelApply() {
+  return http.post('/api/mixture/cancel')
+} 

@@ -37,13 +37,36 @@ public class MixtureController {
     }
 
     /**
+     * 获取加料记录列表
+     */
+    @GetMapping("/recordList")
+    public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
+        return mixtureService.getMixesRecordList(mixtureQo);
+    }
+
+    /**
+     * 获取加料统计列表
+     */
+    @GetMapping("/stats")
+    public PageVo<MixtureVo> getMixesStatsList(MixtureQo mixtureQo) {
+        return mixtureService.getMixesStatsList(mixtureQo);
+    }
+
+    /**
      * 加料申请
      */
     @PostMapping("/apply")
-    public void applyMixes(@RequestBody Mixture mixture) {
-        mixtureService.applyMixes(mixture);
+    public void apply(@RequestBody Mixture mixture) {
+        mixtureService.apply(mixture);
     }
 
+    /**
+     * 执行备料操作
+     */
+    @PostMapping("/prepare")
+    public void prepare(@RequestBody Mixture mixture) {
+        mixtureService.prepare(mixture);
+    }
 
     /**
      * 底罐重量
@@ -57,8 +80,29 @@ public class MixtureController {
      * 执行加料操作
      */
     @PostMapping("/feed")
-    public void executeMixes(@RequestBody Mixture mixture) {
-        mixtureService.executeMixes(mixture);
+    public void executeFeed(@RequestBody Mixture mixture) {
+        mixtureService.executeFeed(mixture);
+    }
+
+    /**
+     * 执行领料操作
+     */
+    @GetMapping("/picking")
+    public List<Mixture> getTankForPicking() {
+        return mixtureService.getTankForPicking();
+    }
+
+    /**
+     * 执行领料操作
+     */
+    @PostMapping("/picking")
+    public void picking(@RequestBody Mixture mixture) {
+        mixtureService.picking(mixture);
+    }
+
+    @GetMapping("/return")
+    public List<Mixture> getTankForReturn() {
+        return mixtureService.getTankForReturn();
     }
 
     /**
@@ -70,35 +114,16 @@ public class MixtureController {
     }
 
     /**
-     * 获取加料记录列表
+     * 执行取消操作
      */
-    @GetMapping("/recordList")
-    public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
-        return mixtureService.getMixesRecordList(mixtureQo);
+    @PostMapping("/cancel")
+    public void executeCancel(@RequestBody Mixture mixture) {
+        mixtureService.executeCancel(mixture);
     }
 
-    /**
-     * 执行备料操作
-     */
-    @PostMapping("/prepare")
-    public void prepare(@RequestBody Mixture mixture) {
-        mixtureService.prepare(mixture);
-    }
-
-    /**
-     * 执行领料操作
-     */
-    @PostMapping("/picking")
-    public void picking(@RequestBody Mixture mixture) {
-        mixtureService.picking(mixture);
-    }
-
-    /**
-     * 获取加料统计列表
-     */
-    @GetMapping("/stats")
-    public PageVo<MixtureVo> getMixesStatsList(MixtureQo mixtureQo) {
-        return mixtureService.getMixesStatsList(mixtureQo);
+    @PostMapping("/remark")
+    public void remark(@RequestBody Mixture mixture) {
+        mixtureService.remark(mixture);
     }
 
     /**
@@ -108,14 +133,4 @@ public class MixtureController {
     public Double getWeightData() {
         return mixtureService.getWeightData();
     }
-
-    @GetMapping("/return")
-    public List<Mixture> getTankForReturn() {
-        return mixtureService.getTankForReturn();
-    }
-
-    @PostMapping("/remark")
-    public void remark(@RequestBody Mixture mixture) {
-        mixtureService.remark(mixture);
-    }
-} 
+}

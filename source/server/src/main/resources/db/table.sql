@@ -52,3 +52,7 @@ CREATE TABLE mixture_info (
     create_time text,                         -- 创建时间
     update_time text                          -- 更新时间
 );
+
+
+ALTER TABLE mixture_info ADD COLUMN picking_time text after feeding_user_id;
+ALTER TABLE mixture_info ADD COLUMN picking_user_id INTEGER after picking_time;

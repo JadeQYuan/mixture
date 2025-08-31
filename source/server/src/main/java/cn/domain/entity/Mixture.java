@@ -24,9 +24,12 @@ public class Mixture {
     private String applyTime;                  // 申请加料时间
     private String feedingTime;                // 实际加料时间
     private Integer feedingUserId;             // 加料操作员ID（关联user_info表）
+    private String pickingTime;                // 领料时间
+    private Integer pickingUserId;             // 领料操作员ID（关联user_info表）
     private String returnTime;                 // 退料时间
     private Integer returnUserId;              // 退料操作员ID（关联user_info表）
     /**
+     * -1. 撤销
      * 0. 申请加料
      * 1. 加料完成/已领料
      * 2. 已退料

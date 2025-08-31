@@ -70,6 +70,17 @@ export const columns = [
     width: '200'
   },
   {
+    prop: 'pickingUserAccount',
+    label: '用料人员',
+    width: '160',
+    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
+  },
+  {
+    prop: 'pickingTime',
+    label: '用料时间',
+    width: '200'
+  },
+  {
     prop: 'bottomWeight',
     label: '罐底重量',
     width: '120',
@@ -144,6 +155,15 @@ export const remarkDialogConfig = {
       prop: 'productSpec',
       label: '产品型号',
       type: 'input',
+    },
+    { 
+      prop: 'flameRetardantWeight', 
+      label: '阻燃粉', 
+      type: 'number', 
+      required: true,
+      suffix: 'kg', 
+      inputType: 'number', 
+      props: { min: 0, step: 0.1 } 
     },
     {
       prop: 'remark',

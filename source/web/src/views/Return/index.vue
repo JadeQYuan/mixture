@@ -42,15 +42,29 @@
         </template>
       </Form>
     </Dialog>
+
+    <!-- 撤销确认对话框 -->
+    <ConfirmDialog
+      :visible="cancelDialog.visible"
+      title="撤销申请"
+      message="确定要撤销该申请吗？"
+      icon="Warning"
+      icon-type="danger"
+      confirm-text="确认"
+      confirm-type="primary"
+      @update:visible="val => cancelDialog.visible = val"
+      @confirm="confirmCancel"
+      @cancel="() => cancelDialog.visible = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { submitReturnOperation, getTankWeightData, getReturnTankList } from '@/api/mixture'
+import { submitReturnOperation, getTankWeightData, getReturnTankList, cancelApply } from '@/api/mixture'
 import CardGrid from '@/components/CardGrid'
-import { Dialog } from '@/components/Dialog'
+import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { displayFields, returnDialogConfig } from './config'
 
@@ -74,8 +88,16 @@ const actionButtons = [
     text: '退料',
     type: 'warning',
     size: 'large',
-    disabled: (row) => row.status === 0,
+    disabled: (row) => row.status !== 1,
     action: ( row ) => openReturnDialog(row)
+  },
+  {
+    key: 'cancel',
+    text: '撤销',
+    type: 'danger',
+    size: 'large',
+    disabled: (row) => row.status !== 0 && row.status !== 3,
+    action: ( row ) => openCancelDialog(row)
   }
 ]
 
@@ -214,12 +236,41 @@ async function handleReturnSubmit(formData) {
   }
 }
 
-// 新增：Dialog关闭时处理
+// Dialog关闭时处理
 function handleDialogVisibleUpdate(val) {
   if (!val) {
     closeReturnDialog()
   } else {
     returnDialog.visible = true
+  }
+}
+
+// 撤销对话框
+const cancelDialog = reactive({
+  visible: false,
+  loading: false,
+  form: {id: null, tankId: null, tankNo: ''}
+})
+
+function openCancelDialog(row) {
+  cancelDialog.visible = true
+  cancelDialog.form.id = row.mixtureId
+  cancelDialog.form.tankId = row.id
+  cancelDialog.form.tankNo = row.tankNo
+}
+
+async function confirmCancel() {
+  if (cancelDialog.loading) return // 防止重复提交
+  try {
+    cancelDialog.loading = true
+    await cancelApply(cancelDialog.form)
+    ElMessage.success('领料申请已提交！')
+    cancelDialog.visible = false 
+    await card.value.search() // 重新获取列表
+  } finally {
+    setTimeout(() => {
+      cancelDialog.loading = false
+    }, 300)
   }
 }
 

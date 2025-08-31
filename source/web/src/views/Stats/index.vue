@@ -41,6 +41,9 @@ function handlerParams(params) {
     if (timeType === 'applyTime') {
       query.applyStartTime = start
       query.applyEndTime = end
+    } else if (timeType === 'pickingTime') {
+      query.pickingStartTime = start
+      query.pickingEndTime = end
     } else if (timeType === 'feedingTime') {
       query.feedingStartTime = start
       query.feedingEndTime = end

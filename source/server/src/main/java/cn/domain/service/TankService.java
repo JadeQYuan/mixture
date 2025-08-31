@@ -64,18 +64,7 @@ public class TankService {
     }
 
     public List<TankVo> getTanksForApply() {
-        List<TankVo> tanks = tankMapper.getTanksForApply();
-        for (TankVo tank : tanks) {
-            Mixture mixture = mixtureMapper.tankStatus(tank.getId());
-            if (mixture != null && mixture.getStatus() == 4) {
-                tank.setMixtureId(mixture.getId());
-                tank.setPicking(true);
-                tank.setFullWeight(mixture.getFullWeight());
-            } else {
-                tank.setPicking(false);
-            }
-        }
-        return tanks;
+        return tankMapper.getTanksForApply();
     }
 
     private void insertTank(Tank tank) {

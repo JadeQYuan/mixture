@@ -11,6 +11,7 @@ import lombok.Data;
 public class MixtureQo extends PageQo {
     /** 人员关键字 */
     private String applyUserKey;
+    private String pickingUserKey;
     /** 料罐编号 */
     private String tankNo;
     /** 班次 */
@@ -25,6 +26,8 @@ public class MixtureQo extends PageQo {
     private String applyEndTime;
     private String feedingStartTime;
     private String feedingEndTime;
+    private String pickingStartTime;
+    private String pickingEndTime;
     private String returnStartTime;
     private String returnEndTime;
 } 

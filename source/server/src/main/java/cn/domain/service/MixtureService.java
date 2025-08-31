@@ -2,15 +2,13 @@ package cn.domain.service;
 
 import cn.domain.entity.Mixture;
 import cn.domain.mapper.MixtureMapper;
-import cn.domain.serial.SerialService;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import cn.domain.pojo.MixtureQo;
 import cn.domain.pojo.MixtureVo;
 import cn.domain.pojo.PageVo;
+import cn.domain.serial.SerialService;
 import cn.domain.util.TokenUtil;
-
-import lombok.CustomLog;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,11 +44,35 @@ public class MixtureService {
         return new PageVo<>(mixesList);
     }
 
+    public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
+        mixtureQo.setStatus(Arrays.asList(1, 2, 3, 4));
+        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
+        Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
+        return new PageVo<>(mixesList);
+    }
+
+    public PageVo<MixtureVo> getMixesStatsList(MixtureQo mixtureQo) {
+        mixtureQo.setStatus(Collections.singletonList(2));
+        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");;
+        Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
+        return new PageVo<>(mixesList);
+    }
+
+
     @Transactional
-    public void applyMixes(Mixture mixture) {
+    public void apply(Mixture mixture) {
         Integer userId = TokenUtil.getToken();
         mixture.setApplyUserId(userId);
-        mixtureMapper.insert(mixture);
+        mixture.setPickingUserId(userId);
+        mixtureMapper.apply(mixture);
+        tankService.updateUser(mixture.getTankId(), userId);
+    }
+
+    @Transactional
+    public void prepare(Mixture mixture) {
+        Integer userId = TokenUtil.getToken();
+        mixture.setApplyUserId(userId);
+        mixtureMapper.prepare(mixture);
         tankService.updateUser(mixture.getTankId(), userId);
     }
 
@@ -60,7 +82,7 @@ public class MixtureService {
     }
 
     @Transactional
-    public void executeMixes(Mixture mixture) {
+    public void executeFeed(Mixture mixture) {
         Mixture info = mixtureMapper.selectById(mixture.getId());
         mixture.setFeedingUserId(TokenUtil.getToken());
         if (info.getStatus() == 0) {
@@ -72,8 +94,24 @@ public class MixtureService {
             log.info("加料记录状态未匹配，id={} status={}", mixture.getId(), info.getStatus());
             return;
         }
-        mixtureMapper.executeMixes(mixture);
+        mixtureMapper.executeFeed(mixture);
         serialService.stopReading();
+    }
+
+    public List<Mixture> getTankForPicking() {
+        return mixtureMapper.getTankForPicking();
+    }
+
+    @Transactional
+    public void picking(Mixture mixture) {
+        Integer userId = TokenUtil.getToken();
+        mixture.setPickingUserId(userId);
+        mixtureMapper.executePicking(mixture);
+        tankService.updateUser(mixture.getTankId(), userId);
+    }
+
+    public List<Mixture> getTankForReturn() {
+        return mixtureMapper.getTankForReturn(TokenUtil.getToken());
     }
 
     @Transactional
@@ -89,45 +127,15 @@ public class MixtureService {
     }
 
     @Transactional
-    public void prepare(Mixture mixture) {
-        mixtureMapper.executePrepare(mixture);
-        tankService.updateUser(mixture.getTankId(), TokenUtil.getToken());
-    }
-
-    @Transactional
-    public void picking(Mixture mixture) {
-        Integer userId = TokenUtil.getToken();
-        mixture.setApplyUserId(userId);
-        mixtureMapper.executePicking(mixture);
-        tankService.updateUser(mixture.getTankId(), userId);
-    }
-
-    public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
-        LocalDateTime end = LocalDateTime.now();
-        LocalDateTime start = LocalDateTime.now().minusDays(3);
-        mixtureQo.setStatus(Arrays.asList(1, 2, 3, 4));
-        mixtureQo.setFeedingStartTime(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        mixtureQo.setFeedingEndTime(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
-        Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
-        return new PageVo<>(mixesList);
-    }
-
-    public PageVo<MixtureVo> getMixesStatsList(MixtureQo mixtureQo) {
-        mixtureQo.setStatus(Collections.singletonList(2));
-        PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time ASC ");;
-        Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
-        return new PageVo<>(mixesList);
+    public void executeCancel(Mixture mixture) {
+        mixtureMapper.executeCancel(mixture);
+        tankService.updateUser(mixture.getTankId(), null);
     }
 
     public Double getWeightData() {
 //        double weight = Math.random() * 100 + 50;
 //        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
         return serialService.readWeight();
-    }
-
-    public List<Mixture> getTankForReturn() {
-        return mixtureMapper.getTankForReturn(TokenUtil.getToken());
     }
 
     public void remark(Mixture mixture) {

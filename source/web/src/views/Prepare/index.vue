@@ -1,5 +1,5 @@
 <template>
-  <div class="feed-apply-container">
+  <div class="prepare-container">
     <CardGrid
       ref="card"
       :display-fields="displayFields"
@@ -9,7 +9,7 @@
       :header-render="item => ('料罐：' + item.tankNo)"
     />
 
-    <!-- 加料申请对话框 -->
+    <!-- 备料申请对话框 -->
     <Dialog
       :visible="applyDialog.visible"
       :title="applyDialogConfig.title"
@@ -25,18 +25,22 @@
         style="padding-right: 30px;"
       />
     </Dialog>
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { feedApply } from '@/api/mixture'
 import { getApplyTankList } from '@/api/tank'
+import { submitPicking } from '@/api/mixture'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { applyDialogConfig } from './config'
+import ConfirmDialog from '@/components/Dialog/ConfirmDialog.vue'
+import { dialogConfig } from '../TankManage/config'
 
 const card = ref()
 const applyForm = ref()
@@ -58,15 +62,15 @@ const displayFields = [
 // 操作按钮配置
 const actionButtons = [
   {
-    key: 'apply',
-    text: '申请',
-    type: 'primary',
+    key: 'prepare',
+    text: '备料',
+    type: 'warning',
     size: 'large',
     action: ( row ) => openApplyDialog(row)
   }
 ]
 
-// 加料申请对话框
+// 备料申请对话框
 const applyDialog = reactive({
   visible: false,
   loading: false,
@@ -89,8 +93,9 @@ const applyDialogButtons = [
   }
 ]
 
-// 加料申请对话框相关函数
+// 备料申请对话框相关函数
 function openApplyDialog(row) {
+  // autoRefresh.value = false // 打开弹窗时关闭自动刷新
   applyDialog.visible = true
   applyDialog.form = {
     tankId: row.id,
@@ -103,6 +108,7 @@ function openApplyDialog(row) {
 }
 
 function closeApplyDialog() {
+  // autoRefresh.value = true // 关闭弹窗时恢复自动刷新
   applyDialog.visible = false
   applyDialog.form = { tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null }
   // 清空校验状态
@@ -115,7 +121,7 @@ async function handleApplySubmit(formData) {
   try {
     applyDialog.loading = true
     await feedApply(formData)
-    ElMessage.success('加料申请已提交！')
+    ElMessage.success('备料申请已提交！')
     closeApplyDialog()
     await card.value.search() // 重新获取列表
   } finally {
@@ -125,7 +131,7 @@ async function handleApplySubmit(formData) {
   }
 }
 
-// Dialog关闭时处理
+// 新增：Dialog关闭时处理
 function handleDialogVisibleUpdate(val) {
   if (!val) {
     closeApplyDialog()
@@ -133,9 +139,10 @@ function handleDialogVisibleUpdate(val) {
     applyDialog.visible = true
   }
 }
+
 </script>
 
 <style scoped>
-.feed-apply-container {
+.prepare-container {
 }
 </style> 

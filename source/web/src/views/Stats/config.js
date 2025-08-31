@@ -9,6 +9,11 @@ export const searchFields = [
     placeholder: '请输入姓名/工号'
   },
   {
+    key: 'pickingUserKey',
+    label: '用料人员',
+    placeholder: '请输入姓名/工号'
+  },
+  {
     key: 'tankNo',
     label: '料罐',
     placeholder: '请输入料罐编号'
@@ -34,6 +39,7 @@ export const searchFields = [
     placeholder: '请选择时间类型',
     options: [
       { label: '申请时间', value: 'applyTime' },
+      { label: '用料时间', value: 'pickingTime' },
       { label: '加料时间', value: 'feedingTime' },
       { label: '退料时间', value: 'returnTime' }
     ],
@@ -87,6 +93,17 @@ export const columns = [
   {
     prop: 'applyTime',
     label: '申请时间',
+    width: '200'
+  },
+  {
+    prop: 'pickingUserAccount',
+    label: '用料人员',
+    width: '160',
+    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
+  },
+  {
+    prop: 'pickingTime',
+    label: '用料时间',
     width: '200'
   },
   {
@@ -144,6 +161,11 @@ export const columns = [
     width: '100',
     render: (row) => `${row.actualWeight} kg`,
     exportRender: (row) => `${row.actualWeight}`
+  },
+  {
+    prop: 'remark',
+    label: '备注',
+    width: '200',
   }
 ]
 
