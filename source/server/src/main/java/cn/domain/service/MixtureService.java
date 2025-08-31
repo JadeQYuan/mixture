@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -74,6 +72,10 @@ public class MixtureService {
         mixture.setApplyUserId(userId);
         mixtureMapper.prepare(mixture);
         tankService.updateUser(mixture.getTankId(), userId);
+    }
+
+    public Mixture getLastReturnWeight(Integer tankId) {
+        return mixtureMapper.getReturnWeight(tankId);
     }
 
     public void bottom(Mixture mixture) {

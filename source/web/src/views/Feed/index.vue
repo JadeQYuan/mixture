@@ -81,6 +81,20 @@
       </Form>
     </Dialog>
 
+    <!-- 底罐确认对话框 -->
+    <ConfirmDialog
+      :visible="bottomConfirmDialog.visible"
+      title="确认"
+      message="底罐重量与上次退料重量相差较大, 确认继续?"
+      icon="Warning"
+      icon-type="danger"
+      confirm-text="确认"
+      confirm-type="primary"
+      @update:visible="val => bottomConfirmDialog.visible = val"
+      @confirm="confirmBottom"
+      @cancel="() => bottomConfirmDialog.visible = false"
+    />
+
     <!-- 加料确认对话框 -->
     <ConfirmDialog
       :visible="feedConfirmDialog.visible"
@@ -100,7 +114,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getFeedManageList, submitFeedOperation, getTankWeightData, saveBottomTankWeight, getFeedThreshold } from '@/api/mixture'
+import { getFeedManageList, submitFeedOperation, getTankWeightData, getBottom, saveBottomTankWeight, getFeedThreshold, getBottomThreshold } from '@/api/mixture'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -133,7 +147,7 @@ const actionButtons = [
   },
   {
     key: 'bottomTank',
-    text: '底罐(备料)',
+    text: '底罐',
     color: "rgb(78, 142, 47)",
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
@@ -141,7 +155,7 @@ const actionButtons = [
   },
   {
     key: 'feed',
-    text: '加料(备料)',
+    text: '加料',
     type: 'success',
     size: 'large',
     action: ( row ) => openFeedDialog(row),
@@ -196,6 +210,8 @@ const bottomTankDialog = reactive({
   visible: false,
   step: 0,
   loading: false,
+  threshold: 5,
+  returnBottom: { id: null, bottomWeight: null },
   form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null }
 })
 
@@ -204,7 +220,7 @@ const feedDialog = reactive({
   visible: false,
   step: 0,
   loading: false,
-  threshold: 0,
+  threshold: 5,
   form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, 
       flameRetardantWeight: 0, actualWeight: null }
 })
@@ -227,7 +243,7 @@ const bottomTankButtons = [
     text: '下一步',
     type: 'primary',
     validate: true,
-    action: () => handleBottomTankNext(),
+    action: () => handleBottomTankNext(false),
     visible: (step) => step === 0
   },
   {
@@ -272,7 +288,7 @@ const footerButtons = [
 ]
 
 // 底罐操作相关函数
-function openBottomTankDialog(row) {
+async function openBottomTankDialog(row) {
   bottomTankDialog.visible = true
   bottomTankDialog.step = 0
   bottomTankDialog.form.id = row.id
@@ -286,6 +302,8 @@ function openBottomTankDialog(row) {
   bottomTankDialog.form.bottomWeight = null
   // 启动定时器，获取底罐重量
   startWeightTimer(val => bottomTankDialog.form.bottomWeight = val)
+  bottomTankDialog.threshold = await getBottomThreshold()
+  bottomTankDialog.returnBottom = await getBottom()
 }
 
 function handleBottomTankPrev() {
@@ -298,11 +316,17 @@ function handleBottomTankPrev() {
   bottomTankDialog.step = step
 }
 
-function handleBottomTankNext() {
+function handleBottomTankNext(confirmed) {
   // 检查底罐重量是否已获取
   if (!bottomTankDialog.form.bottomWeight) {
     ElMessage.warning('正在获取底罐重量数据，请稍候')
     return
+  }
+  if (bottomTankDialog.returnBottom.bottomWeight 
+      && (bottomTankDialog.returnBottom.bottomWeight - bottomTankDialog.form.bottomTankDialog).toFixed(2) > bottomTankDialog.threshold 
+      && !confirmed) {
+    bottomTankDialog.visible = true
+    return 
   }
   // 底罐重量确定，进入确认步骤
   stopWeightTimer()
@@ -425,6 +449,16 @@ const feedConfirmDialog = reactive({
 function confirmFeed() {
   feedConfirmDialog.visible = false
   handleNextStep(true)
+}
+
+// 加料确认对话框
+const bottomConfirmDialog = reactive({
+  visible: false,
+})
+
+function confirmBottom() {
+  bottomConfirmDialog.visible = false
+  handleBottomTankNext(true)
 }
 
 onUnmounted(() => {

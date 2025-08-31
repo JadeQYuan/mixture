@@ -32,15 +32,12 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedApply } from '@/api/mixture'
+import { submitPrepare } from '@/api/mixture'
 import { getApplyTankList } from '@/api/tank'
-import { submitPicking } from '@/api/mixture'
 import CardGrid from '@/components/CardGrid'
 import { Dialog } from '@/components/Dialog'
 import Form from '@/components/Form'
 import { applyDialogConfig } from './config'
-import ConfirmDialog from '@/components/Dialog/ConfirmDialog.vue'
-import { dialogConfig } from '../TankManage/config'
 
 const card = ref()
 const applyForm = ref()
@@ -120,7 +117,7 @@ async function handleApplySubmit(formData) {
   
   try {
     applyDialog.loading = true
-    await feedApply(formData)
+    await submitPrepare(formData)
     ElMessage.success('备料申请已提交！')
     closeApplyDialog()
     await card.value.search() // 重新获取列表

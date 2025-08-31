@@ -99,6 +99,18 @@ public interface MixtureMapper {
             "WHERE f.id = #{id}")
     Mixture selectById(Integer id);
 
+    /**
+     * 查询料罐上次退料的重量
+     * @param tankId
+     * @return
+     */
+    @Select("SELECT id, return_weight as returnWeight " +
+            "FROM mixture_info " +
+            "WHERE tank_id = #{tankId} and status = 2 " +
+            "ORDER BY create_time DESC " +
+            "LIMIT 1 ")
+    Mixture getReturnWeight(Integer tankId);
+
     @Update("UPDATE mixture_info SET bottom_weight = #{bottomWeight} WHERE id = #{id}")
     void bottom(Mixture mixture);
 

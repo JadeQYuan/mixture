@@ -5,6 +5,11 @@ export function getFeedManageList(params) {
   return http.get('/api/mixture/list', { params })
 }
 
+// 底罐重量
+export function getBottom(params) {
+  return http.get('/api/mixture/bottom', { params })
+}
+
 // 保存底罐重量
 export function saveBottomTankWeight(data) {
   return http.post('/api/mixture/bottom', data)
@@ -73,4 +78,9 @@ export function cancelApply() {
 // 获取加料阈值
 export function getFeedThreshold() {
   return http.get('/api/mixture/feedThreshold')
+} 
+
+// 获取底罐阈值
+export function getBottomThreshold() {
+  return http.get('/api/mixture/bottomThreshold')
 } 

@@ -74,6 +74,15 @@ public class MixtureController {
 
     /**
      * 底罐重量
+     * @return
+     */
+    @GetMapping("/bottom")
+    public Mixture getLastReturnWeight(Integer tankId) {
+        return mixtureService.getLastReturnWeight(tankId);
+    }
+
+    /**
+     * 底罐重量
      */
     @PostMapping("/bottom")
     public void bottom(@RequestBody Mixture mixture) {
@@ -145,5 +154,14 @@ public class MixtureController {
     @GetMapping("/feedThreshold")
     public Double feedThreshold() {
         return appConfig.getFeedThreshold();
+    }
+
+    /**
+     * 罐底阈值
+     * @return
+     */
+    @GetMapping("/bottomThreshold")
+    public Double bottomThreshold() {
+        return appConfig.getBottomThreshold();
     }
 }
