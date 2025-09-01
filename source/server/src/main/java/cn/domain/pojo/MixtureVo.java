@@ -18,10 +18,11 @@ public class MixtureVo {
     private String applyTime;
     private Integer applyUserId;
     private String applyUserName;
+    private String applyUserAccount;
     private String pickingTime;
     private Integer pickingUserId;
     private String pickingUserName;
-    private String applyUserAccount;
+    private String pickingUserAccount;
     private Double bottomWeight;
     private Double fullWeight;
     private Double flameRetardantWeight;

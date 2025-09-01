@@ -1,7 +1,9 @@
 package cn.domain.service;
 
+import cn.domain.entity.Check;
 import cn.domain.entity.Mixture;
 import cn.domain.mapper.MixtureMapper;
+import cn.domain.pojo.MixtureBottomVo;
 import cn.domain.pojo.MixtureQo;
 import cn.domain.pojo.MixtureVo;
 import cn.domain.pojo.PageVo;
@@ -34,6 +36,9 @@ public class MixtureService {
 
     @Autowired
     private SerialService serialService;
+
+    @Autowired
+    private CheckService checkService;
 
     public List<MixtureVo> getTodoList(MixtureQo mixtureQo) {
         mixtureQo.setStatus(Arrays.asList(0, 3));
@@ -83,9 +88,22 @@ public class MixtureService {
         return mixtureMapper.getReturnWeight(tankId);
     }
 
-    public void bottom(Mixture mixture) {
-        mixtureMapper.bottom(mixture);
+    @Transactional
+    public void bottom(MixtureBottomVo bottomVo) {
+        mixtureMapper.bottom(bottomVo);
         serialService.stopReading();
+        if (bottomVo.getCheck()) {
+            Mixture info = mixtureMapper.selectById(bottomVo.getId());
+            Check check = new Check();
+            check.setTankId(info.getTankId());
+            check.setTankNo(info.getTankNo());
+            check.setReturnId(bottomVo.getReturnId());
+            check.setReturnWeight(bottomVo.getReturnWeight());
+            check.setBottomId(bottomVo.getId());
+            check.setBottomWeight(bottomVo.getBottomWeight());
+            check.setOpinion(bottomVo.getOpinion());
+            checkService.check(check);
+        }
     }
 
     @Transactional
@@ -131,6 +149,14 @@ public class MixtureService {
         mixtureMapper.executeReturn(mixture);
         tankService.updateUser(mixture.getTankId(), null);
         serialService.stopReading();
+    }
+
+    public void updateReturn(Integer id, Double bottomWeight) {
+        Mixture info = mixtureMapper.selectById(id);
+        double actualWeight = BigDecimal.valueOf(info.getFullWeight())
+                .add(BigDecimal.valueOf(info.getFlameRetardantWeight()))
+                .add(BigDecimal.valueOf(-bottomWeight)).doubleValue();
+        mixtureMapper.updateReturn(id, bottomWeight, actualWeight);
     }
 
     @Transactional

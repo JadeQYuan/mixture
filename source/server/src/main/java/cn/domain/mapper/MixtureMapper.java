@@ -1,6 +1,7 @@
 package cn.domain.mapper;
 
 import cn.domain.entity.Mixture;
+import cn.domain.pojo.MixtureBottomVo;
 import cn.domain.pojo.MixtureQo;
 import cn.domain.pojo.MixtureVo;
 import org.apache.ibatis.annotations.*;
@@ -19,9 +20,10 @@ public interface MixtureMapper {
                     "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
                     "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
                     "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
-                    "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
+                    "f.apply_time as applyTime, f.picking_time as pickingTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
             "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
-            "u2.user_name as feedingUserName, u2.account as feedingUserAccount ",
+            "u2.user_name as feedingUserName, u2.account as feedingUserAccount, ",
+            "u3.user_name as pickingUserName, u3.account as pickingUserAccount ",
             "FROM mixture_info f ",
             "LEFT JOIN tank_info t ON f.tank_id = t.id ",
             "LEFT JOIN user_info u1 ON f.apply_user_id = u1.id ",
@@ -112,7 +114,7 @@ public interface MixtureMapper {
     Mixture getReturnWeight(Integer tankId);
 
     @Update("UPDATE mixture_info SET bottom_weight = #{bottomWeight} WHERE id = #{id}")
-    void bottom(Mixture mixture);
+    void bottom(MixtureBottomVo bottomVo);
 
     @Update("UPDATE mixture_info SET full_weight = #{fullWeight}, " +
             "flame_retardant_weight = #{flameRetardantWeight}, " +
@@ -147,6 +149,11 @@ public interface MixtureMapper {
             "return_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 2 " +
             "WHERE id = #{id}")
     void executeReturn(Mixture mixture);
+
+    @Update("UPDATE mixture_info SET return_weight = #{returnWeight}, actual_weight = #{actualWeight}, " +
+            "return_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime') " +
+            "WHERE id = #{id}")
+    void updateReturn(Integer id, Double returnWeight, Double actualWeight);
 
     @Update("UPDATE mixture_info SET update_time = datetime('now', 'localtime'), status = -1 " +
             "WHERE id = #{id}")

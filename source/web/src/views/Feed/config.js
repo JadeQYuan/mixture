@@ -92,7 +92,11 @@ export const bottomTankConfig = {
     { prop: 'planWeight', label: '计划加料', type: 'input', disabled: true, size: 'large', style: { width: '100%' }, 
             suffix: 'kg' },
     { prop: 'bottomWeight', label: '底罐', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
-            suffix: 'kg', disabled: true }
+            suffix: 'kg', disabled: true },
+    { prop: 'check', label: '确认', type: 'redio', required: true, size: 'large', style: { width: '100%' }, 
+            options: [{label: '是', value: true}, {label: '否', value: false}], visible: false},
+    { prop: 'opinion', label: '意见', type: 'textarea', required: true, size: 'large', style: { width: '100%' }, 
+            visible: (formdata) => formdata && formdata.check }
   ],
   rules: {
     bottomWeight: [ { required: true, message: '请获取底罐重量', trigger: 'blur' } ]
@@ -121,7 +125,7 @@ export const feedDialogConfig = {
     { prop: 'actualWeight', label: '实际加料', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
             suffix: 'kg', disabled: true },
     { prop: 'flameRetardantWeight', label: '阻燃粉', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
-            suffix: 'kg', inputType: 'number', disabled: (currentStep) => currentStep !== 1 , visible: (currentStep) => currentStep >= 1, 
+            suffix: 'kg', inputType: 'number', disabled: (formdata, currentStep) => currentStep !== 1 , visible: (formdata, currentStep) => currentStep >= 1, 
             props: { min: 0, step: 0.1 } }
   ],
   rules: {

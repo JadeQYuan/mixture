@@ -211,8 +211,9 @@ const bottomTankDialog = reactive({
   step: 0,
   loading: false,
   threshold: 5,
-  returnBottom: { id: null, bottomWeight: null },
-  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null }
+  last: { id: null, bottomWeight: null },
+  form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, 
+      check: false, returnId: null, returnWeight: null, opinion: '' }
 })
 
 // 加料操作对话框
@@ -303,7 +304,7 @@ async function openBottomTankDialog(row) {
   // 启动定时器，获取底罐重量
   startWeightTimer(val => bottomTankDialog.form.bottomWeight = val)
   bottomTankDialog.threshold = await getBottomThreshold()
-  bottomTankDialog.returnBottom = await getBottom()
+  bottomTankDialog.last = await getBottom({tankId: row.tankId})
 }
 
 function handleBottomTankPrev() {
@@ -322,10 +323,10 @@ function handleBottomTankNext(confirmed) {
     ElMessage.warning('正在获取底罐重量数据，请稍候')
     return
   }
-  if (bottomTankDialog.returnBottom.bottomWeight 
-      && (bottomTankDialog.returnBottom.bottomWeight - bottomTankDialog.form.bottomTankDialog).toFixed(2) > bottomTankDialog.threshold 
+  if (bottomTankDialog.last.returnWeight 
+      && (bottomTankDialog.last.returnWeight - bottomTankDialog.form.bottomWeight) > bottomTankDialog.threshold 
       && !confirmed) {
-    bottomTankDialog.visible = true
+    bottomConfirmDialog.visible = true
     return 
   }
   // 底罐重量确定，进入确认步骤
@@ -411,7 +412,10 @@ function handlePrevStep() {
   // 如果返回到需要获取数据的步骤，重新启动对应步骤的定时器并立即获取数据
   if (step === 0) {
     // 返回第一步，立即启动满罐重量获取
-    startWeightTimer(val => feedDialog.form.fullWeight = val)
+    startWeightTimer(val => {
+      feedDialog.form.fullWeight = val
+      feedDialog.form.actualWeight = (val - feedDialog.form.bottomWeight).toFixed(2)
+    })
   }
   feedDialog.step = step
 }
@@ -458,6 +462,9 @@ const bottomConfirmDialog = reactive({
 
 function confirmBottom() {
   bottomConfirmDialog.visible = false
+  bottomTankDialog.form.check = true
+  bottomTankDialog.form.returnId = bottomTankDialog.last.id
+  bottomTankDialog.form.returnWeight = bottomTankDialog.last.returnWeight
   handleBottomTankNext(true)
 }
 

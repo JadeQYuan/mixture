@@ -278,11 +278,7 @@ function getButtonVisible(button) {
 function getFieldDisabled(field) {
   // 如果字段有自定义的disabled函数，使用它
   if (typeof field.disabled === 'function') {
-    if (props.extends) {
-      return field.disabled(props.extends, props.formData)
-    } else {
-      return field.disabled(props.formData)
-    }
+    return field.disabled(props.formData, props.extends)
   }
   // 否则使用静态的disabled值
   return field.disabled || false
@@ -292,11 +288,7 @@ function getFieldDisabled(field) {
 function getFieldVisible(field) {
   // 如果字段有自定义的visible函数，使用它
   if (typeof field.visible === 'function') {
-    if (props.extends) {
-      return field.visible(props.extends, props.formData)
-    } else {
-      return field.visible(props.formData)
-    }
+    return field.visible(props.formData, props.extends)
   }
   // 否则使用静态的visible值，默认为true
   return field.visible !== false

@@ -2,6 +2,7 @@ package cn.domain.controller;
 
 import cn.domain.config.AppConfig;
 import cn.domain.entity.Mixture;
+import cn.domain.pojo.MixtureBottomVo;
 import cn.domain.service.MixtureService;
 import cn.domain.pojo.MixtureQo;
 import cn.domain.pojo.MixtureVo;
@@ -90,8 +91,8 @@ public class MixtureController {
      * 底罐重量
      */
     @PostMapping("/bottom")
-    public void bottom(@RequestBody Mixture mixture) {
-        mixtureService.bottom(mixture);
+    public void bottom(@RequestBody MixtureBottomVo bottomVo) {
+        mixtureService.bottom(bottomVo);
     }
 
     /**

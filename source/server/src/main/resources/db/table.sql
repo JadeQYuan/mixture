@@ -10,7 +10,7 @@ CREATE TABLE user_info (
     face_path text,                           -- 人脸图片路径
     face_feature text,                        -- 人脸特征数据（用于人脸识别）
     remark text,                              -- 备注信息
-    del_flag INTEGER,                            -- 删除标识 0 删除，1 未删除
+    del_flag INTEGER,                         -- 删除标识 0 删除，1 未删除
     create_time text,                         -- 创建时间
     update_time text                          -- 更新时间
 );
@@ -53,6 +53,24 @@ CREATE TABLE mixture_info (
     update_time text                          -- 更新时间
 );
 
-
 ALTER TABLE mixture_info ADD COLUMN picking_time text after feeding_user_id;
 ALTER TABLE mixture_info ADD COLUMN picking_user_id INTEGER after picking_time;
+
+-- 校验信息表
+CREATE TABLE check_info (
+    id INTEGER PRIMARY KEY,                   -- 加料记录ID，主键，自增
+    tank_id INTEGER,                          -- 料罐ID（关联tank_info表）
+    tank_no text,                             -- 料罐编号
+    return_id INTEGER,                        -- 退料记录
+    return_weight real,                       -- 退料重量（kg）
+    bottom_id INTEGER,                        -- 加料记录
+    bottom_weight real,                       -- 罐底重量（kg）
+    opinion text,                             -- 物料员意见
+    user_id INTEGER,                          -- 物料员ID
+    admin_opinion text,                       -- 管理员意见
+    admin_id INTEGER,                         -- 管理员ID
+    status INTEGER,                           -- 状态
+    correct_weight real,                      -- 校正重量（kg）
+    create_time text,                         -- 创建时间
+    update_time text                          -- 更新时间
+);
