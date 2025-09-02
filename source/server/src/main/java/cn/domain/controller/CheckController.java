@@ -1,8 +1,8 @@
 package cn.domain.controller;
 
 import cn.domain.entity.Check;
+import cn.domain.pojo.CheckQo;
 import cn.domain.pojo.CheckVo;
-import cn.domain.pojo.PageQo;
 import cn.domain.pojo.PageVo;
 import cn.domain.service.CheckService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,8 @@ public class CheckController {
     private CheckService checkService;
 
     @GetMapping("/list")
-    public PageVo<CheckVo> getCheckList(PageQo pageQo) {
-        return checkService.getCheckList(pageQo);
+    public PageVo<CheckVo> getCheckList(CheckQo checkQo) {
+        return checkService.getCheckList(checkQo);
     }
 
     /**

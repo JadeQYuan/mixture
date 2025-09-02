@@ -2,6 +2,7 @@ package cn.domain.service;
 
 import cn.domain.entity.Check;
 import cn.domain.mapper.CheckMapper;
+import cn.domain.pojo.CheckQo;
 import cn.domain.pojo.CheckVo;
 import cn.domain.pojo.PageQo;
 import cn.domain.pojo.PageVo;
@@ -28,9 +29,9 @@ public class CheckService {
     @Lazy
     private MixtureService mixtureService;
 
-    public PageVo<CheckVo> getCheckList(PageQo pageQo) {
-        PageHelper.startPage(pageQo.getPageNo(), pageQo.getPageSize()).setOrderBy(" f.create_time DESC ");
-        Page<CheckVo> checkList = (Page<CheckVo>) checkMapper.selectByCondition();
+    public PageVo<CheckVo> getCheckList(CheckQo checkQo) {
+        PageHelper.startPage(checkQo.getPageNo(), checkQo.getPageSize()).setOrderBy(" f.create_time DESC ");
+        Page<CheckVo> checkList = (Page<CheckVo>) checkMapper.selectByCondition(checkQo);
         return new PageVo<>(checkList);
     }
 
@@ -42,6 +43,7 @@ public class CheckService {
 
     @Transactional
     public void process(Check check) {
+        check.setAdminId(TokenUtil.getToken());
         checkMapper.process(check);
         if (check.getStatus() == 1) {
             Check info = checkMapper.selectById(check.getId());

@@ -7,6 +7,7 @@ import Home from '@/views/Home.vue'
 import Layout from '@/components/Layout.vue'
 import UserManage from '@/views/UserManage'
 import TankManage from '@/views/TankManage'
+import Check from '@/views/Check'
 import Apply from '@/views/Apply'
 import Picking from '@/views/Picking'
 import Return from '@/views/Return'
@@ -86,11 +87,17 @@ const routes = [
         meta: { roles: ['Admin', 'Accountant'], title: '领料统计' }
       },
       {
+        path: 'check',
+        name: 'Check',
+        component: Check,
+        meta: { roles: ['Admin'], title: '数据检查' }
+      },  
+      {
         path: 'tank-manage',
         name: 'TankManage',
         component: TankManage,
         meta: { roles: ['Admin', 'MaterialClerk'], title: '料罐管理' }
-      },  
+      },
       {
         path: 'user-manage',
         name: 'UserManage',

@@ -17,8 +17,8 @@ public class CheckVo {
      private String userAccount;
      private String adminOpinion;
      private Integer adminId;
-     private String adminUserName;
-     private String adminUserAccount;
+     private String adminName;
+     private String adminAccount;
      private Integer status;
      private Double correctWeight;
      private String createTime;

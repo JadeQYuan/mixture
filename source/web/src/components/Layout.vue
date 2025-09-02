@@ -24,8 +24,7 @@
       <div class="user-section">
         <div class="user-info-box">
           <img class="user-avatar" :src="userAvatar" alt="头像" />
-          <div class="user-account">{{ userAccount }}</div>
-          <div class="user-name">{{ userName }}</div>
+          <div class="user-info">{{ userName }}({{ userAccount }})</div>
         </div>
         <div class="logout-btn-box">
           <el-button type="info" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
@@ -137,6 +136,7 @@ function logout() {
   font-size: 1.6em;
   padding-top: 180px;
   align-items: stretch;
+  overflow: scroll;
 }
 .el-menu-vertical-demo {
   flex: 1;
@@ -179,18 +179,11 @@ function logout() {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 16px;
   border: 2px solid #e0e0e0;
   background: #fff;
 }
-.user-account {
-  font-size: 0.6em;
-  color: #333;
-  text-align: center;
-  font-weight: bold;
-}
-.user-name {
-  font-size: 0.6em;
+.user-info {
+  font-size: 36px;
   color: #333;
   text-align: center;
   font-weight: bold;
