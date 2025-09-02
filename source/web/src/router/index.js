@@ -48,7 +48,7 @@ const routes = [
         path: 'apply',
         name: 'Apply',
         component: Apply,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '加料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '加料' }
       },
       {
         path: 'return',
@@ -60,7 +60,7 @@ const routes = [
         path: 'prepare',
         name: 'Prepare',
         component: Prepare,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料' }
       },
       {
         path: 'picking',
@@ -84,7 +84,7 @@ const routes = [
         path: 'stats',
         name: 'Stats',
         component: Stats,
-        meta: { roles: ['Admin', 'Accountant'], title: '领料统计' }
+        meta: { roles: ['Admin', 'Accountant'], title: '用料统计' }
       },
       {
         path: 'check',

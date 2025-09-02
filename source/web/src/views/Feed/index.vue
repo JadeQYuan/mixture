@@ -251,6 +251,7 @@ const bottomTankButtons = [
     key: 'confirm',
     text: '确认',
     type: 'success',
+    validate: true,
     loading: () => bottomTankDialog.loading,
     action: () => handleBottomTankSubmit(),
     visible: (step) => step === 1
@@ -282,6 +283,7 @@ const footerButtons = [
     key: 'feed',
     text: '提交',
     type: 'success',
+    validate: true,
     loading: () => feedDialog.loading,
     action: ( row ) => handleFeedSubmit(row),
     visible: (step) => step === 2
@@ -305,6 +307,7 @@ async function openBottomTankDialog(row) {
   startWeightTimer(val => bottomTankDialog.form.bottomWeight = val)
   bottomTankDialog.threshold = await getBottomThreshold()
   bottomTankDialog.last = await getBottom({tankId: row.tankId})
+  bottomTankDialog.form.check = false
 }
 
 function handleBottomTankPrev() {
@@ -315,6 +318,7 @@ function handleBottomTankPrev() {
     startWeightTimer(val => bottomTankDialog.form.bottomWeight = val)
   }
   bottomTankDialog.step = step
+  bottomTankDialog.form.check = false
 }
 
 function handleBottomTankNext(confirmed) {
@@ -354,7 +358,6 @@ function closeBottomTankDialog() {
   bottomTankDialog.visible = false
   stopWeightTimer()
   bottomTankDialog.step = 0
-  bottomTankDialog.form = { id: null, tankId: null, tankNo: '', bottomWeight: null }
   // 清空校验状态
   bottomTankForm.value?.resetFields?.()
 }

@@ -15,7 +15,7 @@
       :visible="processDialog.visible"
       :title="processDialog.title"
       :width="dialogConfig.width"
-      @update:visible="val => processDialog.visible = val"
+      @update:visible="handleDialogVisibleUpdate"
     >
       <Form
         ref="processForm"
@@ -87,7 +87,7 @@ const dialogFormButtons = [
   {
     key: 'cancel',
     text: '取消',
-    action: () => processDialog.visible = false
+    action: () => closeProcessDialog()
   },
   {
     key: 'submit',
@@ -116,12 +116,25 @@ async function handleDialogOk(formData) {
     processDialog.loading = true
     await processCheck(formData)
     ElMessage.success('处理成功')
-    processDialog.visible = false
+    closeProcessDialog()
     await table.value.search()
   } finally {
     setTimeout(() => {
       processDialog.loading = false
     }, 300)
+  }
+}
+
+function closeProcessDialog() {
+  processDialog.visible = false
+  processForm.value?.resetFields?.()
+}
+
+function handleDialogVisibleUpdate(val) {
+  if (!val) {
+    closeProcessDialog()
+  } else {
+    processDialog.visible = true
   }
 }
 

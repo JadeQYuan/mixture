@@ -11,13 +11,14 @@
     <Dialog
       :title="remarkDialogConfig.title"
       :width="remarkDialogConfig.width"
-      :visible="remarkDialogVisible"
-      @update:visible="val => remarkDialogVisible = val"
+      :visible="remarkDialog.visible"
+      @update:visible="handleDialogVisibleUpdate"
     >
       <Form
+        ref="remarkForm"
         :fields="remarkDialogConfig.fields"
         :rules="remarkDialogConfig.rules"
-        :form-data="remarkForm"
+        :form-data="remarkDialog.form"
         :footer-buttons="dialogFormButtons"
         style="padding-right: 30px;"
       />
@@ -26,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFeedRecordList, saveFeedRemark } from '@/api/mixture'
 import DataTable from '@/components/DataTable'
@@ -35,6 +36,7 @@ import Form from '@/components/Form'
 import { searchFields, columns, remarkDialogConfig } from './config'
 
 const table = ref()
+const remarkForm = ref()
 
 const actionButtons = [
   {
@@ -56,6 +58,7 @@ const dialogFormButtons = [
     key: 'feed',
     text: '提交',
     type: 'primary',
+    validate: true,
     action: ( formdata ) => saveRemark(formdata),
   }
 ]
@@ -84,26 +87,40 @@ function handlerParams(params) {
 }
 
 // 备注弹窗相关
-const remarkDialogVisible = ref(false)
-const remarkForm = ref({ id: null, remark: '', materialName: '', productSpec: '' })
+const remarkDialog = reactive({
+  visible: false,
+  form: { id: null, remark: '', materialName: '', productSpec: '', flameRetardantWeight: '' }
+})
 
 function openRemarkDialog(row) {
-  remarkForm.value.materialName = row.materialName
-  remarkForm.value.productSpec = row.productSpec
-  remarkForm.value.remark = row.remark || ''
-  remarkForm.value.id = row.id
-  remarkDialogVisible.value = true
+  remarkDialog.form.id = row.id
+  remarkDialog.form.materialName = row.materialName
+  remarkDialog.form.productSpec = row.productSpec
+  remarkDialog.form.flameRetardantWeight = row.flameRetardantWeight
+  remarkDialog.form.remark = row.remark || ''
+  remarkDialog.visible = true
 }
 
 function closeRemarkDialog() {
-  remarkDialogVisible.value = false
+  remarkDialog.visible = false
+  // 重置表单数据与校验状态
+  remarkForm.value?.resetFields?.()
 }
 
 async function saveRemark(formdata) {
   await saveFeedRemark(formdata)
   ElMessage.success('保存成功')
-  remarkDialogVisible.value = false
+  closeRemarkDialog()
   await table.value.search();
+}
+
+// Dialog关闭时处理
+function handleDialogVisibleUpdate(val) {
+  if (!val) {
+    closeRemarkDialog()
+  } else {
+    remarkDialog.visible = true
+  }
 }
 </script>
 

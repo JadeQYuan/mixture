@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "face")
+@ConfigurationProperties(prefix = "app")
 public class AppConfig {
 
     private Double feedThreshold = 5.0;

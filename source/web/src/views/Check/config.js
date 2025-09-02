@@ -138,20 +138,14 @@ export const dialogConfig = {
     },
   ],
   rules: {
-    checkType: [
-      { required: true, message: '请选择检查类型', trigger: 'change' }
-    ],
-    checkItem: [
-      { required: true, message: '请输入检查项目', trigger: 'blur' }
-    ],
-    checkValue: [
-      { required: true, message: '请输入检查值', trigger: 'blur' }
-    ],
-    expectedValue: [
-      { required: true, message: '请输入期望值', trigger: 'blur' }
+    adminOpinion: [
+      { required: true, message: '请输入意见', trigger: 'change' }
     ],
     status: [
-      { required: true, message: '请选择状态', trigger: 'change' }
+      { required: true, message: '请选择是否更正', trigger: 'change' }
+    ],
+    correctWeight: [
+      { required: true, message: '请输入更正重量', trigger: 'blur' }
     ]
   }
 }

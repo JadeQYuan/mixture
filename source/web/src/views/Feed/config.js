@@ -99,7 +99,8 @@ export const bottomTankConfig = {
             visible: (formdata) => formdata && formdata.check }
   ],
   rules: {
-    bottomWeight: [ { required: true, message: '请获取底罐重量', trigger: 'blur' } ]
+    bottomWeight: [ { required: true, message: '请获取底罐重量', trigger: 'blur' } ],
+    opinion: [ { required: true, message: '请输入意见', trigger: 'blur' } ]
   },
   steps: [
     { title: '底罐重量', description: '记录底罐重量' },

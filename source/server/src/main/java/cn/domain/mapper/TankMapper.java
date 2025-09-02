@@ -72,7 +72,8 @@ public interface TankMapper {
     @Select("<script>" +
             "SELECT t.id, t.tank_no as tankNo, t.remark " +
             "FROM tank_info t " +
-            "WHERE user_id is null and t.del_flag = 1" +
+            "WHERE user_id is null and t.del_flag = 1 " +
+            "and id not in (select distinct tank_id from mixture_info where status not in (-1, 2)) " +
             "</script>")
     List<TankVo> getTanksForApply();
 

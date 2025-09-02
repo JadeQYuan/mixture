@@ -14,7 +14,7 @@
       :visible="dialog.visible"
       :title="dialog.title"
       :width="dialogConfig.width"
-      @update:visible="val => dialog.visible = val"
+      @update:visible="handleDialogVisibleUpdate"
     >
       <Form
         ref="tankForm"
@@ -98,7 +98,7 @@ const dialogFormButtons = [
   {
     key: 'cancel',
     text: '取消',
-    action: () => dialog.visible = false
+    action: () => closeDialog()
   },
   {
     key: 'submit',
@@ -142,7 +142,7 @@ async function handleDialogOk(formData) {
       await updateTank(updateData)
       ElMessage.success('编辑料罐成功')
     }
-    dialog.visible = false
+    closeDialog()
     await table.value.search()
   } finally {
     setTimeout(() => {
@@ -175,6 +175,19 @@ async function handleDeleteTank() {
     deleteDialog.id = null
     deleteDialog.visible = false
     await table.value.search()
+  }
+}
+
+function closeDialog() {
+  dialog.visible = false
+  tankForm.value?.resetFields?.()
+}
+
+function handleDialogVisibleUpdate(val) {
+  if (!val) {
+    closeDialog()
+  } else {
+    dialog.visible = true
   }
 }
 

@@ -76,8 +76,8 @@ export function getPickingTankList() {
 } 
 
 // 获取加料申请用的料罐列表
-export function cancelApply() {
-  return http.post('/api/mixture/cancel')
+export function cancelApply(data) {
+  return http.post('/api/mixture/cancel', data)
 }
 
 // 获取加料阈值

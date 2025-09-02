@@ -126,6 +126,7 @@ const footerButtons = [
     key: 'feed',
     text: '提交',
     type: 'success',
+    validate: true,
     loading: () => returnDialog.loading,
     action: ( row ) => handleReturnSubmit(row),
     visible: (step) => step === 1
@@ -226,7 +227,7 @@ async function handleReturnSubmit(formData) {
     // 确保清除定时器
     stopWeightTimer()
     await submitReturnOperation(formData)
-    ElMessage.success('退料操作成功')
+    ElMessage.success('退料成功! ')
     closeReturnDialog()
     await card.value.search() // 重新获取列表
   } finally {
@@ -254,8 +255,8 @@ const cancelDialog = reactive({
 
 function openCancelDialog(row) {
   cancelDialog.visible = true
-  cancelDialog.form.id = row.mixtureId
-  cancelDialog.form.tankId = row.id
+  cancelDialog.form.id = row.id
+  cancelDialog.form.tankId = row.tankId
   cancelDialog.form.tankNo = row.tankNo
 }
 
@@ -264,7 +265,7 @@ async function confirmCancel() {
   try {
     cancelDialog.loading = true
     await cancelApply(cancelDialog.form)
-    ElMessage.success('领料申请已提交！')
+    ElMessage.success('加料申请已取消！')
     cancelDialog.visible = false 
     await card.value.search() // 重新获取列表
   } finally {

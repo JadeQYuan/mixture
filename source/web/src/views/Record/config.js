@@ -154,7 +154,7 @@ export const columns = [
   {
     prop: 'actualWeight',
     label: '实际用料',
-    width: '100',
+    width: '120',
     render: (row) => row.returnTime ? `${row.actualWeight} kg` : ''
   },
   {

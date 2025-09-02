@@ -65,8 +65,8 @@ const pickingDialog = reactive({
 
 function openPickingDialog(row) {
   pickingDialog.visible = true
-  pickingDialog.form.id = row.mixtureId
-  pickingDialog.form.tankId = row.id
+  pickingDialog.form.id = row.id
+  pickingDialog.form.tankId = row.tankId
   pickingDialog.form.tankNo = row.tankNo
 }
 
