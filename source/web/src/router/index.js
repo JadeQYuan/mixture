@@ -48,25 +48,25 @@ const routes = [
         path: 'apply',
         name: 'Apply',
         component: Apply,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '加料' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '用料申请' }
       },
       {
         path: 'return',
         name: 'Return',
         component: Return,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '退料' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '退料/撤销' }
       },
       {
         path: 'prepare',
         name: 'Prepare',
         component: Prepare,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料申请' }
       },
       {
         path: 'picking',
         name: 'Picking',
         component: Picking,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '领料' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料领用' }
       },
       {
         path: 'feed',
@@ -90,7 +90,7 @@ const routes = [
         path: 'check',
         name: 'Check',
         component: Check,
-        meta: { roles: ['Admin'], title: '数据检查' }
+        meta: { roles: ['Admin'], title: '异常处理' }
       },  
       {
         path: 'tank-manage',

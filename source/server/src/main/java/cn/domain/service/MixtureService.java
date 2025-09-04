@@ -53,7 +53,7 @@ public class MixtureService {
     }
 
     public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
-        mixtureQo.setStatus(Arrays.asList(1, 2, 3, 4));
+        mixtureQo.setStatus(Arrays.asList(1, 2, 4));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
@@ -166,12 +166,19 @@ public class MixtureService {
     }
 
     public Double getWeightData() {
-        double weight = Math.random() * 100 - 30;
-        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
-//        return serialService.readWeight();
+//        double weight = Math.random() * 100 - 30;
+//        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
+        return serialService.readWeight();
     }
 
     public void remark(Mixture mixture) {
+        Mixture info = mixtureMapper.selectById(mixture.getId());
+        if (info.getStatus() == 2) {
+            double actualWeight = BigDecimal.valueOf(info.getFullWeight())
+                    .add(BigDecimal.valueOf(mixture.getFlameRetardantWeight()))
+                    .add(BigDecimal.valueOf(-info.getReturnWeight())).doubleValue();
+            mixture.setActualWeight(actualWeight);
+        }
         mixtureMapper.updateRemark(mixture);
     }
 }

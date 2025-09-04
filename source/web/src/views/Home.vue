@@ -8,11 +8,11 @@
     <el-card class="todo-content" v-if="todo.list.length > 0">
       <template v-for="item in todo.list">
         <el-row>
-          <el-space>
-            <el-text tag="b" class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
-            <el-text tag="ins" class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-text>
-            <el-text tag="i" class="todo-info">{{ item.materialName }} </el-text>
-            <el-text tag="mark" class="todo-info">{{ item.planWeight }} kg</el-text>
+          <el-space size="large">
+            <el-text class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
+            <el-text class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-text>
+            <el-text class="todo-info">{{ item.materialName }} </el-text>
+            <el-text type="primary" class="todo-info">{{ item.planWeight }} kg</el-text>
           </el-space>
         </el-row>
       </template>
@@ -169,14 +169,16 @@ onUnmounted(() => {
 
 .todo-content {
   position: fixed;
-  top: 50px;
-  right: 80px;
-  width: 500px;
-  max-height: 400px;
+  top: 30px;
+  right: 30px;
+  width: 550px;
+  max-height: 650px;
   opacity: 0.5;
   overflow: auto;
 }
 .todo-info {
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 48px;
 }
 </style> 

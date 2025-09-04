@@ -31,6 +31,11 @@ export const columns = [
     render: (row) => row.returnWeight ? `${row.returnWeight} kg` : ''
   },
   {
+    prop: 'returnTime',
+    label: '退料时间',
+    width: '200',
+  },
+  {
     prop: 'userAccount',
     label: '物料员',
     width: '160',
@@ -67,7 +72,8 @@ export const columns = [
   {
     type: 'actions',
     label: '操作',
-    width: '120'
+    width: '120',
+    fixed: 'right'
   }
 ]
 

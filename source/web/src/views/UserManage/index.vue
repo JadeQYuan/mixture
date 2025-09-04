@@ -201,6 +201,9 @@ const table = ref()
 
 const store = useStore()
 const userId = computed(() => store.state.userInfo?.id || '')
+const userRole = computed(() => store.state.userInfo?.roleCode || '')
+
+
 // 1. actionButtons 拆分入口
 const actionButtons = [
   {
@@ -229,7 +232,15 @@ const actionButtons = [
     text: '修改密码',
     type: 'info',
     size: 'large',
-    action: ( row ) => openPasswordDialog(row)
+    action: ( row ) => openPasswordDialog(row),
+    disabled: (row) => {
+      if (userRole.value === 'Admin') {
+        return row.roleCode === 'Admin' && row.id !== userId.value
+      } else if (userRole.value === 'MaterialClerk') {
+        return row.roleCode === 'MaterialClerk' && row.id !== userId.value
+      }
+      return true
+    }
   },
   {
     key: 'deletePhoto',

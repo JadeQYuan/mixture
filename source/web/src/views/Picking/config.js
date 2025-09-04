@@ -28,6 +28,11 @@ export const pickingConfig = {
       prop: 'fullWeight',
       label: '满罐重量',
       render: (row) => row.fullWeight ? `${row.fullWeight} kg` : ''
+    },
+    {
+      prop: 'actualWeight',
+      label: '实际重量',
+      render: (row) => row.fullWeight ? `${(row.fullWeight - row.bottomWeight).toFixed(2)} kg` : ''
     }
   ]
 }

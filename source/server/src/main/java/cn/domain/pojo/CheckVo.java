@@ -8,6 +8,7 @@ public class CheckVo {
      private Integer tankId;
      private String tankNo;
      private Integer returnId;
+     private String returnTime;
      private Double returnWeight;
      private Integer bottomId;
      private Double bottomWeight;

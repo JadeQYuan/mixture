@@ -466,6 +466,7 @@ const bottomConfirmDialog = reactive({
 function confirmBottom() {
   bottomConfirmDialog.visible = false
   bottomTankDialog.form.check = true
+  bottomTankDialog.form.opinion = "异常原因：\n实际重量： \n处理意见： "
   bottomTankDialog.form.returnId = bottomTankDialog.last.id
   bottomTankDialog.form.returnWeight = bottomTankDialog.last.returnWeight
   handleBottomTankNext(true)
