@@ -4,9 +4,6 @@
       <el-menu
         class="el-menu-vertical-demo"
         router
-        background-color="#f5f5f5"
-        text-color="#333"
-        active-text-color="#1976d2"
         :default-active="activeMenu"
         v-if="currentRole"
       >
@@ -27,7 +24,7 @@
           <div class="user-info">{{ userName }}({{ userAccount }})</div>
         </div>
         <div class="logout-btn-box">
-          <el-button type="info" size="large" @click="logout" style="width: 100%;">退出登录</el-button>
+          <el-button type="warning" link size="large" @click="logout" style="width: 100%;">退出登录</el-button>
         </div>
       </div>
     </div>
@@ -132,7 +129,7 @@ function logout() {
   min-width: 200px;
   max-width: 400px;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #FFF;
   font-size: 1.6em;
   padding-top: 180px;
   align-items: stretch;
@@ -175,8 +172,8 @@ function logout() {
   margin: 5px 0 5px 0;
 }
 .user-avatar {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e0e0e0;
@@ -191,11 +188,11 @@ function logout() {
 .logout-btn-box {
   display: flex;
   justify-content: center;
-  background: #f5f5f5;
+  background: #FFF;
   width: 100%;
 }
 .logout-btn-box .el-button {
-  font-size: 0.8em !important;
+  font-size: 28px !important;
   height: 60px;
 }
 .main-content {
@@ -231,77 +228,5 @@ function logout() {
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-@media (max-width: 900px) {
-  .layout {
-    flex-direction: column;
-    font-size: 1.4em;
-  }
-  .sidebar-wrapper {
-    flex-direction: row;
-    width: 100vw;
-    max-width: 100vw;
-    min-width: 0;
-    min-height: unset;
-    height: auto;
-    font-size: 1.1em;
-  }
-  .el-menu-vertical-demo {
-    width: 100vw;
-    min-width: 0;
-    font-size: 1.5em;
-    margin-top: 12px;
-  }
-  .custom-menu-item {
-    height: 56px !important;
-  }
-  .main-content {
-    font-size: 1.3em;
-    height: auto;
-  }
-  .content-inner {
-    height: auto;
-  }
-  .user-info-box {
-    margin: 12px 0 6px 0;
-  }
-  .user-avatar {
-    width: 70px;
-    height: 70px;
-  }
-  .logout-btn-box {
-    padding: 12px 0 10px 0;
-  }
-  .logout-btn-box .el-button {
-    font-size: 1.1em !important;
-    height: 40px;
-  }
-}
-@media (max-width: 600px) {
-  .layout {
-    font-size: 1em;
-  }
-  .sidebar-wrapper {
-    font-size: 0.95em;
-    width: 100vw;
-    max-width: 100vw;
-  }
-  .main-content {
-    font-size: 1em;
-  }
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-  }
-  .el-menu-vertical-demo {
-    font-size: 1.1em;
-  }
-  .custom-menu-item {
-    height: 40px !important;
-  }
-  .logout-btn-box .el-button {
-    font-size: 1em !important;
-    height: 32px;
-  }
 }
 </style> 

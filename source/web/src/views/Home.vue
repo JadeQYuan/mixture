@@ -9,10 +9,10 @@
       <template v-for="item in todo.list">
         <el-row>
           <el-space>
-            <el-text type="primary" class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
-            <el-tag type="primary" class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-tag>
-            <el-tag type="success" class="todo-info">{{ item.materialName }} </el-tag>
-            <el-text type="warning" class="todo-info">{{ item.planWeight }} kg</el-text>
+            <el-text tag="b" class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
+            <el-text tag="ins" class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-text>
+            <el-text tag="i" class="todo-info">{{ item.materialName }} </el-text>
+            <el-text tag="mark" class="todo-info">{{ item.planWeight }} kg</el-text>
           </el-space>
         </el-row>
       </template>
@@ -174,7 +174,7 @@ onUnmounted(() => {
   width: 500px;
   max-height: 400px;
   opacity: 0.5;
-  overflow: scroll;
+  overflow: auto;
 }
 .todo-info {
   font-size: 22px;

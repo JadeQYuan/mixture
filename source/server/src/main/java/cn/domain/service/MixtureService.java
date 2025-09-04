@@ -166,9 +166,9 @@ public class MixtureService {
     }
 
     public Double getWeightData() {
-//        double weight = Math.random() * 100 + 50;
-//        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
-        return serialService.readWeight();
+        double weight = Math.random() * 100 - 30;
+        return Math.round(weight * 100.0) / 100.0; // 保留两位小数
+//        return serialService.readWeight();
     }
 
     public void remark(Mixture mixture) {
