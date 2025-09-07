@@ -203,7 +203,6 @@ const store = useStore()
 const userId = computed(() => store.state.userInfo?.id || '')
 const userRole = computed(() => store.state.userInfo?.roleCode || '')
 
-
 // 1. actionButtons 拆分入口
 const actionButtons = [
   {
@@ -271,7 +270,7 @@ const headerButtons = [
 ]
 
 // 对话框配置
-const dialogConfig = getUserFormConfig()
+const dialogConfig = computed(() => getUserFormConfig(userRole.value))
 const passwordDialogConfig = getPasswordFormConfig()
 
 // 对话框

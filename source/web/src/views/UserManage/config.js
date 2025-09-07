@@ -58,13 +58,16 @@ export const columns = [
 ]
 
 // 用户表单字段配置
-export const userFormFields = [
+export function userFormFields(userRole) {
+  return [
   {
     prop: 'roleCode',
     label: '角色',
     type: 'radio',
     size: 'large',
-    options: getOptions(ROLE_MAP).filter(item => item.value != 'Admin')
+    options: userRole === 'Admin' ? 
+            getOptions(ROLE_MAP).filter(item => item.value !== 'Admin') : 
+            getOptions(ROLE_MAP).filter(item => item.value === 'Operator' || item.value === 'SeniorOperator')
   },
   {
     prop: 'account',
@@ -88,7 +91,8 @@ export const userFormFields = [
     rows: 3,
     size: 'large'
   }
-]
+]}
+
 // 用户表单验证规则
 export const userFormRules = {
   roleCode: [
@@ -133,11 +137,11 @@ export const passwordFormRules = {
   ]
 }
 // 获取用户表单配置
-export function getUserFormConfig() {
+export function getUserFormConfig(roleCode) {
   return {
     title: '用户信息',
     width: '600px',
-    fields: userFormFields,
+    fields: userFormFields(roleCode),
     rules: userFormRules
   }
 }

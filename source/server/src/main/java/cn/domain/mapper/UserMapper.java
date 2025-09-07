@@ -28,7 +28,7 @@ public interface UserMapper {
         "AND account LIKE '%' || #{account} || '%'",
         "</if>",
         "<if test='isAdmin != null and !isAdmin '>",
-        "AND role_code != 'Admin' ",
+        "AND (role_code != 'Admin' and role_code != 'Accountant') ",
         "</if>",
         "and del_flag = 1",
         "</where>",

@@ -133,7 +133,7 @@ function logout() {
   font-size: 1.6em;
   padding-top: 180px;
   align-items: stretch;
-  overflow: scroll;
+  overflow: auto;
 }
 .el-menu-vertical-demo {
   flex: 1;
