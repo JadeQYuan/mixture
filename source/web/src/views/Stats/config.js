@@ -54,7 +54,7 @@ export const searchFields = [
     label: '时间范围',
     type: 'datetimerange',
     placeholder: '请选择时间范围',
-    defaultValue: [ dayjs().subtract(1, 'month').startOf('day').format("YYYY-MM-DD HH:mm:ss"), dayjs().endOf('day').format("YYYY-MM-DD HH:mm:ss") ],
+    defaultValue: () => [ dayjs().subtract(1, 'month').startOf('day').format("YYYY-MM-DD HH:mm:ss"), dayjs().endOf('day').format("YYYY-MM-DD HH:mm:ss") ],
     disabledDate: (date) => (date < dayjs(selectDate.value).subtract(3, 'month')) || (date > dayjs(selectDate.value).add(3, 'month')),
     calendarChange: (date) => selectDate.value = date[0]
   },

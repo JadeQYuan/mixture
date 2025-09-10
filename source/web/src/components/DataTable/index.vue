@@ -16,7 +16,7 @@
             :placeholder="field.placeholder"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
-            :default-value="field.defaultValue"
+            :default-value="typeof field.defaultValue == 'function' ? field.defaultValue() : field.defaultValue"
             :disabled-date="field.disabledDate"
             @calendar-change="field.calendarChange"
             :clearable=false
@@ -279,7 +279,7 @@ const currentPage = ref(1)
 const initSearchForm = () => {
   props.searchFields.forEach(field => {
     // 如果有默认值，使用默认值；否则使用空字符串
-    searchForm[field.key] = field.defaultValue || ''
+    searchForm[field.key] = typeof field.defaultValue === 'function' ? field.defaultValue() : field.defaultValue || ''
   })
 }
 

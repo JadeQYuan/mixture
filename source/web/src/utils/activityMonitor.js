@@ -2,7 +2,7 @@
 class ActivityMonitor {
   constructor() {
     this.timeout = null
-    this.inactivityTime = 2 * 60 * 1000 // 2分钟
+    this.inactivityTime = 1 * 60 * 1000 // 1分钟
     this.isActive = false
     this.onLogout = null
     this.init()

@@ -71,16 +71,15 @@ const actionButtons = [
     type: 'primary',
     size: 'large',
     action: (row) => openDialog('edit', row),
-    disabled: (row) => row.userAccount
+    disabled: (row) => !!row.userAccount
   },
   {
     key: 'delete',
     text: '删除',
     type: 'danger',
     size: 'large',
-    disabled: (row) => row.status === 'active', // 正常状态禁用删除
-    action: (row) => confirmDelete(row),
-    disabled: (row) => row.userAccount
+    disabled: (row) => !!row.userAccount, // 正常状态禁用删除
+    action: (row) => confirmDelete(row)
   }
 ]
 

@@ -76,13 +76,13 @@ public class ArcSoftConfig {
      */
     private Boolean supportIrLiveness = true;
 
-    private String appid;
+    private String appId;
 
     // win平台sdk
-    private String sdkkey;
+    private String sdkKey;
 
     // dll/so库路径
-    private String libpath;
+    private String libPath;
 
     /**
      * 装载FaceEngine交给spring托管
@@ -91,9 +91,9 @@ public class ArcSoftConfig {
      */
     @Bean
     public FaceEngine faceEngine() {
-        libpath = new File("").getAbsolutePath() + libpath;
-        FaceEngine faceEngine = new FaceEngine(libpath);
-        int errorCode = faceEngine.activeOnline(appid, sdkkey);
+        libPath = new File("").getAbsolutePath() + libPath;
+        FaceEngine faceEngine = new FaceEngine(libPath);
+        int errorCode = faceEngine.activeOnline(appId, sdkKey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
             log.error("引擎注册失败");
             throw new AppException("引擎注册失败");
