@@ -4,6 +4,7 @@ import com.arcsoft.face.*;
 import com.arcsoft.face.enums.CompareModel;
 import com.arcsoft.face.enums.DetectModel;
 import com.arcsoft.face.enums.ErrorInfo;
+import com.arcsoft.face.enums.ExtractType;
 import com.arcsoft.face.toolkit.ImageInfo;
 import com.arcsoft.face.toolkit.ImageInfoEx;
 import cn.domain.exception.AppException;
@@ -88,7 +89,7 @@ public class ArcFaceService {
             return null;
         }
         FaceFeature faceFeature = new FaceFeature();
-        int i = faceEngine.extractFaceFeature(imageInfoEx, faceInfoList.get(0), faceFeature);
+        int i = faceEngine.extractFaceFeature(imageInfoEx, faceInfoList.get(0), ExtractType.REGISTER, 0, faceFeature);
         checkEngineResult(i, ErrorInfo.MOK.getValue(), "人脸特征提取失败");
         return faceFeature;
     }
@@ -112,7 +113,7 @@ public class ArcFaceService {
         // 人脸属性检测
         FunctionConfiguration configuration = new FunctionConfiguration();
         configuration.setSupportAge(true);
-        configuration.setSupportFace3dAngle(true);
+//        configuration.setSupportFace3dAngle(true);
         configuration.setSupportGender(true);
         configuration.setSupportLiveness(true);
         int process = faceEngine.process(imageInfo, faceInfoList, configuration);
@@ -149,74 +150,74 @@ public class ArcFaceService {
         return ageInfoList.get(0).getAge();
     }
 
-    /**
-     * IR活体检测
-     * IR活体值，未知=-1 、非活体=0 、活体=1、超出人脸=-2
-     *
-     * @return
-     */
-    public List<IrLivenessInfo> getIRLiveness(ImageInfo imageInfoGray) {
-        // 设置活体测试 阈值
-        int errorCode1 = faceEngine.setLivenessParam(0.5f, 0.7f);
+//    /**
+//     * IR活体检测
+//     * IR活体值，未知=-1 、非活体=0 、活体=1、超出人脸=-2
+//     *
+//     * @return
+//     */
+//    public List<IrLivenessInfo> getIRLiveness(ImageInfo imageInfoGray) {
+//        // 设置活体测试 阈值
+//        int errorCode1 = faceEngine.setLivenessParam(0.5f, 0.7f);
+//
+//        //IR属性处理
+//        List<FaceInfo> faceInfoListGray = new ArrayList<FaceInfo>();
+//        int errorCode = faceEngine.detectFaces(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray);
+//
+//        FunctionConfiguration configuration2 = new FunctionConfiguration();
+//        configuration2.setSupportIRLiveness(true);
+//        errorCode = faceEngine.processIr(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray, configuration2);
+//        //IR活体检测
+//        List<IrLivenessInfo> irLivenessInfo = new ArrayList<>();
+//        errorCode = faceEngine.getLivenessIr(irLivenessInfo);
+//
+//        for (IrLivenessInfo livenessInfo : irLivenessInfo) {
+//            log.info("IR活体：{}", livenessInfo.getLiveness());
+//        }
+//        return irLivenessInfo;
+//    }
 
-        //IR属性处理
-        List<FaceInfo> faceInfoListGray = new ArrayList<FaceInfo>();
-        int errorCode = faceEngine.detectFaces(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray);
+//    /**
+//     * RGB活体检测
+//     * RGB活体值，未知=-1 、非活体=0 、活体=1、超出人脸=-2
+//     *
+//     * @return
+//     */
+//    public int getRGBLiveness(ImageInfo imageInfoGray) {
+//        // 设置活体测试 阈值
+//        int errorCode1 = faceEngine.setLivenessParam(0.5f, 0.7f);
+//
+//        //IR属性处理
+//        List<FaceInfo> faceInfoListGray = new ArrayList<FaceInfo>();
+//        int errorCode = faceEngine.detectFaces(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray);
+//
+//        FunctionConfiguration configuration2 = new FunctionConfiguration();
+//        configuration2.setSupportIRLiveness(true);
+//        errorCode = faceEngine.processIr(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray, configuration2);
+//        //IR活体检测
+//        List<IrLivenessInfo> irLivenessInfo = new ArrayList<>();
+//        errorCode = faceEngine.getLivenessIr(irLivenessInfo);
+//
+//        log.info("IR活体：{}", irLivenessInfo.get(0).getLiveness());
+//        return irLivenessInfo.get(0).getLiveness();
+//    }
 
-        FunctionConfiguration configuration2 = new FunctionConfiguration();
-        configuration2.setSupportIRLiveness(true);
-        errorCode = faceEngine.processIr(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray, configuration2);
-        //IR活体检测
-        List<IrLivenessInfo> irLivenessInfo = new ArrayList<>();
-        errorCode = faceEngine.getLivenessIr(irLivenessInfo);
-
-        for (IrLivenessInfo livenessInfo : irLivenessInfo) {
-            log.info("IR活体：{}", livenessInfo.getLiveness());
-        }
-        return irLivenessInfo;
-    }
-
-    /**
-     * RGB活体检测
-     * RGB活体值，未知=-1 、非活体=0 、活体=1、超出人脸=-2
-     *
-     * @return
-     */
-    public int getRGBLiveness(ImageInfo imageInfoGray) {
-        // 设置活体测试 阈值
-        int errorCode1 = faceEngine.setLivenessParam(0.5f, 0.7f);
-
-        //IR属性处理
-        List<FaceInfo> faceInfoListGray = new ArrayList<FaceInfo>();
-        int errorCode = faceEngine.detectFaces(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray);
-
-        FunctionConfiguration configuration2 = new FunctionConfiguration();
-        configuration2.setSupportIRLiveness(true);
-        errorCode = faceEngine.processIr(imageInfoGray.getImageData(), imageInfoGray.getWidth(), imageInfoGray.getHeight(), imageInfoGray.getImageFormat(), faceInfoListGray, configuration2);
-        //IR活体检测
-        List<IrLivenessInfo> irLivenessInfo = new ArrayList<>();
-        errorCode = faceEngine.getLivenessIr(irLivenessInfo);
-
-        log.info("IR活体：{}", irLivenessInfo.get(0).getLiveness());
-        return irLivenessInfo.get(0).getLiveness();
-    }
-
-    /**
-     * 3D信息检测
-     *
-     * @return
-     */
-    public Face3DAngle getFace3DAngle(ImageInfoEx imageInfo) {
-        List<FaceInfo> faceInfoList = detectFace(imageInfo);
-        process(imageInfo, faceInfoList);
-
-        List<Face3DAngle> face3DAngleList = new ArrayList<Face3DAngle>();
-        int errorCode = faceEngine.getFace3DAngle(face3DAngleList);
-        Face3DAngle face3DAngle = face3DAngleList.get(0);
-        log.info("3D角度：{}, {}, {}", face3DAngle.getPitch(), face3DAngle.getRoll(), + face3DAngle.getYaw());
-
-        return face3DAngle;
-    }
+//    /**
+//     * 3D信息检测
+//     *
+//     * @return
+//     */
+//    public Face3DAngle getFace3DAngle(ImageInfoEx imageInfo) {
+//        List<FaceInfo> faceInfoList = detectFace(imageInfo);
+//        process(imageInfo, faceInfoList);
+//
+//        List<Face3DAngle> face3DAngleList = new ArrayList<Face3DAngle>();
+//        int errorCode = faceEngine.getFace3DAngle(face3DAngleList);
+//        Face3DAngle face3DAngle = face3DAngleList.get(0);
+//        log.info("3D角度：{}, {}, {}", face3DAngle.getPitch(), face3DAngle.getRoll(), + face3DAngle.getYaw());
+//
+//        return face3DAngle;
+//    }
 
     /**
      * 错误检测

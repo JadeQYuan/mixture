@@ -1,6 +1,7 @@
 package cn.domain.config;
 
 import cn.domain.exception.AppException;
+import com.arcsoft.face.ActiveFileInfo;
 import com.arcsoft.face.EngineConfiguration;
 import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.FunctionConfiguration;
@@ -81,6 +82,8 @@ public class ArcSoftConfig {
     // win平台sdk
     private String sdkKey;
 
+    private String activeKey;
+
     // dll/so库路径
     private String libPath;
 
@@ -93,11 +96,14 @@ public class ArcSoftConfig {
     public FaceEngine faceEngine() {
         libPath = new File("").getAbsolutePath() + libPath;
         FaceEngine faceEngine = new FaceEngine(libPath);
-        int errorCode = faceEngine.activeOnline(appId, sdkKey);
+        int errorCode = faceEngine.activeOnline(appId, sdkKey, activeKey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
             log.error("引擎注册失败");
             throw new AppException("引擎注册失败");
         }
+        ActiveFileInfo activeFileInfo = new ActiveFileInfo();
+        faceEngine.getActiveFileInfo(activeFileInfo);
+        log.info("activeInfo, {}", activeFileInfo);
         EngineConfiguration engineConfiguration = getFaceEngineConfiguration();
         // 初始化引擎
         errorCode = faceEngine.init(engineConfiguration);
@@ -142,7 +148,7 @@ public class ArcSoftConfig {
                 engineConfiguration.setDetectFaceOrientPriority(DetectOrient.ASF_OP_ALL_OUT);
         }
         // 设置识别的最小人脸比
-        engineConfiguration.setDetectFaceScaleVal(detectFaceScale);
+//        engineConfiguration.setDetectFaceScaleVal(detectFaceScale);
         engineConfiguration.setDetectFaceMaxNum(detectFaceMaxNum);
         // 功能配置
         initFuncConfiguration(engineConfiguration);
@@ -159,7 +165,7 @@ public class ArcSoftConfig {
         // 是否支持年龄检测
         functionConfiguration.setSupportAge(supportAge);
         // 是否支持3d 检测
-        functionConfiguration.setSupportFace3dAngle(supportFace3dAngle);
+//        functionConfiguration.setSupportFace3dAngle(supportFace3dAngle);
         // 是否支持人脸检测
         functionConfiguration.setSupportFaceDetect(supportFaceDetect);
         // 是否支持人脸识别

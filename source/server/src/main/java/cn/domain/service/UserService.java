@@ -280,22 +280,22 @@ public class UserService {
         return userId;
     }
 
-    /**
-     * IR活体检测
-     *
-     * @param imageInfoGray
-     */
-    private void checkIRLivenessFace(ImageInfo imageInfoGray) {
-        List<IrLivenessInfo> irLiveness = arcFaceService.getIRLiveness(imageInfoGray);
-        if (CollectionUtils.isEmpty(irLiveness)) {
-            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
-        }
-        if (irLiveness.size() > 1) {
-            throw new AppException("检测到多张人脸，请保持镜头只有一人！");
-        }
-        int irCode = irLiveness.get(0).getLiveness();
-        if (irCode != 1) {
-            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
-        }
-    }
+//    /**
+//     * IR活体检测
+//     *
+//     * @param imageInfoGray
+//     */
+//    private void checkIRLivenessFace(ImageInfo imageInfoGray) {
+//        List<IrLivenessInfo> irLiveness = arcFaceService.getIRLiveness(imageInfoGray);
+//        if (CollectionUtils.isEmpty(irLiveness)) {
+//            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
+//        }
+//        if (irLiveness.size() > 1) {
+//            throw new AppException("检测到多张人脸，请保持镜头只有一人！");
+//        }
+//        int irCode = irLiveness.get(0).getLiveness();
+//        if (irCode != 1) {
+//            throw new AppException("人脸校验失败,非活体，请调整角度重新拍摄！");
+//        }
+//    }
 }

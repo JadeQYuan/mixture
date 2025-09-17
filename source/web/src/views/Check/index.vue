@@ -107,8 +107,6 @@ function openProcessDialog(row) {
   processDialog.form.returnWeight = row.returnWeight
   processDialog.form.bottomWeight = row.bottomWeight
   processDialog.form.opinion = row.opinion
-    // 清空校验状态
-  processForm.value?.resetFields?.()
 }
 
 async function handleDialogOk(formData) {
