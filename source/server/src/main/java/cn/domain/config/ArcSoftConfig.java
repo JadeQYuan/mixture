@@ -98,8 +98,8 @@ public class ArcSoftConfig {
         FaceEngine faceEngine = new FaceEngine(libPath);
         int errorCode = faceEngine.activeOnline(appId, sdkKey, activeKey);
         if (errorCode != ErrorInfo.MOK.getValue() && errorCode != ErrorInfo.MERR_ASF_ALREADY_ACTIVATED.getValue()) {
-            log.error("引擎注册失败");
-            throw new AppException("引擎注册失败");
+            log.error("引擎注册失败, errorCode={}", errorCode);
+            throw new AppException("引擎注册失败, errorCode=" + errorCode);
         }
         ActiveFileInfo activeFileInfo = new ActiveFileInfo();
         faceEngine.getActiveFileInfo(activeFileInfo);
@@ -108,8 +108,8 @@ public class ArcSoftConfig {
         // 初始化引擎
         errorCode = faceEngine.init(engineConfiguration);
         if (errorCode != ErrorInfo.MOK.getValue()) {
-            log.error("初始化引擎失败");
-            throw new AppException("初始化引擎失败");
+            log.error("初始化引擎失败, errorCode={}", errorCode);
+            throw new AppException("初始化引擎失败, errorCode=" + errorCode);
         }
         return faceEngine;
     }
