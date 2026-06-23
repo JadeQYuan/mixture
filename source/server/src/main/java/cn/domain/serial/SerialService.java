@@ -28,7 +28,9 @@ public class SerialService {
 
     @PostConstruct
     public void init() {
-        connect();
+        if (serialConfig.getEnabled()) {
+            connect();
+        }
     }
 
     @PreDestroy
@@ -104,6 +106,10 @@ public class SerialService {
      * @return 重量值（千克）
      */
     public Double readWeight() {
+        if (!serialConfig.getEnabled()) {
+            double weight = Math.random() * 100 - 30;
+            return Math.round(weight * 100.0) / 100.0; // 保留两位小数
+        }
         if (!isConnected()) {
             log.warn("串口未连接，尝试重新连接");
             reconnect();

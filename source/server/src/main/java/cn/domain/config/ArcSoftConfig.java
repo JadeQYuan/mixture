@@ -10,6 +10,8 @@ import com.arcsoft.face.enums.DetectOrient;
 import com.arcsoft.face.enums.ErrorInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,6 +95,7 @@ public class ArcSoftConfig {
      * @return
      */
     @Bean
+    @ConditionalOnProperty("face.enabled")
     public FaceEngine faceEngine() {
         libPath = new File("").getAbsolutePath() + libPath;
         FaceEngine faceEngine = new FaceEngine(libPath);
@@ -112,6 +115,13 @@ public class ArcSoftConfig {
             throw new AppException("初始化引擎失败, errorCode=" + errorCode);
         }
         return faceEngine;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FaceEngine fakeFaceEngine() {
+        libPath = new File("").getAbsolutePath() + libPath;
+        return new FaceEngine(libPath);
     }
 
     /**

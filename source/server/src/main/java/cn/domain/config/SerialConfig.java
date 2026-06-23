@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "serial")
 public class SerialConfig {
 
+    private Boolean enabled;
+
     /**
      * 串口设备名称，如COM1、COM2等
      */
