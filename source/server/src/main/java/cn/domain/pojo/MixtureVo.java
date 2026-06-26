@@ -39,4 +39,6 @@ public class MixtureVo {
     private String remark;
     private String createTime;
     private String updateTime;
+    /** 是否超过加料提醒时间阈值 */
+    private Boolean overdue;
 } 

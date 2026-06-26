@@ -21,4 +21,7 @@ public class AppConfig {
 
     /** 阻燃粉比例区间上限（分母），实际加料重量/阻燃粉重量 <= 此值 */
     private Double flameRetardantRatioMax = 35.0;
+
+    /** 加料提醒时间阈值（分钟），申请加料后超过此时间未操作则首页醒目提醒 */
+    private Integer pickingTimeThreshold = 30;
 }

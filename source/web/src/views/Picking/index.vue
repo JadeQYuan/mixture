@@ -89,6 +89,20 @@
       @confirm="confirmRatio"
       @cancel="() => ratioConfirmDialog.visible = false"
     />
+
+    <!-- 不需阻燃粉时的确认对话框 -->
+    <ConfirmDialog
+      :visible="noFlameConfirmDialog.visible"
+      title="领料确认"
+      :message="noFlameConfirmDialog.message"
+      icon="InfoFilled"
+      icon-type="info"
+      confirm-text="确认领料"
+      confirm-type="success"
+      @update:visible="val => noFlameConfirmDialog.visible = val"
+      @confirm="confirmNoFlamePicking"
+      @cancel="() => noFlameConfirmDialog.visible = false"
+    />
   </div>
 </template>
 
@@ -188,6 +202,13 @@ const flameTipDialog = reactive({
   pendingRow: null
 })
 
+// 不需阻燃粉时的确认对话框
+const noFlameConfirmDialog = reactive({
+  visible: false,
+  message: '',
+  pendingRow: null
+})
+
 // 底罐重量确认对话框
 const bottomConfirmDialog = reactive({
   visible: false
@@ -259,8 +280,10 @@ async function handlePicking(row) {
     flameTipDialog.pendingRow = row
     flameTipDialog.visible = true
   } else {
-    // 不需阻燃粉：直接打开步骤对话框（仅确认信息）
-    openPickingStepDialogWithRow(row)
+    // 不需阻燃粉：弹确认框直接提交
+    noFlameConfirmDialog.message = `确认领取料罐 ${row.tankNo}（${row.materialName} ${row.productSpec}）？`
+    noFlameConfirmDialog.pendingRow = row
+    noFlameConfirmDialog.visible = true
   }
 }
 
@@ -397,6 +420,32 @@ function confirmBottom() {
 function confirmRatio() {
   ratioConfirmDialog.visible = false
   handleNextStep(true)
+}
+
+// 不需阻燃粉时直接提交领料
+async function confirmNoFlamePicking() {
+  const row = noFlameConfirmDialog.pendingRow
+  noFlameConfirmDialog.visible = false
+  try {
+    await submitPicking({
+      id: row.id,
+      tankId: row.tankId,
+      tankNo: row.tankNo,
+      shiftType: row.shiftType,
+      materialName: row.materialName,
+      productSpec: row.productSpec,
+      planWeight: row.planWeight,
+      fullWeight: row.fullWeight,
+      needFlameRetardant: false,
+      pickingBottomWeight: null,
+      pickingTotalWeight: null,
+      flameRetardantWeight: 0
+    })
+    ElMessage.success('领料成功！')
+    await card.value.search()
+  } catch (e) {
+    // error handled by http interceptor
+  }
 }
 
 onUnmounted(() => {

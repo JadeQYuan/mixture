@@ -7,8 +7,9 @@
     </div>
     <el-card class="todo-content" v-if="todo.list.length > 0">
       <template v-for="item in todo.list">
-        <el-row>
+        <el-row :class="{ 'todo-row-warning': item.overdue }">
           <el-space size="large">
+            <el-icon v-if="item.overdue" class="todo-warning-icon"><WarningFilled /></el-icon>
             <el-text class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
             <el-text class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-text>
             <el-text class="todo-info">{{ item.materialName }} </el-text>
@@ -26,6 +27,7 @@
 import { getTodoList } from '@/api/mixture'
 import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { WarningFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const hintStyle = ref({
@@ -171,7 +173,7 @@ onUnmounted(() => {
   position: fixed;
   top: 30px;
   right: 30px;
-  width: 550px;
+  width: 580px;
   max-height: 650px;
   opacity: 0.5;
   overflow: auto;
@@ -181,4 +183,28 @@ onUnmounted(() => {
   font-weight: 600;
   line-height: 48px;
 }
-</style> 
+
+.todo-row-warning {
+  background-color: #fef0f0;
+  border-left: 4px solid #f56c6c;
+  border-radius: 4px;
+  padding: 0 8px;
+  animation: warning-blink 1.5s ease-in-out infinite;
+}
+
+.todo-warning-icon {
+  font-size: 28px;
+  color: #f56c6c;
+  animation: warning-icon-pulse 1s ease-in-out infinite;
+}
+
+@keyframes warning-blink {
+  0%, 100% { background-color: #fef0f0; }
+  50% { background-color: #fde2e2; }
+}
+
+@keyframes warning-icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+</style>

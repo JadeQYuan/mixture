@@ -1,5 +1,6 @@
 package cn.domain.service;
 
+import cn.domain.config.AppConfig;
 import cn.domain.entity.Check;
 import cn.domain.entity.Mixture;
 import cn.domain.mapper.MixtureMapper;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +44,29 @@ public class MixtureService {
     @Autowired
     private CheckService checkService;
 
+    @Autowired
+    private AppConfig appConfig;
+
     public List<MixtureVo> getTodoList(MixtureQo mixtureQo) {
         mixtureQo.setStatus(Arrays.asList(0, 3));
-        return mixtureMapper.selectByCondition(mixtureQo);
+        List<MixtureVo> list = mixtureMapper.selectByCondition(mixtureQo);
+        int thresholdMinutes = appConfig.getPickingTimeThreshold();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        for (MixtureVo vo : list) {
+            if (vo.getApplyTime() != null) {
+                try {
+                    LocalDateTime applyTime = LocalDateTime.parse(vo.getApplyTime(), fmt);
+                    long diffMinutes = Duration.between(applyTime, now).toMinutes();
+                    vo.setOverdue(diffMinutes > thresholdMinutes);
+                } catch (Exception e) {
+                    vo.setOverdue(false);
+                }
+            } else {
+                vo.setOverdue(false);
+            }
+        }
+        return list;
     }
 
     public PageVo<MixtureVo> getMixesList(MixtureQo mixtureQo) {
