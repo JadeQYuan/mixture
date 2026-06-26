@@ -30,6 +30,7 @@
           class="grid-card"
           shadow="hover"
           :header="getHeader(item)"
+          :style="cardStyle ? cardStyle(item) : {}"
         >
           <!-- 卡片内容 -->
           <div class="card-content">
@@ -113,6 +114,11 @@ const props = defineProps({
   request: {
     type: Function,
     default: () => []
+  },
+  // 卡片样式函数，接收 item 返回样式对象
+  cardStyle: {
+    type: Function,
+    default: null
   }
 })
 

@@ -124,18 +124,13 @@ export const feedDialogConfig = {
     { prop: 'fullWeight', label: '满罐', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
             suffix: 'kg', disabled: true },
     { prop: 'actualWeight', label: '实际加料', type: 'input', required: true, size: 'large', style: { width: '100%' }, 
-            suffix: 'kg', disabled: true },
-    { prop: 'flameRetardantWeight', label: '阻燃粉', type: 'number', required: true, size: 'large', style: { width: '100%' }, 
-            suffix: 'kg', inputType: 'number', disabled: (formdata, currentStep) => currentStep !== 1 , visible: (formdata, currentStep) => currentStep >= 1, 
-            props: { min: 0, step: 0.1 } }
+            suffix: 'kg', disabled: true }
   ],
   rules: {
-    fullWeight: [ { required: true, message: '请获取加料后重量', trigger: 'blur' } ],
-    flameRetardantWeight: [ { required: true, message: '请输入阻燃粉重量', trigger: 'blur' } ]
+    fullWeight: [ { required: true, message: '请获取加料后重量', trigger: 'blur' } ]
   },
   steps: [
     { title: '加料重量', description: '记录加料重量' },
-    { title: '阻燃粉重量', description: '输入阻燃粉重量' },
     { title: '确认提交', description: '确认加料数据' }
   ]
 }

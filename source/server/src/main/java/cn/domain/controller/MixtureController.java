@@ -104,10 +104,10 @@ public class MixtureController {
     }
 
     /**
-     * 执行领料操作
+     * 获取可领料列表
      */
     @GetMapping("/picking")
-    public List<Mixture> getTankForPicking() {
+    public List<MixtureVo> getTankForPicking() {
         return mixtureService.getTankForPicking();
     }
 
@@ -164,10 +164,21 @@ public class MixtureController {
 
     /**
      * 罐底阈值
-     * @return
      */
     @GetMapping("/bottomThreshold")
     public Double bottomThreshold() {
         return appConfig.getBottomThreshold();
+    }
+
+    /**
+     * 领料配置（合并接口）
+     */
+    @GetMapping("/pickingConfig")
+    public java.util.Map<String, Object> pickingConfig() {
+        java.util.Map<String, Object> config = new java.util.HashMap<>();
+        config.put("bottomThreshold", appConfig.getPickingBottomThreshold());
+        config.put("flameRetardantRatioMin", appConfig.getFlameRetardantRatioMin());
+        config.put("flameRetardantRatioMax", appConfig.getFlameRetardantRatioMax());
+        return config;
     }
 }

@@ -31,13 +31,16 @@ public class Mixture {
     /**
      * -1. 撤销
      * 0. 申请加料
-     * 1. 加料完成/已领料
+     * 1. 已加料
      * 2. 已退料
-     * 3. 备料
+     * 3. 申请备料
      * 4. 已备料
+     * 5. 已领料
      */
     private Integer status;                    // 状态
     private String remark;                     // 备注信息
+    private Double pickingBottomWeight;        // 领料时底罐重量（kg），阻燃粉称重前
+    private Double pickingTotalWeight;         // 领料时总重量（kg），添加阻燃粉后
     private String createTime;                 // 创建时间
     private String updateTime;                 // 更新时间
 } 

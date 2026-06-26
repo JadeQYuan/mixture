@@ -89,3 +89,8 @@ export function getFeedThreshold() {
 export function getBottomThreshold() {
   return http.get('/api/mixture/bottomThreshold')
 } 
+
+// 获取领料配置（合并接口：bottomThreshold, flameRetardantRatioMin, flameRetardantRatioMax）
+export function getPickingConfig() {
+  return http.get('/api/mixture/pickingConfig')
+}

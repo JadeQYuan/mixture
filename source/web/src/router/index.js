@@ -51,6 +51,12 @@ const routes = [
         meta: { roles: ['SeniorOperator', 'Operator'], title: '用料申请' }
       },
       {
+        path: 'picking',
+        name: 'Picking',
+        component: Picking,
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '领料' }
+      },
+      {
         path: 'return',
         name: 'Return',
         component: Return,
@@ -61,12 +67,6 @@ const routes = [
         name: 'Prepare',
         component: Prepare,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '备料申请' }
-      },
-      {
-        path: 'picking',
-        name: 'Picking',
-        component: Picking,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料领用' }
       },
       {
         path: 'feed',

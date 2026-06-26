@@ -223,7 +223,7 @@ const feedDialog = reactive({
   loading: false,
   threshold: 5,
   form: { id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '', planWeight: null, bottomWeight: null, fullWeight: null, 
-      flameRetardantWeight: 0, actualWeight: null }
+      actualWeight: null }
 })
 
 const bottomTankButtons = [
@@ -277,7 +277,7 @@ const footerButtons = [
     type: 'primary',
     validate: true,
     action: () => handleNextStep(false),
-    visible: (step) => step < 2
+    visible: (step) => step < 1
   },
   {
     key: 'feed',
@@ -286,7 +286,7 @@ const footerButtons = [
     validate: true,
     loading: () => feedDialog.loading,
     action: ( row ) => handleFeedSubmit(row),
-    visible: (step) => step === 2
+    visible: (step) => step === 1
   }
 ]
 
@@ -376,7 +376,6 @@ async function openFeedDialog(row) {
   feedDialog.form.bottomWeight = row.bottomWeight // 使用已有的底罐重量
   currentTankId.value = row.tankNo // 设置当前罐号
   feedDialog.form.fullWeight = null
-  feedDialog.form.flameRetardantWeight = 0
   // 启动定时器，获取满罐重量
   startWeightTimer(val => {
     feedDialog.form.fullWeight = val
@@ -396,15 +395,8 @@ function handleNextStep(confirmed) {
     } else if (Math.abs((feedDialog.form.planWeight - feedDialog.form.actualWeight).toFixed(2)) > feedDialog.threshold && !confirmed) {
       feedConfirmDialog.visible = true
     } else {
-      // 满罐重量确定，进入第二步
+      // 满罐重量确定，进入确认步骤
       stopWeightTimer()
-      feedDialog.step = step
-    }
-  } else if (step === 2) {
-    if (feedDialog.form.flameRetardantWeight === null || feedDialog.form.flameRetardantWeight === undefined || feedDialog.form.flameRetardantWeight < 0) {
-      ElMessage.warning('请输入阻燃粉重量');
-    } else {
-      // 阻燃粉重量确定，进入第三步
       feedDialog.step = step
     }
   }

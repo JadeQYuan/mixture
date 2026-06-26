@@ -19,6 +19,17 @@ export const MATERIAL_MAP = {
   '35KV': '35KV'
 }
 
+// 加料状态映射表
+export const STATUS_MAP = {
+  '-1': '撤销',
+  '0': '申请加料',
+  '1': '已加料',
+  '2': '已退料',
+  '3': '备料',
+  '4': '已备料',
+  '5': '已领料'
+}
+
 // 通用：由 MAP 生成 options
 export function getOptions(map) {
   return Object.entries(map).map(([value, label]) => ({ label, value }))

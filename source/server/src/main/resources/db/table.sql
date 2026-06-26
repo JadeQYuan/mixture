@@ -55,6 +55,8 @@ CREATE TABLE mixture_info (
 
 ALTER TABLE mixture_info ADD COLUMN picking_time text after feeding_user_id;
 ALTER TABLE mixture_info ADD COLUMN picking_user_id INTEGER after picking_time;
+ALTER TABLE mixture_info ADD COLUMN picking_bottom_weight real;
+ALTER TABLE mixture_info ADD COLUMN picking_total_weight real;
 
 -- 校验信息表
 CREATE TABLE check_info (

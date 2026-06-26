@@ -19,6 +19,7 @@ public interface MixtureMapper {
             "SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType, f.status, " +
                     "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
                     "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
+                    "f.picking_bottom_weight as pickingBottomWeight, f.picking_total_weight as pickingTotalWeight, " +
                     "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
                     "f.apply_time as applyTime, f.picking_time as pickingTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
             "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
@@ -74,9 +75,9 @@ public interface MixtureMapper {
      * @return 影响行数
      */
     @Insert("INSERT INTO mixture_info (tank_id, tank_no, apply_user_id, picking_user_id, shift_type, material_name, product_spec, plan_weight, " +
-            "apply_time, picking_time, status, create_time, update_time) " +
+            "apply_time, status, create_time, update_time) " +
             "VALUES (#{tankId}, #{tankNo}, #{applyUserId}, #{pickingUserId}, #{shiftType}, #{materialName}, #{productSpec}, #{planWeight}, " +
-            "datetime('now', 'localtime'), datetime('now', 'localtime'), 0, datetime('now', 'localtime'), datetime('now', 'localtime'))")
+            "datetime('now', 'localtime'), 0, datetime('now', 'localtime'), datetime('now', 'localtime'))")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int apply(Mixture mixture);
 
@@ -95,6 +96,7 @@ public interface MixtureMapper {
     @Select("SELECT f.id, f.tank_id as tankId, f.tank_no as tankNo, f.shift_type as shiftType, f.status, " +
             "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
             "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
+            "f.picking_bottom_weight as pickingBottomWeight, f.picking_total_weight as pickingTotalWeight, " +
             "f.return_weight as returnWeight, " +
             "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark " +
             "FROM mixture_info f " +
@@ -117,7 +119,6 @@ public interface MixtureMapper {
     void bottom(MixtureBottomVo bottomVo);
 
     @Update("UPDATE mixture_info SET full_weight = #{fullWeight}, " +
-            "flame_retardant_weight = #{flameRetardantWeight}, " +
             "feeding_time = datetime('now', 'localtime'), feeding_user_id = #{feedingUserId}, " +
             "status = #{status} WHERE id = #{id}")
     void executeFeed(Mixture mixture);
@@ -127,12 +128,15 @@ public interface MixtureMapper {
             "m.material_name as materialName, m.product_spec as productSpec, m.plan_weight as planWeight, " +
             "m.bottom_weight as bottomWeight, m.full_weight as fullWeight, m.flame_retardant_weight as flameRetardantWeight " +
             "FROM mixture_info m " +
-            "WHERE m.status = 4 " +
+            "WHERE m.status = 4 or (m.status = 1 and m.apply_user_id = #{userId}) " +
             "</script>")
-    List<Mixture> getTankForPicking();
+    List<MixtureVo> getTankForPicking(Integer userId);
 
     @Update("UPDATE mixture_info SET picking_user_id = #{pickingUserId}, " +
-            "picking_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 1 " +
+            "flame_retardant_weight = #{flameRetardantWeight}, " +
+            "picking_bottom_weight = #{pickingBottomWeight}, " +
+            "picking_total_weight = #{pickingTotalWeight}, " +
+            "picking_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 5 " +
             "WHERE id = #{id}")
     void executePicking(Mixture mixture);
 

@@ -89,14 +89,13 @@ function handlerParams(params) {
 // 备注弹窗相关
 const remarkDialog = reactive({
   visible: false,
-  form: { id: null, remark: '', materialName: '', productSpec: '', flameRetardantWeight: '' }
+  form: { id: null, remark: '', materialName: '', productSpec: '' }
 })
 
 function openRemarkDialog(row) {
   remarkDialog.form.id = row.id
   remarkDialog.form.materialName = row.materialName
   remarkDialog.form.productSpec = row.productSpec
-  remarkDialog.form.flameRetardantWeight = row.flameRetardantWeight
   remarkDialog.form.remark = row.remark || ''
   remarkDialog.visible = true
 }

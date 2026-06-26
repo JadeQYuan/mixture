@@ -124,12 +124,6 @@ export const columns = [
     render: (row) => `${row.fullWeight} kg`
   },
   {
-    prop: 'flameRetardantWeight',
-    label: '阻燃粉重量',
-    width: '120',
-    render: (row) => `${row.flameRetardantWeight} kg`
-  },
-  {
     prop: 'feedingTime',
     label: '加料时间',
     width: '200'
@@ -139,6 +133,18 @@ export const columns = [
     label: '加料人员',
     width: '160',
     render: (row) => `${row.feedingUserName}(${row.feedingUserAccount})`
+  },
+  {
+    prop: 'flameRetardantWeight',
+    label: '阻燃粉重量',
+    width: '120',
+    render: (row) => row.flameRetardantWeight ? `${row.flameRetardantWeight} kg` : ''
+  },
+  {
+    prop: 'pickingTime',
+    label: '领料时间',
+    width: '200',
+    render: (row) => row.pickingTime ? `${row.pickingTime}` : ''
   },
   {
     prop: 'returnTime',
@@ -186,15 +192,6 @@ export const remarkDialogConfig = {
       prop: 'productSpec',
       label: '产品型号',
       type: 'input',
-    },
-    { 
-      prop: 'flameRetardantWeight', 
-      label: '阻燃粉', 
-      type: 'number', 
-      required: true,
-      suffix: 'kg', 
-      inputType: 'number', 
-      props: { min: 0, step: 0.1 } 
     },
     {
       prop: 'remark',

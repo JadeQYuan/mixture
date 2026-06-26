@@ -53,7 +53,7 @@ public class MixtureService {
     }
 
     public PageVo<MixtureVo> getMixesRecordList(MixtureQo mixtureQo) {
-        mixtureQo.setStatus(Arrays.asList(1, 2, 4));
+        mixtureQo.setStatus(Arrays.asList(1, 2, 4, 5));
         PageHelper.startPage(mixtureQo.getPageNo(), mixtureQo.getPageSize()).setOrderBy(" f.apply_time DESC ");
         Page<MixtureVo> mixesList = (Page<MixtureVo>) mixtureMapper.selectByCondition(mixtureQo);
         return new PageVo<>(mixesList);
@@ -123,16 +123,22 @@ public class MixtureService {
         serialService.stopReading();
     }
 
-    public List<Mixture> getTankForPicking() {
-        return mixtureMapper.getTankForPicking();
+    public List<MixtureVo> getTankForPicking() {
+        Integer userId = TokenUtil.getToken();
+        return mixtureMapper.getTankForPicking(userId);
     }
 
     @Transactional
     public void picking(Mixture mixture) {
         Integer userId = TokenUtil.getToken();
         mixture.setPickingUserId(userId);
+        // 如果未设置阻燃粉重量，默认为0
+        if (mixture.getFlameRetardantWeight() == null) {
+            mixture.setFlameRetardantWeight(0.0);
+        }
         mixtureMapper.executePicking(mixture);
         tankService.updateUser(mixture.getTankId(), userId);
+        serialService.stopReading();
     }
 
     public List<Mixture> getTankForReturn() {
