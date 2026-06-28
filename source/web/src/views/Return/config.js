@@ -7,7 +7,7 @@ export const displayFields = [
 ]
 
 export const returnDialogConfig = {
-  fileds: [
+  fields: [
     {
       prop: 'tankNo',
       label: '料罐',

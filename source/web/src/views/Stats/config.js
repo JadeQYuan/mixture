@@ -92,26 +92,15 @@ export const columns = [
     exportRender: (row) => `${row.planWeight}`
   },
   {
-    prop: 'applyUserAccount',
-    label: '申请人员',
-    width: '160',
-    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
-  },
-  {
     prop: 'applyTime',
     label: '申请时间',
     width: '200'
   },
   {
-    prop: 'pickingUserAccount',
-    label: '用料人员',
+    prop: 'applyUserAccount',
+    label: '申请人员',
     width: '160',
-    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
-  },
-  {
-    prop: 'pickingTime',
-    label: '用料时间',
-    width: '200'
+    render: (row) => `${row.applyUserName}(${row.applyUserAccount})`
   },
   {
     prop: 'bottomWeight',
@@ -147,6 +136,17 @@ export const columns = [
     label: '加料人员',
     width: '160',
     render: (row) => `${row.feedingUserName}(${row.feedingUserAccount})`
+  },
+  {
+    prop: 'pickingTime',
+    label: '用料时间',
+    width: '200'
+  },
+  {
+    prop: 'pickingUserAccount',
+    label: '用料人员',
+    width: '160',
+    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
   },
   {
     prop: 'returnTime',

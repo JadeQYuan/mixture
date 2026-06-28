@@ -357,13 +357,12 @@ function handleNextStep(confirmed) {
     }
     // 校验：阻燃粉比例不在区间范围内，提示确认
     const flameWeight = parseFloat(pickingDialog.form.flameRetardantWeight)
-    const fullWeight = parseFloat(pickingDialog.form.fullWeight)
     const bottomWeight = parseFloat(pickingDialog.form.pickingBottomWeight)
-    const actualWeight = fullWeight - bottomWeight
-    if (flameWeight > 0 && actualWeight > 0) {
-      const ratio = actualWeight / flameWeight
+    if (flameWeight > 0 && bottomWeight > 0) {
+      const ratio = bottomWeight / flameWeight
+      console.log(ratio, pickingDialog.ratioMin, pickingDialog.ratioMax)
       if ((ratio < pickingDialog.ratioMin || ratio > pickingDialog.ratioMax) && !confirmed) {
-        ratioConfirmDialog.message = `阻燃粉重量不合格，建议添加重量：${suggestWeight} kg，确认继续？`
+        ratioConfirmDialog.message = `阻燃粉重量不合格，建议添加重量：${pickingDialog.form.suggestWeight} kg，确认继续？`
         ratioConfirmDialog.visible = true
         return
       }

@@ -55,7 +55,7 @@ export const searchFields = [
     type: 'datetimerange',
     placeholder: '请选择时间范围',
     defaultValue: () => [ dayjs().subtract(7, 'day').startOf('day').format("YYYY-MM-DD HH:mm:ss"), dayjs().endOf('day').format("YYYY-MM-DD HH:mm:ss") ],
-    disabledDate: (date) => (date < dayjs(selectDate.value).subtract(1, 'month')) || (date > dayjs(selectDate.value).add(1, 'month')),
+    disabledDate: (date) => selectDate.value ? ((date < dayjs(selectDate.value).subtract(1, 'month')) || (date > dayjs(selectDate.value).add(1, 'month'))) : false,
     calendarChange: (date) => selectDate.value = date[0]
   },
 ]
@@ -90,38 +90,27 @@ export const columns = [
     render: (row) => row.planWeight ? `${row.planWeight} kg`: ''
   },
   {
+    prop: 'applyTime',
+    label: '申请时间',
+    width: '200'
+  },
+  {
     prop: 'applyUserAccount',
     label: '申请人员',
     width: '160',
     render: (row) => row.applyUserAccount ? `${row.applyUserName}(${row.applyUserAccount})` : ''
   },
   {
-    prop: 'applyTime',
-    label: '申请时间',
-    width: '200'
-  },
-  {
-    prop: 'pickingUserAccount',
-    label: '用料人员',
-    width: '160',
-    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
-  },
-  {
-    prop: 'pickingTime',
-    label: '用料时间',
-    width: '200'
-  },
-  {
     prop: 'bottomWeight',
     label: '罐底重量',
     width: '120',
-    render: (row) => `${row.bottomWeight} kg`
+    render: (row) => row.bottomWeight != null ? `${row.bottomWeight} kg` : ''
   },
   {
     prop: 'fullWeight',
     label: '满罐重量',
     width: '120',
-    render: (row) => `${row.fullWeight} kg`
+    render: (row) => row.fullWeight != null ? `${row.fullWeight} kg` : ''
   },
   {
     prop: 'feedingTime',
@@ -132,7 +121,7 @@ export const columns = [
     prop: 'feedingUserAccount',
     label: '加料人员',
     width: '160',
-    render: (row) => `${row.feedingUserName}(${row.feedingUserAccount})`
+    render: (row) => row.feedingUserAccount ? `${row.feedingUserName}(${row.feedingUserAccount})` : ''
   },
   {
     prop: 'flameRetardantWeight',
@@ -142,9 +131,15 @@ export const columns = [
   },
   {
     prop: 'pickingTime',
-    label: '领料时间',
+    label: '用料时间',
     width: '200',
     render: (row) => row.pickingTime ? `${row.pickingTime}` : ''
+  },
+  {
+    prop: 'pickingUserAccount',
+    label: '用料人员',
+    width: '160',
+    render: (row) => row.pickingUserAccount ? `${row.pickingUserName}(${row.pickingUserAccount})` : ''
   },
   {
     prop: 'returnTime',

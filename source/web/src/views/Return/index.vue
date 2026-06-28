@@ -17,7 +17,7 @@
     >
       <Form
         ref="returnForm"
-        :fields="returnDialogConfig.fileds"
+        :fields="returnDialogConfig.fields"
         :rules="returnDialogConfig.rules"
         :form-data="returnDialog.form"
         :extends="returnDialog.step"
@@ -88,7 +88,7 @@ const actionButtons = [
     text: '退料',
     type: 'warning',
     size: 'large',
-    disabled: (row) => row.status !== 1,
+    disabled: (row) => row.status !== 5,
     action: ( row ) => openReturnDialog(row)
   },
   {

@@ -144,7 +144,7 @@ public interface MixtureMapper {
             "SELECT m.id, m.tank_id as tankId, m.apply_time as applyTime, m.status, t.tank_no as tankNo, t.remark " +
             "FROM mixture_info m " +
             "LEFT JOIN tank_info t ON m.tank_id = t.id " +
-            "WHERE m.status in (0, 1, 3, 4) " +
+            "WHERE m.status in (0,  3, 5) " +
             "AND t.user_id = #{userId} " +
             "</script>")
     List<Mixture> getTankForReturn(Integer userId);
