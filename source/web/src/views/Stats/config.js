@@ -123,8 +123,15 @@ export const columns = [
     label: '阻燃粉重量',
     exportLabel: '阻燃粉重量(kg)',
     width: '120',
-    render: (row) => `${row.flameRetardantWeight} kg`,
-    exportRender: (row) => `${row.flameRetardantWeight}`
+    renderHtml: true,
+    render: (row) => {
+      if (!row.flameRetardantWeight) return ''
+      const text = `${row.flameRetardantWeight} kg`
+      return row.flameRetardantAbnormal
+        ? `<span style="color: #F56C6C; font-weight: bold;">${text}</span>`
+        : text
+    },
+    exportRender: (row) => row.flameRetardantAbnormal ? `${row.flameRetardantWeight}(异常)` : `${row.flameRetardantWeight}`
   },
   {
     prop: 'feedingTime',

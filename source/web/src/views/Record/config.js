@@ -127,7 +127,14 @@ export const columns = [
     prop: 'flameRetardantWeight',
     label: '阻燃粉重量',
     width: '120',
-    render: (row) => row.flameRetardantWeight ? `${row.flameRetardantWeight} kg` : ''
+    renderHtml: true,
+    render: (row) => {
+      if (!row.flameRetardantWeight) return ''
+      const text = `${row.flameRetardantWeight} kg`
+      return row.flameRetardantAbnormal
+        ? `<span style="color: #F56C6C; font-weight: bold;">${text}</span>`
+        : text
+    }
   },
   {
     prop: 'pickingTime',

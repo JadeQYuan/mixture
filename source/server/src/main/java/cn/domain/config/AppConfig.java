@@ -16,6 +16,9 @@ public class AppConfig {
     /** 领料底罐称重阈值（满罐与底罐重量差超出此值需确认） */
     private Double pickingBottomThreshold = 5.0;
 
+    /** 阻燃粉比例（分母），实际加料重量/阻燃粉重量 的期望比值，默认30 */
+    private Double flameRetardantRatio = 30.0;
+
     /** 阻燃粉比例区间下限（分母），实际加料重量/阻燃粉重量 >= 此值 */
     private Double flameRetardantRatioMin = 25.0;
 

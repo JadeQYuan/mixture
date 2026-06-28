@@ -41,6 +41,7 @@ public class Mixture {
     private String remark;                     // 备注信息
     private Double pickingBottomWeight;        // 领料时底罐重量（kg），阻燃粉称重前
     private Double pickingTotalWeight;         // 领料时总重量（kg），添加阻燃粉后
+    private Boolean flameRetardantAbnormal;    // 阻燃粉是否异常（0-正常，1-异常）
     private String createTime;                 // 创建时间
     private String updateTime;                 // 更新时间
 } 

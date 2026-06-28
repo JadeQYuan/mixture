@@ -160,6 +160,10 @@ public class MixtureService {
         if (mixture.getFlameRetardantWeight() == null) {
             mixture.setFlameRetardantWeight(0.0);
         }
+        // 阻燃粉异常标识由前端判断传入
+        if (mixture.getFlameRetardantAbnormal() == null) {
+            mixture.setFlameRetardantAbnormal(false);
+        }
         mixtureMapper.executePicking(mixture);
         tankService.updateUser(mixture.getTankId(), userId);
         serialService.stopReading();

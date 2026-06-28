@@ -28,6 +28,7 @@ public class MixtureVo {
     private Double flameRetardantWeight;
     private Double pickingBottomWeight;
     private Double pickingTotalWeight;
+    private Boolean flameRetardantAbnormal;
     private String feedingTime;
     private Integer feedingUserId;
     private String feedingUserName;

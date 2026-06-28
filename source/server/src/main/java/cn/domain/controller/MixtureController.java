@@ -177,6 +177,7 @@ public class MixtureController {
     public java.util.Map<String, Object> pickingConfig() {
         java.util.Map<String, Object> config = new java.util.HashMap<>();
         config.put("bottomThreshold", appConfig.getPickingBottomThreshold());
+        config.put("flameRetardantRatio", appConfig.getFlameRetardantRatio());
         config.put("flameRetardantRatioMin", appConfig.getFlameRetardantRatioMin());
         config.put("flameRetardantRatioMax", appConfig.getFlameRetardantRatioMax());
         return config;

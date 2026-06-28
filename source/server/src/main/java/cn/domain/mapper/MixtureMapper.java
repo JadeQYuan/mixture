@@ -20,6 +20,7 @@ public interface MixtureMapper {
                     "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
                     "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
                     "f.picking_bottom_weight as pickingBottomWeight, f.picking_total_weight as pickingTotalWeight, " +
+                    "f.flame_retardant_abnormal as flameRetardantAbnormal, " +
                     "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
                     "f.apply_time as applyTime, f.picking_time as pickingTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
             "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
@@ -136,6 +137,7 @@ public interface MixtureMapper {
             "flame_retardant_weight = #{flameRetardantWeight}, " +
             "picking_bottom_weight = #{pickingBottomWeight}, " +
             "picking_total_weight = #{pickingTotalWeight}, " +
+            "flame_retardant_abnormal = #{flameRetardantAbnormal}, " +
             "picking_time = datetime('now', 'localtime'), update_time = datetime('now', 'localtime'), status = 5 " +
             "WHERE id = #{id}")
     void executePicking(Mixture mixture);

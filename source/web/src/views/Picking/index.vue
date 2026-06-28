@@ -273,7 +273,7 @@ async function handlePicking(row) {
   if (needFlame) {
     // 需阻燃粉：先弹出提示对话框（只显示添加重量）
     const config = await getPickingConfig()
-    const ratioTarget = ((config.flameRetardantRatioMin + config.flameRetardantRatioMax) / 2).toFixed(0)
+    const ratioTarget = config.flameRetardantRatio
     const actualWeight = row.fullWeight && row.bottomWeight ? (row.fullWeight - row.bottomWeight).toFixed(2) : 0
     const suggestWeight = actualWeight > 0 ? (actualWeight / ratioTarget).toFixed(2) : 0
     flameTipDialog.message = `需添加阻燃粉 ${suggestWeight} kg`
@@ -298,7 +298,7 @@ async function openPickingStepDialogWithRow(row) {
   const needFlame = needFlameRetardant(row.productSpec)
   // 获取阈值和比例配置
   const config = await getPickingConfig()
-  const ratioTarget = ((config.flameRetardantRatioMin + config.flameRetardantRatioMax) / 2).toFixed(0)
+  const ratioTarget = config.flameRetardantRatio
   const actualWeight = row.fullWeight && row.bottomWeight ? (row.fullWeight - row.bottomWeight).toFixed(2) : 0
   const suggestWeight = actualWeight > 0 ? (actualWeight / ratioTarget).toFixed(2) : 0
   pickingDialog.visible = true
@@ -316,7 +316,8 @@ async function openPickingStepDialogWithRow(row) {
     pickingBottomWeight: null,
     pickingTotalWeight: null,
     flameRetardantWeight: 0,
-    suggestWeight: suggestWeight  
+    suggestWeight: suggestWeight,
+    flameRetardantAbnormal: false
   }
   currentTankId.value = row.tankNo
   pickingDialog.bottomThreshold = config.bottomThreshold
@@ -360,11 +361,15 @@ function handleNextStep(confirmed) {
     const bottomWeight = parseFloat(pickingDialog.form.pickingBottomWeight)
     if (flameWeight > 0 && bottomWeight > 0) {
       const ratio = bottomWeight / flameWeight
-      console.log(ratio, pickingDialog.ratioMin, pickingDialog.ratioMax)
-      if ((ratio < pickingDialog.ratioMin || ratio > pickingDialog.ratioMax) && !confirmed) {
-        ratioConfirmDialog.message = `阻燃粉重量不合格，建议添加重量：${pickingDialog.form.suggestWeight} kg，确认继续？`
-        ratioConfirmDialog.visible = true
-        return
+      if (ratio < pickingDialog.ratioMin || ratio > pickingDialog.ratioMax) {
+        pickingDialog.form.flameRetardantAbnormal = true
+        if (!confirmed) {
+          ratioConfirmDialog.message = `阻燃粉重量不合格，建议添加重量：${pickingDialog.form.suggestWeight} kg，确认继续？`
+          ratioConfirmDialog.visible = true
+          return
+        }
+      } else {
+        pickingDialog.form.flameRetardantAbnormal = false
       }
     }
     stopWeightTimer()
@@ -438,7 +443,8 @@ async function confirmNoFlamePicking() {
       needFlameRetardant: false,
       pickingBottomWeight: null,
       pickingTotalWeight: null,
-      flameRetardantWeight: 0
+      flameRetardantWeight: 0,
+      flameRetardantAbnormal: false
     })
     ElMessage.success('领料成功！')
     await card.value.search()
