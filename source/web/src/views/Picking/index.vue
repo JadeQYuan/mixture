@@ -134,6 +134,15 @@ const actionButtons = [
     text: '领料',
     type: 'success',
     size: 'large',
+    visible: (row) => row.status === 1,
+    action: (row) => handlePicking(row)
+  },
+  {
+    key: 'preparePicking',
+    text: '备料领料',
+    type: 'warning',
+    size: 'large',
+    visible: (row) => row.status === 4,
     action: (row) => handlePicking(row)
   }
 ]
@@ -145,7 +154,7 @@ function needFlameRetardant(productSpec) {
 
 // 卡片header渲染
 function headerRender(item) {
-  return `料罐：${item.tankNo}`
+  return item.status === 1 ? `料罐：${item.tankNo}` : item.status === 4 ? `备料料罐：${item.tankNo}` : ''
 }
 
 // 根据状态返回卡片样式

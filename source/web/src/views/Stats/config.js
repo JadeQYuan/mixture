@@ -125,7 +125,7 @@ export const columns = [
     width: '120',
     renderHtml: true,
     render: (row) => {
-      if (!row.flameRetardantWeight) return ''
+      if (row.flameRetardantWeight == null) return ''
       const text = `${row.flameRetardantWeight} kg`
       return row.flameRetardantAbnormal
         ? `<span style="color: #F56C6C; font-weight: bold;">${text}</span>`

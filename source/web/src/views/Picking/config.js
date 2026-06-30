@@ -19,7 +19,7 @@ export const displayFields = [
   {
     prop: 'planWeight',
     label: '计划重量',
-    render: (row) => row.planWeight ? `${row.planWeight} kg` : ''
+    render: (row) => row.planWeight != null ? `${row.planWeight} kg` : ''
   },
   {
     prop: 'actualWeight',
