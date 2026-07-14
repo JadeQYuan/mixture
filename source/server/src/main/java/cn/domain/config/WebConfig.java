@@ -25,6 +25,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
         excludedUris.add("/api/login/account");
         excludedUris.add("/api/login/face");
         excludedUris.add("/api/mixture/todo");
+        excludedUris.add("/api/mixture/weight/fake");
         registrationBean.addInitParameter("excludedUris", StringUtils.join(excludedUris, ",")); // 需要排除的uri
         return registrationBean;
     }

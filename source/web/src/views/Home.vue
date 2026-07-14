@@ -11,7 +11,7 @@
           <el-space size="large">
             <el-icon v-if="item.overdue" class="todo-warning-icon"><WarningFilled /></el-icon>
             <el-text class="todo-info">{{ item.applyUserName }}({{item.applyUserAccount}}) </el-text>
-            <el-text class="todo-info">{{ item.status == 0 ? '申请加料' : '申请备料' }} </el-text>
+            <el-text class="todo-info">{{ item.status == 0 ? '申请加料' : item.status == 6 ? '加阻燃粉' : '申请备料' }} </el-text>
             <el-text class="todo-info">{{ item.materialName }} </el-text>
             <el-text type="primary" class="todo-info">{{ item.planWeight }} kg</el-text>
           </el-space>

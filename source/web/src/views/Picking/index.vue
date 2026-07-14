@@ -24,10 +24,10 @@
       @cancel="() => flameTipDialog.visible = false"
     />
 
-    <!-- 领料操作步骤对话框 -->
+    <!-- 领料/添加阻燃粉 操作步骤对话框 -->
     <Dialog
       :visible="pickingDialog.visible"
-      :title="pickingDialogConfig.title"
+      :title="pickingDialog.status === 6 ? '添加阻燃粉' : '领料'"
       :width="pickingDialogConfig.width"
       @update:visible="closePickingDialog"
     >
@@ -41,22 +41,22 @@
         style="padding-right: 30px;"
       >
         <template #form-top>
-          <el-steps 
-            v-if="pickingDialogConfig.steps && pickingDialogConfig.steps.length > 0" 
-            :active="pickingDialog.step" 
-            finish-status="success" 
-            align-center 
+          <el-steps
+            v-if="pickingDialogConfig.steps && pickingDialogConfig.steps.length > 0"
+            :active="pickingDialog.step"
+            finish-status="success"
+            align-center
             style="margin-bottom: 24px; margin-top: 32px;"
           >
-            <el-step 
-              v-for="step in pickingDialogConfig.steps" 
-              :key="step.title" 
-              :title="step.title" 
+            <el-step
+              v-for="step in pickingDialogConfig.steps"
+              :key="step.title"
+              :title="step.title"
               :description="step.description"
             />
           </el-steps>
           <el-divider content-position="center" style="font-size: 136px;">
-            <span style="font-size: 21px;font-weight: bold;color: #FF8C00;">需添加阻燃粉 {{pickingDialog.form.suggestWeight}} kg</span> 
+            <span style="font-size: 21px;font-weight: bold;color: #FF8C00;">需添加阻燃粉 {{pickingDialog.form.suggestWeight}} kg</span>
           </el-divider>
         </template>
       </Form>
@@ -98,7 +98,7 @@
       icon="InfoFilled"
       icon-type="info"
       confirm-text="确认领料"
-      confirm-type="success"
+      :confirm-type="noFlameConfirmDialog.pendingRow.status === 1 ? 'primary' : 'success'"
       @update:visible="val => noFlameConfirmDialog.visible = val"
       @confirm="confirmNoFlamePicking"
       @cancel="() => noFlameConfirmDialog.visible = false"
@@ -109,7 +109,8 @@
 <script setup>
 import { ref, reactive, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getPickingTankList, submitPicking, getTankWeightData, getPickingConfig } from '@/api/mixture'
+import { getPickingTankList, submitPicking, getTankWeightData, getPickingConfig, submitFlameRetardant  } from '@/api/mixture'
+import { COLOR_MAP } from '@/utils/constant'
 import CardGrid from '@/components/CardGrid'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -132,15 +133,23 @@ const actionButtons = [
   {
     key: 'picking',
     text: '领料',
-    type: 'success',
+    color: COLOR_MAP.BTN_BLUE2,
     size: 'large',
     visible: (row) => row.status === 1,
     action: (row) => handlePicking(row)
   },
   {
+    key: 'addFlameRetardant',
+    text: '添加阻燃粉',
+    color: COLOR_MAP.BTN_YELLOW,
+    size: 'large',
+    visible: (row) => row.status === 6,
+    action: (row) => handlePicking(row)
+  },
+  {
     key: 'preparePicking',
     text: '备料领料',
-    type: 'warning',
+    color: COLOR_MAP.BTN_GREEN2,
     size: 'large',
     visible: (row) => row.status === 4,
     action: (row) => handlePicking(row)
@@ -154,7 +163,10 @@ function needFlameRetardant(productSpec) {
 
 // 卡片header渲染
 function headerRender(item) {
-  return item.status === 1 ? `料罐：${item.tankNo}` : item.status === 4 ? `备料料罐：${item.tankNo}` : ''
+  if (item.status === 1) return `料罐：${item.tankNo}`
+  if (item.status === 4) return `备料料罐：${item.tankNo}`
+  if (item.status === 6) return `备料料罐：${item.tankNo}`
+  return ''
 }
 
 // 根据状态返回卡片样式
@@ -162,14 +174,14 @@ function getCardStyle(item) {
   const needFlame = needFlameRetardant(item.productSpec)
   if (item.status === 1) {
     return needFlame
-      ? { backgroundColor: 'rgb(201, 231, 255)', borderLeft: '4px solid #FF8C00' }
-      : { backgroundColor: 'rgb(217, 236, 255)' }
-  } else if (item.status === 4) {
+      ? { backgroundColor: COLOR_MAP.BG_BLUE, border: `3px solid ${COLOR_MAP.BTN_YELLOW}` }
+      : { backgroundColor: COLOR_MAP.BG_BLUE }
+  } else if (item.status === 4 || item.status === 6) {
     return needFlame
-      ? { backgroundColor: 'rgb(209, 237, 204)', borderLeft: '4px solid #FF8C00' }
-      : { backgroundColor: 'rgb(225, 243, 216)' }
+      ? { backgroundColor: COLOR_MAP.BG_GREEN, border: `3px solid ${COLOR_MAP.BTN_YELLOW}` }
+      : { backgroundColor: COLOR_MAP.BG_GREEN }
   }
-  return {}
+  return {} 
 }
 
 // 定时器相关
@@ -215,7 +227,7 @@ const flameTipDialog = reactive({
 const noFlameConfirmDialog = reactive({
   visible: false,
   message: '',
-  pendingRow: null
+  pendingRow: {}
 })
 
 // 底罐重量确认对话框
@@ -234,12 +246,13 @@ const pickingDialog = reactive({
   visible: false,
   step: 0,
   loading: false,
+  status: 1, // 1: 领料, 6: 添加阻燃粉
   bottomThreshold: 5,
   ratioMin: 25,
   ratioMax: 35,
   form: {
     id: null, tankId: null, tankNo: '', shiftType: '', materialName: '', productSpec: '',
-    planWeight: null, fullWeight: null, needFlameRetardant: false,
+    planWeight: null, bottomWeight: null, fullWeight: null, needFlameRetardant: false,
     pickingBottomWeight: null, pickingTotalWeight: null, flameRetardantWeight: 0
   }
 })
@@ -271,7 +284,7 @@ const footerButtons = [
     type: 'success',
     validate: true,
     loading: () => pickingDialog.loading,
-    action: () => handlePickingSubmit(),
+    action: () => handleSubmit(),
     visible: (step) => step === 2
   }
 ]
@@ -279,7 +292,7 @@ const footerButtons = [
 // 点击领料按钮
 async function handlePicking(row) {
   const needFlame = needFlameRetardant(row.productSpec)
-  if (needFlame) {
+  if (needFlame && row.status !== 4) {
     // 需阻燃粉：先弹出提示对话框（只显示添加重量）
     const config = await getPickingConfig()
     const ratioTarget = config.flameRetardantRatio
@@ -290,7 +303,7 @@ async function handlePicking(row) {
     flameTipDialog.visible = true
   } else {
     // 不需阻燃粉：弹确认框直接提交
-    noFlameConfirmDialog.message = `确认领取料罐 ${row.tankNo}（${row.materialName} ${row.productSpec}）？`
+    noFlameConfirmDialog.message = `确认领取料罐 ${row.tankNo}？`
     noFlameConfirmDialog.pendingRow = row
     noFlameConfirmDialog.visible = true
   }
@@ -311,6 +324,7 @@ async function openPickingStepDialogWithRow(row) {
   const actualWeight = row.fullWeight && row.bottomWeight ? (row.fullWeight - row.bottomWeight).toFixed(2) : 0
   const suggestWeight = actualWeight > 0 ? (actualWeight / ratioTarget).toFixed(2) : 0
   pickingDialog.visible = true
+  pickingDialog.status = row.status
   pickingDialog.step = 0
   pickingDialog.form = {
     id: row.id,
@@ -320,6 +334,7 @@ async function openPickingStepDialogWithRow(row) {
     materialName: row.materialName,
     productSpec: row.productSpec,
     planWeight: row.planWeight,
+    bottomWeight: row.bottomWeight,
     fullWeight: row.fullWeight ? row.fullWeight.toFixed(2) : null,
     needFlameRetardant: needFlame,
     pickingBottomWeight: null,
@@ -367,9 +382,10 @@ function handleNextStep(confirmed) {
     }
     // 校验：阻燃粉比例不在区间范围内，提示确认
     const flameWeight = parseFloat(pickingDialog.form.flameRetardantWeight)
-    const bottomWeight = parseFloat(pickingDialog.form.pickingBottomWeight)
-    if (flameWeight > 0 && bottomWeight > 0) {
-      const ratio = bottomWeight / flameWeight
+    const actualWeight = pickingDialog.form.fullWeight && pickingDialog.form.bottomWeight ? 
+              (pickingDialog.form.fullWeight - pickingDialog.form.bottomWeight).toFixed(2) : 0
+    if (flameWeight > 0 && actualWeight > 0) {
+      const ratio = actualWeight / flameWeight
       if (ratio < pickingDialog.ratioMin || ratio > pickingDialog.ratioMax) {
         pickingDialog.form.flameRetardantAbnormal = true
         if (!confirmed) {
@@ -409,13 +425,19 @@ function closePickingDialog() {
   pickingForm.value?.resetFields?.()
 }
 
-async function handlePickingSubmit() {
+// 统一提交处理
+async function handleSubmit() {
   if (pickingDialog.loading) return
   try {
     pickingDialog.loading = true
     stopWeightTimer()
-    await submitPicking(pickingDialog.form)
-    ElMessage.success('领料成功！')
+    if (pickingDialog.status === 6) {
+      await submitFlameRetardant(pickingDialog.form)
+      ElMessage.success('阻燃粉已添加！')
+    } else {
+      await submitPicking(pickingDialog.form)
+      ElMessage.success('领料成功！')
+    }
     pickingDialog.visible = false
     await card.value.search()
   } finally {

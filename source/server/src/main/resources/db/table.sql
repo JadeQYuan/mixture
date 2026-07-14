@@ -58,6 +58,8 @@ ALTER TABLE mixture_info ADD COLUMN picking_user_id INTEGER after picking_time;
 ALTER TABLE mixture_info ADD COLUMN picking_bottom_weight real;
 ALTER TABLE mixture_info ADD COLUMN picking_total_weight real;
 ALTER TABLE mixture_info ADD COLUMN flame_retardant_abnormal INTEGER DEFAULT 0;
+ALTER TABLE mixture_info ADD COLUMN flame_retardant_user_id INTEGER;
+ALTER TABLE mixture_info ADD COLUMN flame_retardant_time text;
 
 -- 校验信息表
 CREATE TABLE check_info (

@@ -48,7 +48,7 @@ public class MixtureService {
     private AppConfig appConfig;
 
     public List<MixtureVo> getTodoList(MixtureQo mixtureQo) {
-        mixtureQo.setStatus(Arrays.asList(0, 3));
+        mixtureQo.setStatus(Arrays.asList(0, 3, 6));
         List<MixtureVo> list = mixtureMapper.selectByCondition(mixtureQo);
         int thresholdMinutes = appConfig.getPickingTimeThreshold();
         LocalDateTime now = LocalDateTime.now();
@@ -137,7 +137,8 @@ public class MixtureService {
         if (info.getStatus() == 0) {
             mixture.setStatus(1);
         } else if (info.getStatus() == 3) {
-            mixture.setStatus(4);
+            boolean needFlame = info.getProductSpec() != null && info.getProductSpec().toUpperCase().contains("V");
+            mixture.setStatus(needFlame ? 6 : 4);
             tankService.updateUser(mixture.getTankId(), null);
         } else {
             log.info("加料记录状态未匹配，id={} status={}", mixture.getId(), info.getStatus());
@@ -150,6 +151,26 @@ public class MixtureService {
     public List<MixtureVo> getTankForPicking() {
         Integer userId = TokenUtil.getToken();
         return mixtureMapper.getTankForPicking(userId);
+    }
+
+    @Transactional
+    public void addFlameRetardant(Mixture mixture) {
+        Mixture info = mixtureMapper.selectById(mixture.getId());
+        if (info.getStatus() != 6) {
+            log.warn("阻燃粉操作状态不正确，id={} status={}", mixture.getId(), info.getStatus());
+            return;
+        }
+        Integer userId = TokenUtil.getToken();
+        if (!userId.equals(info.getApplyUserId())) {
+            log.warn("非申请人尝试加阻燃粉，id={} applyUserId={} currentUserId={}", mixture.getId(), info.getApplyUserId(), userId);
+            return;
+        }
+        mixture.setFlameRetardantUserId(userId);
+        if (mixture.getFlameRetardantAbnormal() == null) {
+            mixture.setFlameRetardantAbnormal(false);
+        }
+        mixtureMapper.executeFlameRetardant(mixture);
+        serialService.stopReading();
     }
 
     @Transactional
@@ -201,6 +222,10 @@ public class MixtureService {
 
     public Double getWeightData() {
         return serialService.readWeight();
+    }
+
+    public void fakeWeight(Double weight) {
+        serialService.fakeWeight(weight);
     }
 
     public void remark(Mixture mixture) {

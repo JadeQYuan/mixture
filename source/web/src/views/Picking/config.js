@@ -30,7 +30,6 @@ export const displayFields = [
 
 // 领料操作对话框表单配置
 export const pickingDialogConfig = {
-  title: '领料',
   width: '700px',
   fields: [
     { prop: 'tankNo', label: '料罐编号', type: 'input', disabled: true, size: 'large', style: { width: '100%' } },

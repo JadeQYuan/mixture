@@ -36,6 +36,7 @@ import { ElMessage } from 'element-plus'
 import { getCheckList, processCheck } from '@/api/check'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
+import { COLOR_MAP } from '@/utils/constant'
 import Form from '@/components/Form'
 import { searchFields, columns, dialogConfig } from './config'
 
@@ -47,11 +48,11 @@ const headerButtons = [
 
 function rowStyle({row, rowIndex}) {
   if (row.status == 1) {
-    return {backgroundColor: 'rgb(250, 236, 216)'}
+    return {backgroundColor: COLOR_MAP.BG_YELLOW}
   } else if (row.status == 2) {
-    return {backgroundColor: 'rgb(225, 243, 216)'}
+    return {backgroundColor: COLOR_MAP.BG_GREEN}
   }
-  return {backgroundColor: 'rgb(248, 152, 152)'}
+  return {backgroundColor: COLOR_MAP.BG_RED}
 }
 
 const actionButtons = [

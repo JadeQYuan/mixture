@@ -22,15 +22,17 @@ public interface MixtureMapper {
                     "f.picking_bottom_weight as pickingBottomWeight, f.picking_total_weight as pickingTotalWeight, " +
                     "f.flame_retardant_abnormal as flameRetardantAbnormal, " +
                     "f.return_weight as returnWeight, f.actual_weight as actualWeight, " +
-                    "f.apply_time as applyTime, f.picking_time as pickingTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, ",
+                    "f.apply_time as applyTime, f.picking_time as pickingTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark, " +
             "u1.user_name as applyUserName, u1.account as applyUserAccount, ",
             "u2.user_name as feedingUserName, u2.account as feedingUserAccount, ",
-            "u3.user_name as pickingUserName, u3.account as pickingUserAccount ",
+            "u3.user_name as pickingUserName, u3.account as pickingUserAccount, ",
+            "u4.user_name as flameRetardantUserName, u4.account as flameRetardantUserAccount ",
             "FROM mixture_info f ",
             "LEFT JOIN tank_info t ON f.tank_id = t.id ",
             "LEFT JOIN user_info u1 ON f.apply_user_id = u1.id ",
             "LEFT JOIN user_info u2 ON f.feeding_user_id = u2.id ",
             "LEFT JOIN user_info u3 ON f.picking_user_id = u3.id ",
+            "LEFT JOIN user_info u4 ON f.flame_retardant_user_id = u4.id ",
             "<where>",
             "<if test='applyUserKey != null and applyUserKey != \"\"'>",
             "AND (u1.user_name LIKE '%' || #{applyUserKey} || '%' or u1.account LIKE '%' || #{applyUserKey} || '%')",
@@ -98,7 +100,7 @@ public interface MixtureMapper {
             "f.material_name as materialName, f.product_spec as productSpec, f.plan_weight as planWeight, " +
             "f.bottom_weight as bottomWeight, f.full_weight as fullWeight, f.flame_retardant_weight as flameRetardantWeight, " +
             "f.picking_bottom_weight as pickingBottomWeight, f.picking_total_weight as pickingTotalWeight, " +
-            "f.return_weight as returnWeight, " +
+            "f.return_weight as returnWeight, f.apply_user_id as applyUserId, " +
             "f.apply_time as applyTime, f.feeding_time as feedingTime, f.return_time as returnTime, f.remark " +
             "FROM mixture_info f " +
             "WHERE f.id = #{id}")
@@ -127,9 +129,19 @@ public interface MixtureMapper {
     @Select("<script>" +
             "SELECT m.id, m.tank_id as tankId, m.tank_no as tankNo, m.apply_time as applyTime, m.status, m.shift_type as shiftType, m.status, " +
             "m.material_name as materialName, m.product_spec as productSpec, m.plan_weight as planWeight, " +
-            "m.bottom_weight as bottomWeight, m.full_weight as fullWeight, m.flame_retardant_weight as flameRetardantWeight " +
+            "m.bottom_weight as bottomWeight, m.full_weight as fullWeight, m.flame_retardant_weight as flameRetardantWeight, " +
+            "m.picking_bottom_weight as pickingBottomWeight, m.picking_total_weight as pickingTotalWeight, " +
+            "m.flame_retardant_abnormal as flameRetardantAbnormal, " +
+            "m.apply_user_id as applyUserId, " +
+            "u1.user_name as applyUserName, u1.account as applyUserAccount, " +
+            "u2.user_name as feedingUserName, u2.account as feedingUserAccount, " +
+            "u3.user_name as pickingUserName, u3.account as pickingUserAccount " +
             "FROM mixture_info m " +
-            "WHERE m.status = 4 or (m.status = 1 and m.apply_user_id = #{userId}) " +
+            "LEFT JOIN tank_info t ON m.tank_id = t.id " +
+            "LEFT JOIN user_info u1 ON m.apply_user_id = u1.id " +
+            "LEFT JOIN user_info u2 ON m.feeding_user_id = u2.id " +
+            "LEFT JOIN user_info u3 ON m.picking_user_id = u3.id " +
+            "WHERE m.status = 4 or (m.status in (1, 6) and m.apply_user_id = #{userId}) " +
             "</script>")
     List<MixtureVo> getTankForPicking(Integer userId);
 
@@ -146,7 +158,7 @@ public interface MixtureMapper {
             "SELECT m.id, m.tank_id as tankId, m.apply_time as applyTime, m.status, t.tank_no as tankNo, t.remark " +
             "FROM mixture_info m " +
             "LEFT JOIN tank_info t ON m.tank_id = t.id " +
-            "WHERE m.status in (0,  3, 5) " +
+            "WHERE m.status in (0, 3, 5, 6) " +
             "AND t.user_id = #{userId} " +
             "</script>")
     List<Mixture> getTankForReturn(Integer userId);
@@ -170,4 +182,15 @@ public interface MixtureMapper {
             "update_time = datetime('now', 'localtime') " +
             "WHERE id = #{id}")
     void updateRemark(Mixture mixture);
+
+    @Update("UPDATE mixture_info SET " +
+            "picking_bottom_weight = #{pickingBottomWeight}, " +
+            "picking_total_weight = #{pickingTotalWeight}, " +
+            "flame_retardant_weight = #{flameRetardantWeight}, " +
+            "flame_retardant_abnormal = #{flameRetardantAbnormal}, " +
+            "flame_retardant_user_id = #{flameRetardantUserId}, " +
+            "flame_retardant_time = datetime('now', 'localtime'), " +
+            "update_time = datetime('now', 'localtime'), status = 4 " +
+            "WHERE id = #{id}")
+    void executeFlameRetardant(Mixture mixture);
 }

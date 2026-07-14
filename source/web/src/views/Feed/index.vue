@@ -115,6 +115,7 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFeedManageList, submitFeedOperation, getTankWeightData, getBottom, saveBottomTankWeight, getFeedThreshold, getBottomThreshold } from '@/api/mixture'
+import { COLOR_MAP } from '@/utils/constant'
 import DataTable from '@/components/DataTable'
 import { Dialog, ConfirmDialog } from '@/components/Dialog'
 import Form from '@/components/Form'
@@ -132,7 +133,7 @@ const actionButtons = [
     key: 'bottomTank',
     text: '底罐',
     type: 'warning',
-    color: 'rgb(51, 117, 185)',
+    color: COLOR_MAP.BTN_BLUE1,
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
     visible: (row) => row.status === 0 && !row.bottomWeight // 没有底罐重量时显示
@@ -140,7 +141,7 @@ const actionButtons = [
   {
     key: 'feed',
     text: '加料',
-    type: 'primary',
+    color: COLOR_MAP.BTN_BLUE2,
     size: 'large',
     action: ( row ) => openFeedDialog(row),
     visible: (row) => row.status === 0 && row.bottomWeight // 有底罐重量时显示
@@ -148,7 +149,7 @@ const actionButtons = [
   {
     key: 'bottomTank',
     text: '底罐',
-    color: "rgb(78, 142, 47)",
+    color: COLOR_MAP.BTN_GREEN1,
     size: 'large',
     action: ( row ) => openBottomTankDialog(row),
     visible: (row) => row.status === 3 && !row.bottomWeight // 没有底罐重量时显示
@@ -157,6 +158,7 @@ const actionButtons = [
     key: 'feed',
     text: '加料',
     type: 'success',
+    color: COLOR_MAP.BTN_GREEN2,
     size: 'large',
     action: ( row ) => openFeedDialog(row),
     visible: (row) => row.status === 3 && row.bottomWeight // 有底罐重量时显示
@@ -165,9 +167,9 @@ const actionButtons = [
 
 function rowStyle({row, rowIndex}) {
   if (row.status == 0) {
-    return {backgroundColor: 'rgb(217, 236, 255)'}
+    return {backgroundColor: COLOR_MAP.BG_BLUE}
   } else if (row.status == 3) {
-    return {backgroundColor: 'rgb(225, 243, 216)'}
+    return {backgroundColor: COLOR_MAP.BG_GREEN}
   }
   return ""
 }

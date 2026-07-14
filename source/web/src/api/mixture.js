@@ -94,3 +94,8 @@ export function getBottomThreshold() {
 export function getPickingConfig() {
   return http.get('/api/mixture/pickingConfig')
 }
+
+// 执行阻燃粉添加操作
+export function submitFlameRetardant(data) {
+  return http.post('/api/mixture/flameRetardant', data)
+}

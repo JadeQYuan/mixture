@@ -40,6 +40,7 @@ public class SerialService {
 
     private byte[] readBuffer;
     private Double weight;
+    private Double weightFake;
 
     private final Executor executor = Executors.newSingleThreadExecutor();
 
@@ -101,12 +102,19 @@ public class SerialService {
         weight = null;
     }
 
+    public void fakeWeight(Double weight) {
+        this.weightFake = weight;
+    }
+
     /**
      * 读取重量数据
      * @return 重量值（千克）
      */
     public Double readWeight() {
         if (!serialConfig.getEnabled()) {
+            if (weightFake != null) {
+                return weightFake;
+            }
             double weight = Math.random() * 100 - 30;
             return Math.round(weight * 100.0) / 100.0; // 保留两位小数
         }

@@ -56,6 +56,7 @@
                   :key="button.key"
                   :type="button.type || 'primary'"
                   :size="button.size || 'large'"
+                  :color="button.color"
                   :disabled="button.disabled ? button.disabled(item, index) : false"
                   :loading="button.loading ? button.loading(item, index) : false"
                   @click="button.action(item, index)"

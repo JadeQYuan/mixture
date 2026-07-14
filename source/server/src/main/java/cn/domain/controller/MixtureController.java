@@ -112,6 +112,14 @@ public class MixtureController {
     }
 
     /**
+     * 执行阻燃粉添加操作
+     */
+    @PostMapping("/flameRetardant")
+    public void addFlameRetardant(@RequestBody Mixture mixture) {
+        mixtureService.addFlameRetardant(mixture);
+    }
+
+    /**
      * 执行领料操作
      */
     @PostMapping("/picking")
@@ -151,6 +159,11 @@ public class MixtureController {
     @GetMapping("/weight")
     public Double getWeightData() {
         return mixtureService.getWeightData();
+    }
+
+    @GetMapping("/weight/fake")
+    public void bottomThreshold(Double weight) {
+        mixtureService.fakeWeight(weight);
     }
 
     /**

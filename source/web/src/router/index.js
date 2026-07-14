@@ -13,7 +13,7 @@ import Picking from '@/views/Picking'
 import Return from '@/views/Return'
 import Feed from '@/views/Feed'
 import Record from '@/views/Record'
-import Prepare from '@/views/Prepare'
+
 import Stats from '@/views/Stats'
 import FaceLogin from '@/views/Login/FaceLogin'
 import CodeLogin from '@/views/Login/CodeLogin'
@@ -48,7 +48,7 @@ const routes = [
         path: 'apply',
         name: 'Apply',
         component: Apply,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '用料申请' }
+        meta: { roles: ['SeniorOperator', 'Operator'], title: '申请' }
       },
       {
         path: 'picking',
@@ -61,12 +61,6 @@ const routes = [
         name: 'Return',
         component: Return,
         meta: { roles: ['SeniorOperator', 'Operator'], title: '退料/撤销' }
-      },
-      {
-        path: 'prepare',
-        name: 'Prepare',
-        component: Prepare,
-        meta: { roles: ['SeniorOperator', 'Operator'], title: '备料申请' }
       },
       {
         path: 'feed',
