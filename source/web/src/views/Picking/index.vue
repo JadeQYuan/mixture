@@ -55,8 +55,8 @@
               :description="step.description"
             />
           </el-steps>
-          <el-divider content-position="center" style="font-size: 136px;">
-            <span style="font-size: 21px;font-weight: bold;color: #FF8C00;">需添加阻燃粉 {{pickingDialog.form.suggestWeight}} kg</span>
+          <el-divider content-position="center" style="font-size: 136px;" v-if="pickingDialog.step === 1">
+            <span style="font-size: 28px;font-weight: bold;color: #FF8C00;">请添加阻燃粉 {{pickingDialog.form.suggestWeight}} kg</span>
           </el-divider>
         </template>
       </Form>
@@ -144,7 +144,7 @@ const actionButtons = [
     color: COLOR_MAP.BTN_YELLOW,
     size: 'large',
     visible: (row) => row.status === 6,
-    action: (row) => handlePicking(row)
+    action: (row) => openPickingStepDialogWithRow(row)
   },
   {
     key: 'preparePicking',
@@ -152,7 +152,7 @@ const actionButtons = [
     color: COLOR_MAP.BTN_GREEN2,
     size: 'large',
     visible: (row) => row.status === 4,
-    action: (row) => handlePicking(row)
+    action: (row) => openPickingStepDialogWithRow(row)
   }
 ]
 
