@@ -27,4 +27,7 @@ public class AppConfig {
 
     /** 加料提醒时间阈值（分钟），申请加料后超过此时间未操作则首页醒目提醒 */
     private Integer pickingTimeThreshold = 30;
+
+    /** 登录超时时长（秒），无操作超过此时间自动登出 */
+    private Integer loginTimeout = 180;
 }

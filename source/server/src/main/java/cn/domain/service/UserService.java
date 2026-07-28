@@ -1,5 +1,6 @@
 package cn.domain.service;
 
+import cn.domain.config.AppConfig;
 import cn.domain.constant.Constants;
 import cn.domain.entity.User;
 import cn.domain.exception.AppException;
@@ -41,6 +42,9 @@ public class UserService {
 
     @Autowired
     private TankService tankService;
+
+    @Autowired
+    private AppConfig appConfig;
 
     @Value("${face.score}")
     private float faceScore;
@@ -218,7 +222,7 @@ public class UserService {
         if (userInfo == null) {
             throw new AppException("账号或密码错误");
         }
-        return TokenUtil.generateToken(userInfo.getId().toString());
+        return buildLoginResult(TokenUtil.generateToken(userInfo.getId().toString()));
     }
 
     public String loginByFace(MultipartFile multipartFile) throws Exception {
@@ -244,7 +248,14 @@ public class UserService {
         if (userInfo == null) {
             throw new AppException("用户不存在");
         }
-        return TokenUtil.generateToken(userId.toString());
+        return buildLoginResult(TokenUtil.generateToken(userId.toString()));
+    }
+
+    private String buildLoginResult(String token) {
+        JSONObject result = new JSONObject();
+        result.put("token", token);
+        result.put("timeout", appConfig.getLoginTimeout());
+        return result.toJSONString();
     }
 
     private Integer compareFaceFeature(FaceFeature faceFeature, Integer id) {

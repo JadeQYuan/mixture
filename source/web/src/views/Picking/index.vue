@@ -144,7 +144,7 @@ const actionButtons = [
     color: COLOR_MAP.BTN_YELLOW,
     size: 'large',
     visible: (row) => row.status === 6,
-    action: (row) => openPickingStepDialogWithRow(row)
+    action: (row) => handlePicking(row)
   },
   {
     key: 'preparePicking',
@@ -152,7 +152,7 @@ const actionButtons = [
     color: COLOR_MAP.BTN_GREEN2,
     size: 'large',
     visible: (row) => row.status === 4,
-    action: (row) => openPickingStepDialogWithRow(row)
+    action: (row) => handlePicking(row)
   }
 ]
 
@@ -293,14 +293,15 @@ const footerButtons = [
 async function handlePicking(row) {
   const needFlame = needFlameRetardant(row.productSpec)
   if (needFlame && row.status !== 4) {
-    // 需阻燃粉：先弹出提示对话框（只显示添加重量）
-    const config = await getPickingConfig()
-    const ratioTarget = config.flameRetardantRatio
-    const actualWeight = row.fullWeight && row.bottomWeight ? (row.fullWeight - row.bottomWeight).toFixed(2) : 0
-    const suggestWeight = actualWeight > 0 ? (actualWeight / ratioTarget).toFixed(2) : 0
-    flameTipDialog.message = `需添加阻燃粉 ${suggestWeight} kg`
-    flameTipDialog.pendingRow = row
-    flameTipDialog.visible = true
+    // // 需阻燃粉：先弹出提示对话框（只显示添加重量）
+    // const config = await getPickingConfig()
+    // const ratioTarget = config.flameRetardantRatio
+    // const actualWeight = row.fullWeight && row.bottomWeight ? (row.fullWeight - row.bottomWeight).toFixed(2) : 0
+    // const suggestWeight = actualWeight > 0 ? (actualWeight / ratioTarget).toFixed(2) : 0
+    // flameTipDialog.message = `需添加阻燃粉 ${suggestWeight} kg`
+    // flameTipDialog.pendingRow = row
+    // flameTipDialog.visible = true
+    openPickingStepDialogWithRow(row)
   } else {
     // 不需阻燃粉：弹确认框直接提交
     noFlameConfirmDialog.message = `确认领取料罐 ${row.tankNo}？`

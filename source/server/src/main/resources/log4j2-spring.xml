@@ -21,16 +21,25 @@
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </console>
 
-        <!-- 这个会打印出所有的error及以下级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
-        <RollingFile name="RollingFile" fileName="${FILE_PATH}/log"
+        <!-- 所有日志 -->
+        <RollingFile name="InfoFile" fileName="${FILE_PATH}/info.log"
+                     filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/info-%d{yyyy-MM-dd}_%i.log.zip">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="200MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="15"/>
+        </RollingFile>
+
+        <!-- error日志 -->
+        <RollingFile name="ErrorFile" fileName="${FILE_PATH}/error.log"
                      filePattern="${FILE_PATH}/%d{yyyy-MM-dd}/error-%d{yyyy-MM-dd}_%i.log.zip">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Policies>
-                <!--interval属性用来指定多久滚动一次，默认是1 hour-->
-                <TimeBasedTriggeringPolicy interval="12"/>
+                <TimeBasedTriggeringPolicy interval="1"/>
                 <SizeBasedTriggeringPolicy size="200MB"/>
             </Policies>
-            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
             <DefaultRolloverStrategy max="15"/>
         </RollingFile>
 
@@ -42,7 +51,8 @@
 
         <!--若是additivity设为false，则 子Logger 只会在自己的appender里输出，而不会在 父Logger 的appender里输出。-->
         <Logger name="cn.domain" level="info">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="InfoFile" level="info"/>
+            <AppenderRef ref="ErrorFile" level="error"/>
         </Logger>
 
         <root level="info">

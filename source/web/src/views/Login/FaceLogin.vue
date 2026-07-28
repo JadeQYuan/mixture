@@ -38,6 +38,7 @@ import { faceLogin } from '@/api/login'
 import { getCurrentUser } from '@/api/user'
 import { useStore } from 'vuex'
 import { startGlobalCamera, getCameraErrorMessage, stopGlobalCamera } from '@/utils/camera'
+import activityMonitor from '@/utils/activityMonitor'
 
 const router = useRouter()
 const store = useStore()
@@ -115,8 +116,10 @@ async function captureAndRecognize() {
     
     if (response) {
       // 识别成功，与密码登录逻辑保持一致
-      const token = response
-      localStorage.setItem('token', token)
+      localStorage.setItem('token', response.token)
+      if (response.timeout) {
+        activityMonitor.setTimeout(response.timeout)
+      }
       stopGlobalCamera()
       isProcessing.value = false
       isCameraActive.value = false

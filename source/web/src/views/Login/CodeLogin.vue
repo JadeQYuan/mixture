@@ -26,6 +26,7 @@ import { accountLogin } from '@/api/login'
 import { getCurrentUser } from '@/api/user'
 import { useStore } from 'vuex'
 import { encryptPassword } from '@/utils/crypto'
+import activityMonitor from '@/utils/activityMonitor'
 
 const router = useRouter()
 const store = useStore()
@@ -50,7 +51,10 @@ async function login() {
       // 前端AES加密
       const encrypted = encryptPassword(form.value.password)
       const res = await accountLogin(form.value.account, encrypted)
-      localStorage.setItem('token', res)
+      localStorage.setItem('token', res.token)
+      if (res.timeout) {
+        activityMonitor.setTimeout(res.timeout)
+      }
       // 登录成功后获取用户信息
       try {
         const userInfo = await getCurrentUser()

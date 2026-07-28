@@ -2,10 +2,14 @@
 class ActivityMonitor {
   constructor() {
     this.timeout = null
-    this.inactivityTime = 3 * 60 * 1000 // 3分钟
+    this.inactivityTime = 3 * 60 * 1000 // 默认3分钟，可由后端配置覆盖
     this.isActive = false
     this.onLogout = null
     this.init()
+  }
+
+  setTimeout(seconds) {
+    this.inactivityTime = seconds * 1000
   }
 
   init() {

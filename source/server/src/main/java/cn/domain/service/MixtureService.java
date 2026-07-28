@@ -229,13 +229,6 @@ public class MixtureService {
     }
 
     public void remark(Mixture mixture) {
-        Mixture info = mixtureMapper.selectById(mixture.getId());
-        if (info.getStatus() == 2) {
-            double actualWeight = BigDecimal.valueOf(info.getFullWeight())
-                    .add(BigDecimal.valueOf(mixture.getFlameRetardantWeight()))
-                    .add(BigDecimal.valueOf(-info.getReturnWeight())).doubleValue();
-            mixture.setActualWeight(actualWeight);
-        }
         mixtureMapper.updateRemark(mixture);
     }
 }

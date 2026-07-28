@@ -178,7 +178,6 @@ public interface MixtureMapper {
     void executeCancel(Mixture mixture);
 
     @Update("UPDATE mixture_info SET remark = #{remark}, material_name = #{materialName}, product_spec = #{productSpec}, " +
-            "flame_retardant_weight = #{flameRetardantWeight}, actual_weight = #{actualWeight}, " +
             "update_time = datetime('now', 'localtime') " +
             "WHERE id = #{id}")
     void updateRemark(Mixture mixture);
