@@ -108,14 +108,6 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
         </dependency>
 
-        <!-- javaCV库 -->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>1.5.7</version>
-            <type>pom</type>
-        </dependency>
-
         <!--        虹软-->
 <!--        <dependency>-->
 <!--            <groupId>com.arcsoft.face</groupId>-->

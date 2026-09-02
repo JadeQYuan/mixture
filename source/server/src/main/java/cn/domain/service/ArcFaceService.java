@@ -5,13 +5,10 @@ import com.arcsoft.face.enums.CompareModel;
 import com.arcsoft.face.enums.DetectModel;
 import com.arcsoft.face.enums.ErrorInfo;
 import com.arcsoft.face.enums.ExtractType;
-import com.arcsoft.face.toolkit.ImageInfo;
 import com.arcsoft.face.toolkit.ImageInfoEx;
 import cn.domain.exception.AppException;
 import cn.domain.util.ArcfaceUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -226,56 +223,6 @@ public class ArcFaceService {
         if (errorCode != sourceCode) {
             throw new AppException(errMsg);
         }
-
-    }
-
-    /**
-     *
-     * 本地摄像头视频进行人脸识别
-     */
-    public void faceRecognition() throws Exception, InterruptedException{
-
-        //new一个摄像头窗口
-        log.info("开始新建摄像头窗口");
-        String canasName = "摄像头窗口";
-        CanvasFrame canvas = new CanvasFrame(canasName);
-        /**
-         * DO_NOTHING_ON_CLOSE，（在你点击关闭按钮的时候，不会被关闭，）不执行任何操作。
-         *
-         * HIDE_ON_CLOSE，(当你点击关闭按钮的时候，不会释放内存，只是隐藏该界面，没有真正的关闭，还占有资源)只隐藏界面，setVisible(false)。
-         *
-         * EXIT_ON_CLOSE,直接关闭应用程序，System.exit(0)。一个main函数对应一整个程序。
-         *
-         * EXIT_ON_CLOSE,直接关闭应用程序，System.exit(0)。一个main函数对应一整个程序。
-         */
-        log.info("窗口设置");
-        canvas.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        //使用OpenCVFrameGrabber获取摄像头画面，0代表当前设备的序号，一般都是0
-        OpenCVFrameGrabber grabber = new OpenCVFrameGrabber(0);
-
-        try {
-
-            //开始获取摄像头数据
-            grabber.start();
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "摄像头准备失败:请检查摄像头是否正确接入!", "提示:", JOptionPane.WARNING_MESSAGE);
-            if (grabber != null) {
-                grabber.close();
-            }
-
-            return;
-        }
-
-        //判断窗口是否关闭
-        while(canvas.isDisplayable()){
-            //获取摄像头图像并在窗口中显示
-            canvas.showImage(grabber.grab());
-        }
-        //调用关闭按钮
-        log.info("调用了关闭摄像头按钮");
-        grabber.close();
-
 
     }
 
